@@ -155,8 +155,9 @@ MonoBehaviour:
   XSize: 10
   YSize: 10
   ZSize: 10
-  TopBlock: {fileID: 0}
-  BottomBlock: {fileID: 0}
+  TopBlock: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
+  BaseBlock: {fileID: 919132149155446097, guid: 0a569a90e9faf2a4ca7c1ca88dd4e687, type: 3}
+  InvisibleBlock: {fileID: 0}
 --- !u!4 &319575868
 Transform:
   m_ObjectHideFlags: 0
