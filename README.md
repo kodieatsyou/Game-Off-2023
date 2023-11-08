@@ -10,17 +10,17 @@ Inspiration: https://www.kickstarter.com/projects/magnetcubes/magnetcubes-cubecl
 Art Style: Voxel
 
 ## Name Ideas:
-CardClimbers.io
-SummitStack.io
-SlopeSprint.io
-AscentArena.io
-AltitudeArena.io
-MountainMeld.io
+* CardClimbers.io
+* SummitStack.io
+* SlopeSprint.io
+* AscentArena.io
+* AltitudeArena.io
+* MountainMeld.io
 
 ## Stack: 
-Engine: Unity
-Language: C#
-Networking: https://www.photonengine.com/PUN
+* Engine: Unity
+* Language: C#
+* Networking: https://www.photonengine.com/PUN
 
 ## Type: Turn based .io party
 
@@ -33,29 +33,29 @@ Up to six players
 Mario party style order generation
 
 #### Turns
-Place 2 blocks
-Move to any block on same level
-Roll die for grapple, wind, or power card usage?
-Grapple (Grapple up to the next level)
-Wind (Move all players one block in the cardinal direction of choice)
-Power cards below
-Timed turn (10-15 seconds?)
-Block building
-Build anywhere on the map
-No building inside another player or floating blocks
+* Place 2 blocks
+* Move to any block on same level
+* Roll die for grapple, wind, or power card usage?
+* Grapple (Grapple up to the next level)
+* Wind (Move all players one block in the cardinal direction of choice)
+* Power cards below
+* Timed turn (10-15 seconds?)
+* Block building
+* Build anywhere on the map
+* No building inside another player or floating blocks
 
 #### Power cards 
 Only use each card once a game, you get a full deck to start
 
-Block Bomb (delete block(s?))
-Timestop (prevent another player from moving)
-Barrier (Make a block/multiple? untouchable)
-Switch (switch place with another player)
-Kick (kick an adjacent player to an adjacent block)
-Levitate (place block directly underneath yourself)
-Steal (remove a block from under a player and add it to your block pouch)
-Taunt (players adjacent to you cannot move or grapple)
-Ninja (perform a free grapple action that goes 2 blocks)
+* Block Bomb (delete block(s?))
+* Timestop (prevent another player from moving)
+* Barrier (Make a block/multiple? untouchable)
+* Switch (switch place with another player)
+* Kick (kick an adjacent player to an adjacent block)
+* Levitate (place block directly underneath yourself)
+* Steal (remove a block from under a player and add it to your block pouch)
+* Taunt (players adjacent to you cannot move or grapple)
+* Ninja (perform a free grapple action that goes 2 blocks)
 
 
 # TODO
