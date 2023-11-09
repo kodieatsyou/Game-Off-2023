@@ -8,7 +8,7 @@ public class BoardManager : MonoBehaviour
     public static int BaseSize = 10;
     private static int HeightSize = BaseSize * 2;
     public static int randomBlockCount = 10;
-    public GameObject TopBlock_Prefab;
+    public GameObject MiddleBlock_Prefab;
     public GameObject BaseBlock_Prefab;
     public GameObject InvisibleBlock_Prefab;
     public static GameObject[,,] BoardCube_Arr;
@@ -18,40 +18,42 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CanBuildOn_Arr = new bool[BaseSize, BaseSize, HeightSize];
-        IsBuilt_Arr = new bool[BaseSize, BaseSize, HeightSize];
-        BoardCube_Arr = new GameObject[BaseSize, BaseSize, HeightSize];
+        CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
+        IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
+        BoardCube_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
 
-        bool[,,] isRandom = GenerateRandom();
+        bool[,,] isRandom = GenerateRandomGrid();
+        Debug.Log(isRandom);
 
-        for (int b = 0; b < BaseSize; b++) // base(b) counts both x and z
+        for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
             {
-                if (isRandom[b, y, b])
+                for (int z = 0; z < BaseSize; z++)
                 {
-                    Debug.Log("Placing Randomized Block");
-                    PlaceCube(BaseBlock_Prefab, b, y, b);
-                    CanBuildOn_Arr[b, y, b] = true;
+                    if (isRandom[x, y, z])
+                    {
+                        Debug.Log("Placing Randomized Block");
+                        PlaceCube(MiddleBlock_Prefab, x, y, z);
+                        CanBuildOn_Arr[x, y, z] = true;
 
-                }
-                else if (y == 0)
-                {
-                    Debug.Log("Placing Base Block");
-                    PlaceCube(BaseBlock_Prefab, b, y, b);
-                    CanBuildOn_Arr[b, y, b] = true;
-                }
-                else if (y >= 1)
-                {
-                    Debug.Log("Placing Invisible Block");
-                    placeCube(InvisibleBlock_Prefab, b, y, b, true);
-                    CanBuildOn_Arr[b, y, b] = false;
-                }
-                else
-                {
-                    Debug.Log("Placing Other Block");
-                    placeCube(TopBlock_Prefab, b, y, b);
-                    CanBuildOn_Arr[b, y, b] = false;
+                    }
+                    else if (y == 0)
+                    {
+                        Debug.Log("Placing Base Block");
+                        PlaceCube(BaseBlock_Prefab, x, y, z);
+                        CanBuildOn_Arr[x, y, z] = true;
+                    }
+                    else if (y >= 1)
+                    {
+                        Debug.Log("Placing Invisible Block");
+                        PlaceCube(InvisibleBlock_Prefab, x, y, z, true);
+                        CanBuildOn_Arr[x, y, z] = false;
+                    }
+                    else
+                    {
+                        Debug.Log("MISSING RULE FOR COORD (" + x + "," + y + "," + z + ")");
+                    }
                 }
             }
         }
@@ -75,12 +77,12 @@ public class BoardManager : MonoBehaviour
         BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2, y * 2, z * 2), transform.rotation);
         if (isInvisible)
         {
-            Debug.Log("Placed block at (" + x + "," + y + "," + z + ")");
+            Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as NOT built.");
             IsBuilt_Arr[x, y, z] = false;
         }
         else
         {
-            Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built");
+            Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
             IsBuilt_Arr[x, y, z] = true;
         }
     }
@@ -99,7 +101,7 @@ public class BoardManager : MonoBehaviour
         {
             return false;
         }
-        else if ((!IsBuilt_Arr[x, y - 1, z]) && (y - 1 > 0) && (y < YSize))
+        else if ((!IsBuilt_Arr[x, y - 1, z]) && (y - 1 > 0) && (y < HeightSize))
         {
             return true;
         }
@@ -111,26 +113,44 @@ public class BoardManager : MonoBehaviour
 
     /// <summary>
     ///  Generates a bool 3d array of coordinates in the field that determine if a block should be random or not.
+    ///  Max height of a random coord is 2 currently
     /// </summary>
-    bool[,,] GenerateRandom()
+    bool[,,] GenerateRandomGrid()
     {
+        bool[,,] randomCoords = new bool[BaseSize, HeightSize, BaseSize];
+        for (int x = 0; x < BaseSize; x++) // preload randomCoords with false
+        {
+            for (int y = 0; y < HeightSize; y++)
+            {
+                for (int z = 0; z < BaseSize; z++)
+                {
+                    randomCoords[x, y, z] = false;
+                }
+            }
+        }
+
         System.Random rand = new System.Random();
-
-        bool[,,] randomCoords = new bool[,,];
-
         int count = 0;
         while (count < randomBlockCount) // create randomBlockCount random x and z set of coordinates
         {
-            int randX = rand.Next(0, XSize);
-            int randZ = rand.Next(0, ZSize);
+            int randX = rand.Next(0, BaseSize);
+            int randZ = rand.Next(0, BaseSize);
+            while (randomCoords[randX, 1, randZ]) // while no collision
+            {
+                randX = rand.Next(0, BaseSize);
+                randZ = rand.Next(0, BaseSize);
+            }
+            randomCoords[randX, 1, randZ] = true;
 
-            randomCoords[count] = true;
+            bool buildTwo = rand.Next(100) < 20; // 20% chance for one coord to be 2 height
+            if (buildTwo)
+            {
+                randomCoords[randX, 2, randZ] = true;
+            }
 
             count++;
         }
-
         return randomCoords;
-
     }
 
 }

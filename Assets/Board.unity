@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 319575868}
-  - component: {fileID: 319575867}
+  - component: {fileID: 319575869}
   m_Layer: 0
   m_Name: BoardStart
   m_TagString: Untagged
@@ -140,24 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &319575867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 319575866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 163639810047a7347b000043308e0313, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  XSize: 10
-  YSize: 10
-  ZSize: 10
-  TopBlock: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
-  BaseBlock: {fileID: 919132149155446097, guid: 0a569a90e9faf2a4ca7c1ca88dd4e687, type: 3}
-  InvisibleBlock: {fileID: 0}
 --- !u!4 &319575868
 Transform:
   m_ObjectHideFlags: 0
@@ -173,6 +155,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &319575869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319575866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33f7343fcdd84184fb19aac0c96c18a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MiddleBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
+  BaseBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
+  InvisibleBlock_Prefab: {fileID: 919132149155446097, guid: 0a569a90e9faf2a4ca7c1ca88dd4e687, type: 3}
 --- !u!1 &378698745
 GameObject:
   m_ObjectHideFlags: 0
