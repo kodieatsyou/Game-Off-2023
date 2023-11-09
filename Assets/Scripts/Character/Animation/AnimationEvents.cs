@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpawnAnimationProp : MonoBehaviour
+public class AnimationEvents : MonoBehaviour
 {
     private GameObject propObj;
     private AnimationProp propAnim;
@@ -52,5 +52,10 @@ public class SpawnAnimationProp : MonoBehaviour
         {
             Destroy(particleObj);
         }
+    }
+
+    void ChangeMaterialTexture(Texture newTexture)
+    {
+        this.gameObject.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("newText", newTexture);
     }
 }
