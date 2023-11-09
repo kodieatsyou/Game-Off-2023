@@ -18,17 +18,16 @@ public class SpawnAnimationProp : MonoBehaviour
     {
         propAnim = prop;
         boneObj = getBone(prop.parentBoneName);
-        if (prop.prop == null)
+        if (prop.prop != null)
         {
-            propObj = new GameObject();
+            propObj = Instantiate(prop.prop, boneObj.transform.position, Quaternion.identity);
             propObj.transform.position = boneObj.transform.position;
             propObj.transform.SetParent(boneObj.transform, true);
 
         } else
         {
-            propObj = Instantiate(prop.prop, boneObj.transform.position, Quaternion.identity);
+            propObj = null;
         }
-        propObj.transform.SetParent(boneObj.transform, true);
     }
 
     void PlayParticleEffect()
@@ -45,7 +44,10 @@ public class SpawnAnimationProp : MonoBehaviour
 
     void Despawn()
     {
-        Destroy(propObj);
+        if(propObj != null)
+        {
+            Destroy(propObj);
+        }
         if(!propAnim.particleHasEnd)
         {
             Destroy(particleObj);
