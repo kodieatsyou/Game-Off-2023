@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e067b53787f65348acb774739761589, type: 3}
+  m_Name: Levitate_Effect
+  m_EditorClassIdentifier: 
+  prop: {fileID: 0}
+  parentBoneName: body
+  particleEffect: {fileID: 2118441668124852113, guid: 4b23f68c87bd15f47b269705555159be, type: 3}
+  parentParticleToBone: 0
+  particleHasEnd: 0
