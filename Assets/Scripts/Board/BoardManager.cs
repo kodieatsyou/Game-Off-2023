@@ -74,7 +74,8 @@ public class BoardManager : MonoBehaviour
     /// <param name="z">z coordinate</param>
     public void PlaceCube(GameObject prefab_type, int x, int y, int z, bool isInvisible = false)
     {
-        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2, y * 2, z * 2), transform.rotation);
+        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x, y, z), transform.rotation);
+        BoardCube_Arr[x, y, z].name = "Block(" + x + "," + y + "," + z + ")";
         if (isInvisible)
         {
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as NOT built.");
