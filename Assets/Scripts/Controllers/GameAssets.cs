@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using AYellowpaper.SerializedCollections;
 
 public class GameAssets : MonoBehaviour
 {
@@ -16,7 +19,16 @@ public class GameAssets : MonoBehaviour
     }
 
     [Header("Loadable Assets")]
+    [Header("Board Blocks")]
+    [Header("Grass")]
+    [SerializedDictionary("Value", "Block Prefab")]
+    public SerializedDictionary<int, GameObject> grass_blocks_;
 
-    [Header("Animation Props")]
-    public GameObject animProp_hourGlass;
+    [Header("Stone")]
+    [SerializedDictionary("Value", "Block Prefab")]
+    public SerializedDictionary<int, GameObject> stone_blocks_;
+
+    [Header("Detail")]
+    public GameObject[] block_details_;
+
 }
