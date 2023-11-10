@@ -122,10 +122,10 @@ public class BoardManager : MonoBehaviour
         if (topNeighborValue != 0) // no top neighbor place detail
         {
             System.Random rand = new System.Random();
-            int randDetailPrefabIdx = rand.Next(Detail_Prefabs.Length - 1);
+            int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length - 1);
             int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
 
-            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(Detail_Prefabs[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
+            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
             BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
 
             // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
