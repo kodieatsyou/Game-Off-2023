@@ -5,15 +5,9 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-<<<<<<< HEAD
     public int BaseSize = 10;
     private static int HeightSize;
     private static int RandomBlockCount;
-=======
-    public static int BaseSize = 10;
-    private static int HeightSize = BaseSize * 2;
-    public static int randomBlockCount = 40;
->>>>>>> origin/board-generation-beautifying
     public GameObject MiddleBlock_Prefab;
     public GameObject BaseBlock_Prefab;
     public GameObject InvisibleBlock_Prefab;
@@ -83,14 +77,10 @@ public class BoardManager : MonoBehaviour
     /// <param name="z">z coordinate</param>
     public void PlaceCube(GameObject prefab_type, int x, int y, int z, bool isInvisible = false)
     {
-<<<<<<< HEAD
-        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x, y, z), transform.rotation);
-        BoardCube_Arr[x, y, z].name = "Block(" + x + "," + y + "," + z + ")";
-=======
         BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
         BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
         BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
->>>>>>> origin/board-generation-beautifying
+
         if (isInvisible)
         {
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as NOT built.");
