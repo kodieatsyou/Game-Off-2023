@@ -7,10 +7,11 @@ public class BoardManager : MonoBehaviour
 {
     public static int BaseSize = 10;
     private static int HeightSize = BaseSize * 2;
-    public static int randomBlockCount = 10;
+    public static int randomBlockCount = 40;
     public GameObject MiddleBlock_Prefab;
     public GameObject BaseBlock_Prefab;
     public GameObject InvisibleBlock_Prefab;
+    public GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
     public static bool[,,] IsBuilt_Arr; // marks block coordinates as built
@@ -74,7 +75,9 @@ public class BoardManager : MonoBehaviour
     /// <param name="z">z coordinate</param>
     public void PlaceCube(GameObject prefab_type, int x, int y, int z, bool isInvisible = false)
     {
-        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2, y * 2, z * 2), transform.rotation);
+        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
+        BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
+        BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
         if (isInvisible)
         {
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as NOT built.");
@@ -85,6 +88,50 @@ public class BoardManager : MonoBehaviour
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
             IsBuilt_Arr[x, y, z] = true;
         }
+    }
+
+    /// <summary>
+    /// Gets an int representing the value for the is built status of the blocks to the left right front back and above of a specified coordinate
+    /// </summary>
+    /// <param name="x">x coordinate</param>
+    /// <param name="y">y coordinate</param>
+    /// <param name="z">z coordinate</param>
+    public int GetBlockNeighborsBuiltValue(int x, int y, int z)
+    {
+        int neighborValue = 0;
+        Boolean[] neighbors = new Boolean[4];
+        if (z + 1 < BaseSize)
+        {
+            if (IsBuilt_Arr[x, y, z + 1]) neighborValue += 1; //Front Block value of 1
+        }
+        if (z - 1 >= 0) {
+            if (IsBuilt_Arr[x, y, z - 1]) neighborValue += 2; //Behind Block value of 2
+        }
+        if (x + 1 < BaseSize)
+        {
+            if (IsBuilt_Arr[x + 1, y, z]) neighborValue += 3; //Left Block value of 7
+        }
+        if (x - 1 >= 0)
+        {
+            if (IsBuilt_Arr[x - 1, y, z]) neighborValue += 4; //Right Block value of 10
+        }
+        if (y + 1 < HeightSize)
+        {
+            if (IsBuilt_Arr[x, y + 1, z]) neighborValue += 5; //Above Block value of 13
+        }
+        //We dont need bottom block
+        return neighborValue;
+    }
+
+    /// <summary>
+    /// Updates a block depending on its neighbors
+    /// </summary>
+    /// <param name="x">x coordinate</param>
+    /// <param name="y">y coordinate</param>
+    /// <param name="z">z coordinate</param>
+    public void UpdateBlock(int x, int y, int z)
+    {
+        return;
     }
 
     /// <summary>
