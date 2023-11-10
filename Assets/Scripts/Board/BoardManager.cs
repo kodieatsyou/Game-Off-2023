@@ -10,7 +10,7 @@ public class BoardManager : MonoBehaviour
     public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
     private static int RandomBlockCount;
-    public GameObject[] Detail_Prefabs;
+    private GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
     public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
@@ -21,6 +21,8 @@ public class BoardManager : MonoBehaviour
     {
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
+
+        Detail_Prefabs = GameAssets.i.block_details_;
 
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
