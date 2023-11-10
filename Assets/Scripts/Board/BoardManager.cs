@@ -7,11 +7,9 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public int BaseSize = 10;
+    public int RandomBlockScale = 4;
     private static int HeightSize;
     private static int RandomBlockCount;
-    //public GameObject MiddleBlock_Prefab;
-    //public GameObject BaseBlock_Prefab;
-    //public GameObject InvisibleBlock_Prefab;
     public GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
     public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
@@ -22,7 +20,7 @@ public class BoardManager : MonoBehaviour
     void Start()
     {
         HeightSize = BaseSize * 2;
-        RandomBlockCount = BaseSize * 4;
+        RandomBlockCount = BaseSize * RandomBlockScale;
 
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
@@ -31,7 +29,6 @@ public class BoardManager : MonoBehaviour
 
         bool[,,] isRandom = GenerateRandomGrid();
         Debug.Log(isRandom);
-
 
         //INITIAL PASS
         for (int x = 0; x < BaseSize; x++)
@@ -122,7 +119,7 @@ public class BoardManager : MonoBehaviour
         if (topNeighborValue != 0) // no top neighbor place detail
         {
             System.Random rand = new System.Random();
-            int randDetailPrefabIdx = rand.Next(Detail_Prefabs.Length - 1);
+            int randDetailPrefabIdx = rand.Next(Detail_Prefabs.Length);
             int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
 
             BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(Detail_Prefabs[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
