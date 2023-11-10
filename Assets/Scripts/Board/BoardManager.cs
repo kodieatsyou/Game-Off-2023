@@ -30,7 +30,7 @@ public class BoardManager : MonoBehaviour
         bool[,,] isRandom = GenerateRandomGrid();
         Debug.Log(isRandom);
 
-        //INITIAL PASS
+        // Fill CanBuildOn_Arr and IsBuilt_Arr with rule-based values
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
@@ -39,19 +39,16 @@ public class BoardManager : MonoBehaviour
                 {
                     if (isRandom[x, y, z])
                     {
-                        Debug.Log("Placing Randomized Block");
                         IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y == 0)
                     {
-                        Debug.Log("Placing Base Block");
                         IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y >= 1)
                     {
-                        Debug.Log("Placing Invisible Block");
                         IsBuilt_Arr[x, y, z] = false;
                         CanBuildOn_Arr[x, y, z] = false;
                     }
@@ -62,7 +59,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
-        //PLACE INITIAL BLOCK PASS
+
+        // Place blocks
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
@@ -102,7 +100,6 @@ public class BoardManager : MonoBehaviour
             BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
             BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
-
 
             System.Random rand = new System.Random();
             bool chanceForDetail = rand.Next(100) < 20;
