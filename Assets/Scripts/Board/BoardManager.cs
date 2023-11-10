@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
@@ -8,11 +9,12 @@ public class BoardManager : MonoBehaviour
     public int BaseSize = 10;
     private static int HeightSize;
     private static int RandomBlockCount;
-    public GameObject MiddleBlock_Prefab;
-    public GameObject BaseBlock_Prefab;
-    public GameObject InvisibleBlock_Prefab;
+    //public GameObject MiddleBlock_Prefab;
+    //public GameObject BaseBlock_Prefab;
+    //public GameObject InvisibleBlock_Prefab;
     public GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
+    public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
     public static bool[,,] IsBuilt_Arr; // marks block coordinates as built
 
@@ -25,10 +27,13 @@ public class BoardManager : MonoBehaviour
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
         BoardCube_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
+        BoardCubeDetail_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
 
         bool[,,] isRandom = GenerateRandomGrid();
         Debug.Log(isRandom);
 
+
+        //INITIAL PASS
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
@@ -38,24 +43,41 @@ public class BoardManager : MonoBehaviour
                     if (isRandom[x, y, z])
                     {
                         Debug.Log("Placing Randomized Block");
-                        PlaceCube(MiddleBlock_Prefab, x, y, z);
+                        IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y == 0)
                     {
                         Debug.Log("Placing Base Block");
-                        PlaceCube(BaseBlock_Prefab, x, y, z);
+                        IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y >= 1)
                     {
                         Debug.Log("Placing Invisible Block");
-                        PlaceCube(InvisibleBlock_Prefab, x, y, z, true);
+                        IsBuilt_Arr[x, y, z] = false;
                         CanBuildOn_Arr[x, y, z] = false;
                     }
                     else
                     {
                         Debug.Log("MISSING RULE FOR COORD (" + x + "," + y + "," + z + ")");
+                    }
+                }
+            }
+        }
+        //PLACE INITIAL BLOCK PASS
+        for (int x = 0; x < BaseSize; x++)
+        {
+            for (int y = 0; y < HeightSize; y++)
+            {
+                for (int z = 0; z < BaseSize; z++)
+                {
+                    if(IsBuilt_Arr[x, y, z])
+                    {
+                        PlaceCube(x, y, z);
+                    } else
+                    {
+                        PlaceCube(x, y, z, true);
                     }
                 }
             }
@@ -75,66 +97,100 @@ public class BoardManager : MonoBehaviour
     /// <param name="x">x coordinate</param>
     /// <param name="y">y coordinate</param>
     /// <param name="z">z coordinate</param>
-    public void PlaceCube(GameObject prefab_type, int x, int y, int z, bool isInvisible = false)
+    public void PlaceCube(int x, int y, int z, bool isInvisible = false)
     {
-        BoardCube_Arr[x, y, z] = (GameObject)Instantiate(prefab_type, new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
-        BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
-        BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
-
-        if (isInvisible)
+        if (!isInvisible)
         {
-            Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as NOT built.");
-            IsBuilt_Arr[x, y, z] = false;
-        }
-        else
-        {
+            BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(x, y, z), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
+            BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
+            BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
-            IsBuilt_Arr[x, y, z] = true;
+
+
+            System.Random rand = new System.Random();
+            bool chanceForDetail = rand.Next(100) < 20;
+            if (chanceForDetail)
+            {
+                PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
+            }
+        }
+    }
+
+    public void PlaceDetail(Transform parentTransform, int x, int y, int z)
+    {
+        int topNeighborValue = GetBlockNeighborsBuiltValue(x, y, z) % 11;
+        if (topNeighborValue != 0) // no top neighbor place detail
+        {
+            System.Random rand = new System.Random();
+            int randDetailPrefabIdx = rand.Next(Detail_Prefabs.Length - 1);
+            int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
+
+            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(Detail_Prefabs[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
+            BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
+
+            // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
+            Vector3 topOfBlock = new Vector3(0, 2.5f, 0);
+            BoardCubeDetail_Arr[x, y, z].transform.position += topOfBlock;
+
         }
     }
 
     /// <summary>
-    /// Gets an int representing the value for the is built status of the blocks to the left right front back and above of a specified coordinate
+    /// Gets an int representing the value for the "is built" status of the blocks to the left right front back and above of a specified coordinate
+    /// If the value returned % 11 == 0 then there is a block above
     /// </summary>
     /// <param name="x">x coordinate</param>
     /// <param name="y">y coordinate</param>
     /// <param name="z">z coordinate</param>
     public int GetBlockNeighborsBuiltValue(int x, int y, int z)
     {
-        int neighborValue = 0;
+        int neighborValue = 1;
         Boolean[] neighbors = new Boolean[4];
         if (z + 1 < BaseSize)
         {
-            if (IsBuilt_Arr[x, y, z + 1]) neighborValue += 1; //Front Block value of 1
+            if (IsBuilt_Arr[x, y, z + 1]) neighborValue *= 2; //Front Block
         }
         if (z - 1 >= 0) {
-            if (IsBuilt_Arr[x, y, z - 1]) neighborValue += 2; //Behind Block value of 2
+            if (IsBuilt_Arr[x, y, z - 1]) neighborValue *= 3; //Behind Block
         }
         if (x + 1 < BaseSize)
         {
-            if (IsBuilt_Arr[x + 1, y, z]) neighborValue += 3; //Left Block value of 7
+            if (IsBuilt_Arr[x + 1, y, z]) neighborValue *= 5; //Left Block
         }
         if (x - 1 >= 0)
         {
-            if (IsBuilt_Arr[x - 1, y, z]) neighborValue += 4; //Right Block value of 10
+            if (IsBuilt_Arr[x - 1, y, z]) neighborValue *= 7; //Right Block
         }
         if (y + 1 < HeightSize)
         {
-            if (IsBuilt_Arr[x, y + 1, z]) neighborValue += 5; //Above Block value of 13
+            if (IsBuilt_Arr[x, y + 1, z]) neighborValue *= 11; //Above Block
         }
         //We dont need bottom block
         return neighborValue;
     }
 
     /// <summary>
-    /// Updates a block depending on its neighbors
+    /// Returns the correct prefab to use for block at x, y, z coordinate
     /// </summary>
     /// <param name="x">x coordinate</param>
     /// <param name="y">y coordinate</param>
     /// <param name="z">z coordinate</param>
-    public void UpdateBlock(int x, int y, int z)
+    public GameObject GetBlock(int x, int y, int z)
     {
-        return;
+        int neighborValue = GetBlockNeighborsBuiltValue(x, y, z);
+        GameObject block;
+        
+        if(neighborValue % 11 == 0 && neighborValue != 0)
+        {
+            Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            block = GameAssets.i.stone_blocks_[neighborValue / 11];
+        } else
+        {
+            Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            block = GameAssets.i.grass_blocks_[neighborValue];
+        }
+
+        return block;
     }
 
     /// <summary>

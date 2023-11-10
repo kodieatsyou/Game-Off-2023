@@ -167,9 +167,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33f7343fcdd84184fb19aac0c96c18a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MiddleBlock_Prefab: {fileID: 3835929682882012217, guid: 5c53bc7c787d2ad458db6dbb41c23639, type: 3}
-  BaseBlock_Prefab: {fileID: 3835929682882012217, guid: 5c53bc7c787d2ad458db6dbb41c23639, type: 3}
-  InvisibleBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
+  BaseSize: 10
+  Detail_Prefabs:
+  - {fileID: 1738640045617134869, guid: 195a65c9de95b634486cb114cff370d9, type: 3}
+  - {fileID: 5372343832551227800, guid: 8f1d53489c3187b49998e86d0b6c1893, type: 3}
+  - {fileID: 6775658047621047833, guid: 8b6c638310b7e4a4bbd69c1d8b831ffc, type: 3}
+  - {fileID: 6026301681723416187, guid: 5cd027f3f0c88134a8351d7a0f9557c0, type: 3}
+  - {fileID: 5519285694982728448, guid: 02bf29bc162f84048ad59350368171bb, type: 3}
+  - {fileID: 1636419631149991453, guid: 1ab55bd0f5c895242aac269d5253d8f2, type: 3}
+  - {fileID: 1650403318061550277, guid: c1afb426945598545ac4c6a571ba75be, type: 3}
+  - {fileID: 3135847372577038901, guid: bf70516b9bcdf7d44a1daffa78cb1513, type: 3}
+  - {fileID: 5284593883643483857, guid: b4310c1b66bce0a4b8d01e5a0d8088ee, type: 3}
+  - {fileID: 3564352919817673239, guid: ea316ce54b37100459a065dc60870c15, type: 3}
+  - {fileID: 5807471559590415957, guid: d2e219bfd441b5a42b1d23b31b07c15c, type: 3}
+  - {fileID: 3881171301046919556, guid: 469967b0490bd044ea0f95791853fe76, type: 3}
+  - {fileID: 6612293046605419101, guid: 56f8b72e76dbbb64584631aaddc07306, type: 3}
+  - {fileID: 1380696667867020071, guid: 609f658740c8fbc45965c5863a308421, type: 3}
+  - {fileID: 337940530703252268, guid: 548894dd5eee64a4f96caa918b2f935d, type: 3}
+  - {fileID: 2845986319323596710, guid: 834c20e5642bdd0499203f44141d07bc, type: 3}
+  - {fileID: 9140929216165335027, guid: b1d993a8fb6e8c548945466e9d06cec6, type: 3}
+  - {fileID: 7032300123889191275, guid: 4555e72be0f10fb4c82be345712de8e6, type: 3}
+  - {fileID: 1964272665515452667, guid: 41991cab3e9199a41acc51f074fbb475, type: 3}
 --- !u!1 &378698745
 GameObject:
   m_ObjectHideFlags: 0
