@@ -7,7 +7,7 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public int BaseSize = 10;
-    public int RandomBlockScale = 4;
+    public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
     private static int RandomBlockCount;
     public GameObject[] Detail_Prefabs;
