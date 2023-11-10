@@ -104,7 +104,7 @@ public class BoardManager : MonoBehaviour
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
 
             System.Random rand = new System.Random();
-            bool chanceForDetail = rand.Next(100) < 20;
+            bool chanceForDetail = rand.Next(100) < 40;
             if (chanceForDetail)
             {
                 PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
