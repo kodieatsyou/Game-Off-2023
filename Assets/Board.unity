@@ -167,9 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33f7343fcdd84184fb19aac0c96c18a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MiddleBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
-  BaseBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
-  InvisibleBlock_Prefab: {fileID: 919132149155446097, guid: 0a569a90e9faf2a4ca7c1ca88dd4e687, type: 3}
+  MiddleBlock_Prefab: {fileID: 3835929682882012217, guid: 5c53bc7c787d2ad458db6dbb41c23639, type: 3}
+  BaseBlock_Prefab: {fileID: 3835929682882012217, guid: 5c53bc7c787d2ad458db6dbb41c23639, type: 3}
+  InvisibleBlock_Prefab: {fileID: 919132149155446097, guid: e0894870fdfd9284e94eddd3824739dc, type: 3}
 --- !u!1 &378698745
 GameObject:
   m_ObjectHideFlags: 0

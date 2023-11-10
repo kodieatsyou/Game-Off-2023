@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    public static int BaseSize = 10;
-    private static int HeightSize = BaseSize * 2;
-    public static int randomBlockCount = 10;
+    public int BaseSize = 10;
+    private int HeightSize = BaseSize * 2;
+    private int randomBlockCount = BaseSize * 4;
     public GameObject MiddleBlock_Prefab;
     public GameObject BaseBlock_Prefab;
     public GameObject InvisibleBlock_Prefab;
@@ -36,7 +36,6 @@ public class BoardManager : MonoBehaviour
                         Debug.Log("Placing Randomized Block");
                         PlaceCube(MiddleBlock_Prefab, x, y, z);
                         CanBuildOn_Arr[x, y, z] = true;
-
                     }
                     else if (y == 0)
                     {
