@@ -10,7 +10,6 @@ public class BoardManager : MonoBehaviour
     public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
     private static int RandomBlockCount;
-    private GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
     public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
@@ -21,8 +20,6 @@ public class BoardManager : MonoBehaviour
     {
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
-
-        Detail_Prefabs = GameAssets.i.block_details_;
 
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
@@ -125,10 +122,10 @@ public class BoardManager : MonoBehaviour
         if (topNeighborValue != 0) // no top neighbor place detail
         {
             System.Random rand = new System.Random();
-            int randDetailPrefabIdx = rand.Next(Detail_Prefabs.Length);
+            int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
             int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
 
-            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(Detail_Prefabs[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
+            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
             BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
 
             // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
