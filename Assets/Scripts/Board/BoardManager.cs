@@ -112,6 +112,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Places a detail prefab on top of a block at the specified coordinate
+    /// </summary>
+    /// <param name="parentTransform">Parent GameObject, should be the block which is getting the detail added to it.</param>
+    /// <param name="x">x coordinate of parent</param>
+    /// <param name="y">y coordinate of parent</param>
+    /// <param name="z">z coordinate of parent</param>
     public void PlaceDetail(Transform parentTransform, int x, int y, int z)
     {
         int topNeighborValue = GetBlockNeighborsBuiltValue(x, y, z) % 11;
