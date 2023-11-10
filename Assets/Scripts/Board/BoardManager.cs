@@ -6,8 +6,8 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public int BaseSize = 10;
-    private int HeightSize = BaseSize * 2;
-    private int randomBlockCount = BaseSize * 4;
+    private static int HeightSize;
+    private static int RandomBlockCount;
     public GameObject MiddleBlock_Prefab;
     public GameObject BaseBlock_Prefab;
     public GameObject InvisibleBlock_Prefab;
@@ -18,6 +18,9 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        HeightSize = BaseSize * 2;
+        RandomBlockCount = BaseSize * 4;
+
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
         BoardCube_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
@@ -131,7 +134,7 @@ public class BoardManager : MonoBehaviour
 
         System.Random rand = new System.Random();
         int count = 0;
-        while (count < randomBlockCount) // create randomBlockCount random x and z set of coordinates
+        while (count < RandomBlockCount) // create RandomBlockCount random x and z set of coordinates
         {
             int randX = rand.Next(0, BaseSize);
             int randZ = rand.Next(0, BaseSize);
