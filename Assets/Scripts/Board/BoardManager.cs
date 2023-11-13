@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class BoardManager : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class BoardManager : MonoBehaviour
     public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
     public static bool[,,] IsBuilt_Arr; // marks block coordinates as built
+
+    public int currentBuiltHeight = 0; // marks the current highest built y position
+    public GameEvent onBoardInitialized;
 
     // Start is called before the first frame update
     void Start()
@@ -76,6 +80,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
+
+        onBoardInitialized.TriggerEvent();
     }
 
     // Update is called once per frame
@@ -95,6 +101,8 @@ public class BoardManager : MonoBehaviour
     {
         if (!isInvisible)
         {
+            if (y + 1 > currentBuiltHeight) currentBuiltHeight = y + 1; //Set the current built height to this blocks y position if the y is greater.
+
             BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(x, y, z), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
             BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
             BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
@@ -257,6 +265,22 @@ public class BoardManager : MonoBehaviour
             count++;
         }
         return randomCoords;
+    }
+
+    /// <summary>
+    ///  Returns the coordinates for the exact middle of the grid with the y set to the highest built level.
+    /// </summary>
+    public Vector3 GetBoardMiddlePos()
+    {
+        if(Math.Floor(BaseSize / 2.0f) == BaseSize / 2.0f) //Check if the middle of the grid is a float or not. If its a whole number the middle is between 2 blocks else the middle is a whole block. 
+        {
+            return new Vector3(((BaseSize / 2.0f) * 2.5f) - 1, currentBuiltHeight * 2.5f, ((BaseSize / 2.0f) * 2.5f) - 1); // Subtract one to get the location between the two "middle" blocks
+            
+        } else
+        {
+            return new Vector3((BaseSize / 2.0f) * 2.5f, currentBuiltHeight * 2.5f, (BaseSize / 2.0f) * 2.5f); // Get the location of the center of the middle block
+        }
+        
     }
 
 }
