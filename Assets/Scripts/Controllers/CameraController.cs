@@ -11,6 +11,16 @@ public class CameraController : MonoBehaviour
     Vector3 mousePreviousPos = Vector3.zero;
     Vector3 mousePositionDelta = Vector3.zero;
 
+    private void OnEnable()
+    {
+        EventManager.StartListening("OnBoardDoneInitializing", OnGameBoardInitialized);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.StopListening("OnBoardDoneInitializing", OnGameBoardInitialized);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -82,9 +92,9 @@ public class CameraController : MonoBehaviour
     /// <summary>
     /// Function is triggered with the onGameBoardInitialized game event and sets up the initial camera position
     /// </summary>
-    public void OnGameBoardInitialized()
+    public void OnGameBoardInitialized(GameObject caller)
     {
-        board = GameObject.FindGameObjectWithTag("Board");
+        board = caller;
         //Set Initial Camera Position
         Vector3 boardMiddlePos = board.GetComponent<BoardManager>().GetBoardMiddlePos();
         transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);

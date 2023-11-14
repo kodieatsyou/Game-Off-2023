@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8ac47a2615ab9c449ae7a911e4c6855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onBoardLoaded: {fileID: 11400000, guid: 7355cfdefba5f874f86f81b67d3b0432, type: 2}
+  player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
   grass_blocks_:
     _serializedList:
     - Key: 1

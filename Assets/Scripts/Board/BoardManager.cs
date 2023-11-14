@@ -17,7 +17,8 @@ public class BoardManager : MonoBehaviour
     public static bool[,,] IsBuilt_Arr; // marks block coordinates as built
 
     public int currentBuiltHeight = 0; // marks the current highest built y position
-    public GameEvent onBoardInitialized;
+
+    public GameObject buildableBlock;
 
     // Start is called before the first frame update
     void Start()
@@ -43,17 +44,14 @@ public class BoardManager : MonoBehaviour
                     if (isRandom[x, y, z])
                     {
                         IsBuilt_Arr[x, y, z] = true;
-                        CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y == 0)
                     {
                         IsBuilt_Arr[x, y, z] = true;
-                        CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y >= 1)
                     {
                         IsBuilt_Arr[x, y, z] = false;
-                        CanBuildOn_Arr[x, y, z] = false;
                     }
                     else
                     {
@@ -73,15 +71,12 @@ public class BoardManager : MonoBehaviour
                     if(IsBuilt_Arr[x, y, z])
                     {
                         PlaceCube(x, y, z);
-                    } else
-                    {
-                        PlaceCube(x, y, z, true);
                     }
                 }
             }
         }
 
-        onBoardInitialized.TriggerEvent();
+        EventManager.TriggerEvent("OnBoardDoneInitializing", this.gameObject);
     }
 
     // Update is called once per frame
@@ -97,23 +92,33 @@ public class BoardManager : MonoBehaviour
     /// <param name="x">x coordinate</param>
     /// <param name="y">y coordinate</param>
     /// <param name="z">z coordinate</param>
-    public void PlaceCube(int x, int y, int z, bool isInvisible = false)
+    public void PlaceCube(int x, int y, int z)
     {
-        if (!isInvisible)
+        if (y + 1 > currentBuiltHeight) currentBuiltHeight = y + 1; //Set the current built height to this blocks y position if the y is greater.
+
+        int neighborValue = GetBlockNeighborsBuiltValue(x, y, z);
+
+        BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(neighborValue), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
+        BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
+        BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
+
+        //Check if there are any built blocks above this block
+        if(neighborValue % 11 != 0)
         {
-            if (y + 1 > currentBuiltHeight) currentBuiltHeight = y + 1; //Set the current built height to this blocks y position if the y is greater.
-
-            BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(x, y, z), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
-            BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
-            BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
-            //Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
-
+            //Check if a detail should be added to the top of the block
             System.Random rand = new System.Random();
             bool chanceForDetail = rand.Next(100) < 40;
             if (chanceForDetail)
             {
                 PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
             }
+
+            //Mark the block above as can be built
+            CanBuildOn_Arr[x, y + 1, z] = true;
+            //Instantiate the "buildable" block prefab on block above this one
+            BoardCube_Arr[x, y + 1, z] = GameObject.Instantiate(buildableBlock, new Vector3(x * 2.5f, (y + 1) * 2.5f, z * 2.5f), transform.rotation);
+            BoardCube_Arr[x, y + 1, z].transform.SetParent(this.transform, false);
+            BoardCube_Arr[x, y + 1, z].name = (x + "," + y + "," + z + " BUILDABLE");
         }
     }
 
@@ -126,21 +131,16 @@ public class BoardManager : MonoBehaviour
     /// <param name="z">z coordinate of parent</param>
     public void PlaceDetail(Transform parentTransform, int x, int y, int z)
     {
-        int topNeighborValue = GetBlockNeighborsBuiltValue(x, y, z) % 11;
-        if (topNeighborValue != 0) // no top neighbor place detail
-        {
-            System.Random rand = new System.Random();
-            int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
-            int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
+        System.Random rand = new System.Random();
+        int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
+        int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
 
-            BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
-            BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
+        BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
+        BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
 
-            // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
-            Vector3 topOfBlock = new Vector3(0, 2.5f, 0);
-            BoardCubeDetail_Arr[x, y, z].transform.position += topOfBlock;
-
-        }
+        // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
+        Vector3 topOfBlock = new Vector3(0, 2.5f, 0);
+        BoardCubeDetail_Arr[x, y, z].transform.position += topOfBlock;
     }
 
     /// <summary>
@@ -180,12 +180,9 @@ public class BoardManager : MonoBehaviour
     /// <summary>
     /// Returns the correct prefab to use for block at x, y, z coordinate
     /// </summary>
-    /// <param name="x">x coordinate</param>
-    /// <param name="y">y coordinate</param>
-    /// <param name="z">z coordinate</param>
-    public GameObject GetBlock(int x, int y, int z)
+    /// <param name="neighborValue">Value of the blocks neighbors based on if they have been built on or not.</param>
+    public GameObject GetBlock(int neighborValue)
     {
-        int neighborValue = GetBlockNeighborsBuiltValue(x, y, z);
         GameObject block;
         
         if(neighborValue % 11 == 0 && neighborValue != 0)

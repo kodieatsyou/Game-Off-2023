@@ -19,6 +19,8 @@ public class GameAssets : MonoBehaviour
     }
 
     [Header("Loadable Assets")]
+    [Header("Essentials")]
+    public GameObject player_object_;
     [Header("Board Blocks")]
     [Header("Grass")]
     [SerializedDictionary("Value", "Block Prefab")]
