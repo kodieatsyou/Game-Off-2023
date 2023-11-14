@@ -21,15 +21,16 @@ public class GameAssets : MonoBehaviour
     [Header("Loadable Assets")]
     [Header("Essentials")]
     public GameObject player_object_;
+
     [Header("Board Blocks")]
+    [Header("Buildable")]
+    public GameObject buildable_block_;
     [Header("Grass")]
     [SerializedDictionary("Value", "Block Prefab")]
     public SerializedDictionary<int, GameObject> grass_blocks_;
-
     [Header("Stone")]
     [SerializedDictionary("Value", "Block Prefab")]
     public SerializedDictionary<int, GameObject> stone_blocks_;
-
     [Header("Detail")]
     public GameObject[] block_details_;
 

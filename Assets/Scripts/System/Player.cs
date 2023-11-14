@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public int Score;
     public int PlayerIndex;
     public bool IsCurrentPlayer;
+    public Vector3 currentBoardPosition;
 
     // Start is called before the first frame update
     void Start()
@@ -28,5 +29,10 @@ public class Player : MonoBehaviour
     void addScore(int score)
     {
         Score += score;
+    }
+
+    public void SetBoardPosition(Vector3 boardPosition)
+    {
+        currentBoardPosition = boardPosition;
     }
 }

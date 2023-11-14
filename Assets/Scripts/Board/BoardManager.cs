@@ -5,20 +5,165 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
+public class BoardSpace
+{
+    private Vector3 boardPos;
+    private Vector3 worldPos;
+    private float worldSpaceScalingFactor;
+    private bool isBuilt;
+    private bool isBuildable;
+    private int neighborValue;
+    private GameObject spaceObj;
+    private GameObject detailObj;
+    private bool playerInSpace;
+
+    public BoardSpace(Vector3 boardPos, float worldSpaceScalingFactor, bool isBuilt, bool isBuildable)
+    {
+        this.boardPos = boardPos;
+        this.worldPos = new Vector3(boardPos.x * worldSpaceScalingFactor, boardPos.y * worldSpaceScalingFactor, boardPos.z * worldSpaceScalingFactor);
+        this.worldSpaceScalingFactor = worldSpaceScalingFactor;
+        this.isBuilt = isBuilt;
+        this.isBuildable = isBuildable;
+        this.neighborValue = 0;
+        this.spaceObj = null;
+        this.detailObj = null;
+        this.playerInSpace = false;
+    }
+
+    public void SetBoardPosition(Vector3 newPos) 
+    { 
+        this.boardPos = newPos;
+        this.worldPos = new Vector3(this.boardPos.x * this.worldSpaceScalingFactor, this.boardPos.y * this.worldSpaceScalingFactor, this.boardPos.z * this.worldSpaceScalingFactor);
+    }
+
+    public Vector3 GetBoardPosition() { return this.boardPos; }
+
+    public Vector3 GetWorldPosition() {  return this.worldPos; }
+
+    public void SetWorldPosition(Vector3 newPos)
+    {
+        this.worldPos = new Vector3(newPos.x * this.worldSpaceScalingFactor, newPos.y * this.worldSpaceScalingFactor, newPos.z * this.worldSpaceScalingFactor);
+    }
+
+    public void SetWorldSpaceScalingFactor(float worlspaceScalingFactor)
+    {
+        this.worldSpaceScalingFactor = worlspaceScalingFactor;
+        this.worldPos = new Vector3(this.boardPos.x * this.worldSpaceScalingFactor, this.boardPos.y * this.worldSpaceScalingFactor, this.boardPos.z * this.worldSpaceScalingFactor);
+    }
+
+    public float GetWorldSpaceScalingFactor() { return this.worldSpaceScalingFactor; }
+
+    public void SetNeighborValue(int neighborValue) { 
+        this.neighborValue = neighborValue; 
+    }
+
+    public int GetNeighborValue() { return this.neighborValue; }
+
+    public void SetIsBuildable(bool isBuildable) { this.isBuildable = isBuildable; }
+
+    public bool GetIsBuildable() { return this.isBuildable; }
+
+    public void SetIsBuilt(bool isBuilt) { this.isBuilt = isBuilt; }
+
+    public bool GetIsBuilt() { return this.isBuilt; }
+
+    public bool SetSpaceObj(Transform parent = null, string name = "")
+    {
+        try
+        {
+            spaceObj = GameObject.Instantiate(GetBlock(), worldPos, Quaternion.identity);
+            if(name == "")
+            {
+                spaceObj.name = (boardPos.x + "," + boardPos.y + "," + boardPos.z);
+            } else {
+                spaceObj.name = name;
+            }
+
+            if(parent != null)
+            {
+                spaceObj.transform.parent = parent;
+            }
+            return true;
+        }
+        catch
+        {
+            Debug.Log("Failed creating object for space at: (" + boardPos.x + "," + boardPos.y + "," + boardPos.z + ")!");
+            return false;
+        }
+    }
+
+    public GameObject GetSpaceObj() { return spaceObj; }
+
+    public bool SetDetailObj()
+    {
+        try
+        {
+            if(isBuilt)
+            {
+                System.Random rand = new System.Random();
+                int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
+                int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
+
+                detailObj = GameObject.Instantiate(
+                    GameAssets.i.block_details_[randDetailPrefabIdx], 
+                    new Vector3((boardPos.x) * worldSpaceScalingFactor, (boardPos.y + 1) * worldSpaceScalingFactor, (boardPos.z) * worldSpaceScalingFactor), 
+                    Quaternion.AngleAxis(rotationAngle, Vector3.up));
+                detailObj.name = spaceObj.name + " DETAIL";
+                detailObj.transform.parent = spaceObj.transform;
+                return true;
+            } else
+            {
+                return false;
+            }
+            
+        }
+        catch
+        {
+            Debug.Log("Failed creating detail object for space at: (" + boardPos.x + "," + boardPos.y + "," + boardPos.z + ")!");
+            return false;
+        }
+    }
+
+    public void SetPlayerInSpace(bool playerInSpace) { this.playerInSpace = playerInSpace; }
+
+    public bool GetPlayerInSpace() {  return this.playerInSpace; }
+
+    private GameObject GetBlock()
+    {
+        GameObject block = null;
+        if(isBuilt)
+        {
+            if (neighborValue % 11 == 0 && neighborValue != 0)
+            {
+                //Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+                block = GameAssets.i.stone_blocks_[neighborValue / 11];
+            }
+            else
+            {
+                //Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+                block = GameAssets.i.grass_blocks_[neighborValue];
+            }
+        } else
+        {
+            if(isBuildable)
+            {
+                block = GameAssets.i.buildable_block_;
+            }
+        }
+        return block;
+    }
+
+}
+
 public class BoardManager : MonoBehaviour
 {
     public int BaseSize = 10;
     public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
     private static int RandomBlockCount;
-    public static GameObject[,,] BoardCube_Arr;
-    public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
-    public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
-    public static bool[,,] IsBuilt_Arr; // marks block coordinates as built
+    public static BoardSpace[,,] BoardSpace_Arr;
 
     public int currentBuiltHeight = 0; // marks the current highest built y position
-
-    public GameObject buildableBlock;
 
     // Start is called before the first frame update
     void Start()
@@ -26,10 +171,7 @@ public class BoardManager : MonoBehaviour
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
 
-        CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
-        IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
-        BoardCube_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
-        BoardCubeDetail_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
+        BoardSpace_Arr = new BoardSpace[BaseSize, HeightSize, BaseSize];
 
         bool[,,] isRandom = GenerateRandomGrid();
         //Debug.Log(isRandom);
@@ -43,15 +185,15 @@ public class BoardManager : MonoBehaviour
                 {
                     if (isRandom[x, y, z])
                     {
-                        IsBuilt_Arr[x, y, z] = true;
+                        BoardSpace_Arr[x, y, z] = new BoardSpace(new Vector3(x, y, z), 2.5f, true, false);
                     }
                     else if (y == 0)
                     {
-                        IsBuilt_Arr[x, y, z] = true;
+                        BoardSpace_Arr[x, y, z] = new BoardSpace(new Vector3(x, y, z), 2.5f, true, false);
                     }
                     else if (y >= 1)
                     {
-                        IsBuilt_Arr[x, y, z] = false;
+                        BoardSpace_Arr[x, y, z] = new BoardSpace(new Vector3(x, y, z), 2.5f, false, false);
                     }
                     else
                     {
@@ -61,17 +203,14 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        // Place blocks
+        // Update blocks
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
             {
                 for (int z = 0; z < BaseSize; z++)
                 {
-                    if(IsBuilt_Arr[x, y, z])
-                    {
-                        PlaceCube(x, y, z);
-                    }
+                    UpdateSpace(x, y, z);
                 }
             }
         }
@@ -85,62 +224,27 @@ public class BoardManager : MonoBehaviour
         // need to update Isbuildable, isbuilt, game object asset of whatever changed.
     }
 
-    /// <summary>
-    /// Places a GameObject of cube at a specified coordinates. Treats levels of the cube differently for different Cube GameObjects
-    /// </summary>
-    /// <param name="prefab_type">Type of prefab to place</param>
-    /// <param name="x">x coordinate</param>
-    /// <param name="y">y coordinate</param>
-    /// <param name="z">z coordinate</param>
-    public void PlaceCube(int x, int y, int z)
+    public void UpdateSpace(int x, int y, int z)
     {
-        if (y + 1 > currentBuiltHeight) currentBuiltHeight = y + 1; //Set the current built height to this blocks y position if the y is greater.
-
         int neighborValue = GetBlockNeighborsBuiltValue(x, y, z);
-
-        BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(neighborValue), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
-        BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
-        BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
+        BoardSpace_Arr[x, y, z].SetNeighborValue(neighborValue);
+        BoardSpace_Arr[x, y, z].SetSpaceObj(this.transform);
 
         //Check if there are any built blocks above this block
-        if(neighborValue % 11 != 0)
+        if (neighborValue % 11 != 0)
         {
             //Check if a detail should be added to the top of the block
             System.Random rand = new System.Random();
             bool chanceForDetail = rand.Next(100) < 40;
             if (chanceForDetail)
             {
-                PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
+                BoardSpace_Arr[x, y, z].SetDetailObj();
             }
-
-            //Mark the block above as can be built
-            CanBuildOn_Arr[x, y + 1, z] = true;
-            //Instantiate the "buildable" block prefab on block above this one
-            BoardCube_Arr[x, y + 1, z] = GameObject.Instantiate(buildableBlock, new Vector3(x * 2.5f, (y + 1) * 2.5f, z * 2.5f), transform.rotation);
-            BoardCube_Arr[x, y + 1, z].transform.SetParent(this.transform, false);
-            BoardCube_Arr[x, y + 1, z].name = (x + "," + y + "," + z + " BUILDABLE");
+            if(y + 1 < HeightSize && BoardSpace_Arr[x, y, z].GetIsBuilt())
+            {
+                BoardSpace_Arr[x, y + 1, z].SetIsBuildable(true);
+            }
         }
-    }
-
-    /// <summary>
-    /// Places a detail prefab on top of a block at the specified coordinate
-    /// </summary>
-    /// <param name="parentTransform">Parent GameObject, should be the block which is getting the detail added to it.</param>
-    /// <param name="x">x coordinate of parent</param>
-    /// <param name="y">y coordinate of parent</param>
-    /// <param name="z">z coordinate of parent</param>
-    public void PlaceDetail(Transform parentTransform, int x, int y, int z)
-    {
-        System.Random rand = new System.Random();
-        int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
-        int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
-
-        BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
-        BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
-
-        // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
-        Vector3 topOfBlock = new Vector3(0, 2.5f, 0);
-        BoardCubeDetail_Arr[x, y, z].transform.position += topOfBlock;
     }
 
     /// <summary>
@@ -153,73 +257,26 @@ public class BoardManager : MonoBehaviour
     public int GetBlockNeighborsBuiltValue(int x, int y, int z)
     {
         int neighborValue = 1;
-        Boolean[] neighbors = new Boolean[4];
         if (z + 1 < BaseSize)
         {
-            if (IsBuilt_Arr[x, y, z + 1]) neighborValue *= 2; //Front Block
+            if (BoardSpace_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; //Front Block
         }
         if (z - 1 >= 0) {
-            if (IsBuilt_Arr[x, y, z - 1]) neighborValue *= 3; //Behind Block
+            if (BoardSpace_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; //Behind Block
         }
         if (x + 1 < BaseSize)
         {
-            if (IsBuilt_Arr[x + 1, y, z]) neighborValue *= 5; //Left Block
+            if (BoardSpace_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; //Left Block
         }
         if (x - 1 >= 0)
         {
-            if (IsBuilt_Arr[x - 1, y, z]) neighborValue *= 7; //Right Block
+            if (BoardSpace_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; //Right Block
         }
         if (y + 1 < HeightSize)
         {
-            if (IsBuilt_Arr[x, y + 1, z]) neighborValue *= 11; //Above Block
+            if (BoardSpace_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; //Above Block
         }
-        //We dont need bottom block
         return neighborValue;
-    }
-
-    /// <summary>
-    /// Returns the correct prefab to use for block at x, y, z coordinate
-    /// </summary>
-    /// <param name="neighborValue">Value of the blocks neighbors based on if they have been built on or not.</param>
-    public GameObject GetBlock(int neighborValue)
-    {
-        GameObject block;
-        
-        if(neighborValue % 11 == 0 && neighborValue != 0)
-        {
-            //Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
-            block = GameAssets.i.stone_blocks_[neighborValue / 11];
-        } else
-        {
-            //Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
-            block = GameAssets.i.grass_blocks_[neighborValue];
-        }
-
-        return block;
-    }
-
-    /// <summary>
-    /// Uses the current CanBuildOn_Arr status and given coordinates to determine if the block at said coordinates can be built.
-    /// Only condition where buildable is when the block below has been built, there is no player on the current block, and the coordinates are valid
-    /// </summary>
-    /// <param name="x">X coordinate value</param>
-    /// <param name="y">y coordinate value</param>
-    /// <param name="z">z coordinate value</param>
-    /// <returns>Boolean representing if the block is buildable or not. True for the player can build, false for not.</returns>
-    public bool IsBuildable(int x, int y, int z)
-    {
-        if (IsBuilt_Arr[x, y, z]) //already built blocks are never buildable
-        {
-            return false;
-        }
-        else if ((!IsBuilt_Arr[x, y - 1, z]) && (y - 1 > 0) && (y < HeightSize))
-        {
-            return true;
-        }
-        else
-        {
-            return false; // default return false
-        }
     }
 
     /// <summary>
@@ -281,3 +338,113 @@ public class BoardManager : MonoBehaviour
     }
 
 }
+
+
+
+
+
+/*
+ * 
+ * /// <summary>
+    /// Returns the correct prefab to use for block at x, y, z coordinate
+    /// </summary>
+    /// <param name="neighborValue">Value of the blocks neighbors based on if they have been built on or not.</param>
+    public GameObject GetBlock(int neighborValue)
+    {
+        GameObject block;
+        
+        if(neighborValue % 11 == 0 && neighborValue != 0)
+        {
+            //Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            block = GameAssets.i.stone_blocks_[neighborValue / 11];
+        } else
+        {
+            //Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            block = GameAssets.i.grass_blocks_[neighborValue];
+        }
+
+        return block;
+    }
+
+    /// <summary>
+    /// Uses the current CanBuildOn_Arr status and given coordinates to determine if the block at said coordinates can be built.
+    /// Only condition where buildable is when the block below has been built, there is no player on the current block, and the coordinates are valid
+    /// </summary>
+    /// <param name="x">X coordinate value</param>
+    /// <param name="y">y coordinate value</param>
+    /// <param name="z">z coordinate value</param>
+    /// <returns>Boolean representing if the block is buildable or not. True for the player can build, false for not.</returns>
+    public bool IsBuildable(int x, int y, int z)
+    {
+        if (IsBuilt_Arr[x, y, z]) //already built blocks are never buildable
+        {
+            return false;
+        }
+        else if ((!IsBuilt_Arr[x, y - 1, z]) && (y - 1 > 0) && (y < HeightSize))
+        {
+            return true;
+        }
+        else
+        {
+            return false; // default return false
+        }
+    }
+
+    /// <summary>
+    /// Places a GameObject of cube at a specified coordinates. Treats levels of the cube differently for different Cube GameObjects
+    /// </summary>
+    /// <param name="prefab_type">Type of prefab to place</param>
+    /// <param name="x">x coordinate</param>
+    /// <param name="y">y coordinate</param>
+    /// <param name="z">z coordinate</param>
+    public void PlaceCube(int x, int y, int z)
+    {
+        if (y + 1 > currentBuiltHeight) currentBuiltHeight = y + 1; //Set the current built height to this blocks y position if the y is greater.
+
+        int neighborValue = GetBlockNeighborsBuiltValue(x, y, z);
+
+        BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(neighborValue), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
+        BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
+        BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
+
+        //Check if there are any built blocks above this block
+        if(neighborValue % 11 != 0)
+        {
+            //Check if a detail should be added to the top of the block
+            System.Random rand = new System.Random();
+            bool chanceForDetail = rand.Next(100) < 40;
+            if (chanceForDetail)
+            {
+                PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
+            }
+
+            //Mark the block above as can be built
+            CanBuildOn_Arr[x, y + 1, z] = true;
+            //Instantiate the "buildable" block prefab on block above this one
+            BoardCube_Arr[x, y + 1, z] = GameObject.Instantiate(buildableBlock, new Vector3(x * 2.5f, (y + 1) * 2.5f, z * 2.5f), transform.rotation);
+            BoardCube_Arr[x, y + 1, z].transform.SetParent(this.transform, false);
+            BoardCube_Arr[x, y + 1, z].name = (x + "," + y + "," + z + " BUILDABLE");
+        }
+    }
+
+    /// <summary>
+    /// Places a detail prefab on top of a block at the specified coordinate
+    /// </summary>
+    /// <param name="parentTransform">Parent GameObject, should be the block which is getting the detail added to it.</param>
+    /// <param name="x">x coordinate of parent</param>
+    /// <param name="y">y coordinate of parent</param>
+    /// <param name="z">z coordinate of parent</param>
+    public void PlaceDetail(Transform parentTransform, int x, int y, int z)
+    {
+        System.Random rand = new System.Random();
+        int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
+        int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
+
+        BoardCubeDetail_Arr[x, y, z] = GameObject.Instantiate(GameAssets.i.block_details_[randDetailPrefabIdx], parentTransform.position, Quaternion.AngleAxis(rotationAngle, Vector3.up), parentTransform);
+        BoardCubeDetail_Arr[x, y, z].name = x + "," + y + "," + z + "-DetailChild";
+
+        // TODO this seems like a hacky way to just add 2.5f to the object to make it appear on the top of the block.
+        Vector3 topOfBlock = new Vector3(0, 2.5f, 0);
+        BoardCubeDetail_Arr[x, y, z].transform.position += topOfBlock;
+    }
+*/

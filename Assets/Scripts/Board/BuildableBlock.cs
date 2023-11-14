@@ -12,6 +12,8 @@ public class BuildableBlock : MonoBehaviour
     public Material unselectedMaterial;
     public Material confirmedMaterial;
 
+
+
     void Start()
     {
         mesh = transform.GetChild(0).gameObject;

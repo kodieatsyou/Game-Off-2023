@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+  buildable_block_: {fileID: 4408310354143738939, guid: 7006ec61074488646963aa05c112a895, type: 3}
   grass_blocks_:
     _serializedList:
     - Key: 1

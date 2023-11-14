@@ -36,7 +36,8 @@ public class TestingController : MonoBehaviour
     {
         if(confirmedSpots.Count > 0)
         {
-            Instantiate(GameAssets.i.player_object_, confirmedSpots[0].transform.position, Quaternion.identity);
+            GameObject newPlayer = Instantiate(GameAssets.i.player_object_, confirmedSpots[0].transform.position, Quaternion.identity);
+            //newPlayer.GetComponent<Player>().SetBoardPosition()
         }
     }
 
