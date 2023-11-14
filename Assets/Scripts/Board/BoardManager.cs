@@ -31,7 +31,7 @@ public class BoardManager : MonoBehaviour
         BoardCubeDetail_Arr = new GameObject[BaseSize, HeightSize, BaseSize];
 
         bool[,,] isRandom = GenerateRandomGrid();
-        Debug.Log(isRandom);
+        //Debug.Log(isRandom);
 
         // Fill CanBuildOn_Arr and IsBuilt_Arr with rule-based values
         for (int x = 0; x < BaseSize; x++)
@@ -57,7 +57,7 @@ public class BoardManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("MISSING RULE FOR COORD (" + x + "," + y + "," + z + ")");
+                        //Debug.Log("MISSING RULE FOR COORD (" + x + "," + y + "," + z + ")");
                     }
                 }
             }
@@ -106,7 +106,7 @@ public class BoardManager : MonoBehaviour
             BoardCube_Arr[x, y, z] = GameObject.Instantiate(GetBlock(x, y, z), new Vector3(x * 2.5f, y * 2.5f, z * 2.5f), transform.rotation);
             BoardCube_Arr[x, y, z].transform.SetParent(this.transform, false);
             BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
-            Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
+            //Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
 
             System.Random rand = new System.Random();
             bool chanceForDetail = rand.Next(100) < 40;
@@ -190,11 +190,11 @@ public class BoardManager : MonoBehaviour
         
         if(neighborValue % 11 == 0 && neighborValue != 0)
         {
-            Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            //Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
             block = GameAssets.i.stone_blocks_[neighborValue / 11];
         } else
         {
-            Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
+            //Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
             block = GameAssets.i.grass_blocks_[neighborValue];
         }
 

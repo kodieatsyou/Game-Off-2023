@@ -1,70 +1,93 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private Camera cam;
-    public float distance;
-    public float angle;
+    public float zoomSpeed = 9f;
+    public float rotationSpeed = 10f;
+    public float maxZoomIn = 10f;
+    public float maxZoomOut = 100f;
+
+    GameObject board;
+    Vector3 mousePreviousPos = Vector3.zero;
+    Vector3 mousePositionDelta = Vector3.zero;
 
     // Start is called before the first frame update
     void Start()
     {
-        cam = GetComponent<Camera>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(board != null)
+        {
+            transform.LookAt(board.GetComponent<BoardManager>().GetBoardMiddlePos());
+            DoZoom();
+            DoRotate();
+        }
+
     }
 
+    /// <summary>
+    /// Rotates the camera around the boards center position by clicking and dragging
+    /// </summary>
+    void DoRotate()
+    {
+        Vector3 target = board.GetComponent<BoardManager>().GetBoardMiddlePos();
+
+        if (Input.GetMouseButton(0))
+        {
+            mousePositionDelta = (Input.mousePosition - mousePreviousPos);
+
+            float horizontalInput = mousePositionDelta.x;
+            float verticalInput = mousePositionDelta.y;
+
+            float rotationX = verticalInput * rotationSpeed * 10f * Time.deltaTime;
+            float rotationY = horizontalInput * rotationSpeed * 10f *Time.deltaTime;
+
+            Vector3 currentRotation = transform.eulerAngles;
+
+            float newRotationX = currentRotation.x - rotationX;
+
+            if (newRotationX >= 0f && newRotationX <= 80f)
+            {
+                transform.RotateAround(target, transform.right, -rotationX);
+                transform.RotateAround(target, Vector3.up, rotationY);
+            }
+        }
+
+        mousePreviousPos = Input.mousePosition;
+    }
+
+    /// <summary>
+    /// Zooms the camera in and out using scroll wheel
+    /// </summary>
+    void DoZoom()
+    {
+        Vector3 target = board.GetComponent<BoardManager>().GetBoardMiddlePos();
+
+        float scrollDelta = -Input.mouseScrollDelta.y;
+
+        Vector3 directionToTarget = target - transform.position;
+
+        float currentDistance = directionToTarget.magnitude;
+
+        float newDistance = Mathf.Clamp(currentDistance + scrollDelta * zoomSpeed * 100f * Time.deltaTime, maxZoomIn, maxZoomOut);
+
+        Vector3 newPosition = target - directionToTarget.normalized * newDistance;
+
+        transform.position = newPosition;
+    }
+
+    /// <summary>
+    /// Function is triggered with the onGameBoardInitialized game event and sets up the initial camera position
+    /// </summary>
     public void OnGameBoardInitialized()
     {
-        //Set Camera Position
-        Vector3 boardMiddlePos = GameObject.FindGameObjectWithTag("Board").GetComponent<BoardManager>().GetBoardMiddlePos();
-        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.localScale = new Vector3(distance, distance, distance);
-        sphere.transform.position = boardMiddlePos;
-        gameObject.transform.position = GameObject.FindGameObjectWithTag("Board").GetComponent<BoardManager>().GetBoardMiddlePos();
-
-
-
-
-        // Normalize the direction vector
-        Vector3 direction = new Vector3(1f, 0f, 0f);
-        float radius = distance / 2;
-        Vector3 normalizedDirection = direction.normalized;
-
-        // Calculate the intersection point with the sphere
-        float t = Vector3.Dot(-boardMiddlePos, normalizedDirection);
-        float discriminant = t * t - (boardMiddlePos.sqrMagnitude - radius * radius);
-
-        // Check if there is an intersection
-        if (discriminant >= 0)
-        {
-            // Calculate the two possible intersection points
-            float t1 = -t + Mathf.Sqrt(discriminant);
-            float t2 = -t - Mathf.Sqrt(discriminant);
-
-            // Choose the intersection point closer to the sphere center
-            float chosenT = Mathf.Min(t1, t2);
-
-            // Calculate the intersection point in world space
-            Vector3 intersectionPoint = boardMiddlePos + chosenT * normalizedDirection;
-
-            // Place the object on the sphere's surface
-
-            GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere2.transform.position = intersectionPoint;
-        }
-        else
-        {
-            Debug.LogError("Direction vector does not intersect with the sphere.");
-        }
-
-
+        board = GameObject.FindGameObjectWithTag("Board");
+        //Set Initial Camera Position
+        Vector3 boardMiddlePos = board.GetComponent<BoardManager>().GetBoardMiddlePos();
+        transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);
     }
+
 }
