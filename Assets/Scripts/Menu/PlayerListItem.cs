@@ -2,18 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class PlayerListItem : MonoBehaviourPunCallbacks
 {
-    [SerializeField] Text text;
+    [SerializeField] TMP_Text text;
+    [SerializeField] GameObject host;
     Player player;
 
-    public void SetUp(Player _player)
+    public void SetInfo(Player _player)
     {
         player = _player;
         text.text = _player.NickName;
+        host.SetActive(player.IsMasterClient);
+
+        if (PhotonNetwork.NickName == _player.NickName)
+        {
+            text.color = Color.black;
+        }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -28,4 +36,9 @@ public class PlayerListItem : MonoBehaviourPunCallbacks
     {
         Destroy(gameObject);
     }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+	{
+        host.SetActive(player.IsMasterClient);
+	}
 }
