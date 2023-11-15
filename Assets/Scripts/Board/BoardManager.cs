@@ -160,6 +160,8 @@ public class BoardSpace
 
 public class BoardManager : MonoBehaviour
 {
+    public static BoardManager Instance;
+
     public int BaseSize = 10;
     public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
@@ -170,6 +172,18 @@ public class BoardManager : MonoBehaviour
     public Vector3 end;
 
     public int currentBuiltHeight = 0; // marks the current highest built y position
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
