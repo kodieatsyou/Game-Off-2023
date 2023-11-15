@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public string Name;
-    public int Score;
-    public int CurrentLevel;
+    public string Name { private set; get; }
+    public int Score { private set; get; }
+    public int CurrentLevel { private set; get; }
     public bool IsActiveTurn { private set; get; }
     public float TurnLength = 15f;
+    public GameObject Object;
 
     private Coroutine TimerCoroutine;
     private GameManager Game;
@@ -17,6 +18,8 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         Game = GameManager.Instance;
+        Name = this.gameObject.name;
+        IsActiveTurn = false;
     }
 
     // Update is called once per frame
