@@ -5,39 +5,59 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private GameManager gameManager;
-    public string Name;
-    public string Id; // allows backend to track player if same name
-    public int Score;
-    public int PlayerIndex;
-    public bool IsCurrentPlayer;
-    public Vector3 currentBoardPosition;
+    public string Name { private set; get; }
+    public int Score { private set; get; }
+    public int CurrentLevel { private set; get; }
+    public bool IsActiveTurn { private set; get; }
+    public float TurnLength = 15f;
+    public GameObject Object;
 
-    // Start is called before the first frame update
-    void Start()
+    private Coroutine TimerCoroutine;
+    private GameManager Game;
+
+    private void Awake()
     {
-        gameManager = GameManager.Instance;
-        Id = System.Guid.NewGuid().ToString();
-        Name = "Player " + PlayerIndex; // TODO Replace with name from menu
+        Game = GameManager.Instance;
+        Name = this.gameObject.name;
+        IsActiveTurn = false;
     }
+
     // Update is called once per frame
     void Update()
     {
-        
+        if (IsActiveTurn)
+        {
+            // TODO Implement turn logic
+        }
+        else
+        {
+            // TODO Implement what happens when not player turn
+        }
     }
 
-    void addScore(int score)
+    public void StartTurn()
     {
-        Score += score;
+        TimerCoroutine = StartCoroutine(TurnTimeEnd());
+        IsActiveTurn = true;
     }
 
-    public void MoveToPosition(Vector3 boardPosition)
+    public void EndTurn()
     {
-        currentBoardPosition = boardPosition;
+        StopCoroutine(TimerCoroutine);
     }
 
-    public void OnMovePlayer(GameObject blockToMoveTo)
+    private IEnumerator TurnTimeEnd()
     {
-
+        if (TurnLength <= 0f) // end of turn
+        {
+            IsActiveTurn = false;
+        }
+        else
+        {
+            TurnLength -= Time.deltaTime;
+            float seconds = Mathf.FloorToInt(TurnLength % 60);
+            //TODO attach to UI timer element timeText.text = string.Format("{0:00}", seconds);
+        }
+        yield return null;
     }
 }
