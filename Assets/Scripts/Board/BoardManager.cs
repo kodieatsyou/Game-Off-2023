@@ -40,6 +40,8 @@ public class BoardSpace
 
     public Vector3 GetWorldPosition() {  return this.worldPos; }
 
+    public Vector3 GetWorldPositionOfTop() { return new Vector3((boardPos.x) * worldSpaceScalingFactor, (boardPos.y + 1) * worldSpaceScalingFactor, (boardPos.z) * worldSpaceScalingFactor); }
+
     public void SetWorldPosition(Vector3 newPos)
     {
         this.worldPos = new Vector3(newPos.x * this.worldSpaceScalingFactor, newPos.y * this.worldSpaceScalingFactor, newPos.z * this.worldSpaceScalingFactor);
@@ -83,6 +85,7 @@ public class BoardSpace
             {
                 spaceObj.transform.parent = parent;
             }
+            spaceObj.AddComponent<Block>().SetSpaceObj(this);
             return true;
         }
         catch
@@ -163,6 +166,9 @@ public class BoardManager : MonoBehaviour
     private static int RandomBlockCount;
     public static BoardSpace[,,] BoardSpace_Arr;
 
+    public Vector3 start;
+    public Vector3 end;
+
     public int currentBuiltHeight = 0; // marks the current highest built y position
 
     // Start is called before the first frame update
@@ -214,7 +220,7 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
-
+        PlacePlayerOnRandomBlock();
         EventManager.TriggerEvent("OnBoardDoneInitializing", this.gameObject);
     }
 
@@ -335,6 +341,41 @@ public class BoardManager : MonoBehaviour
             return new Vector3((BaseSize / 2.0f) * 2.5f, currentBuiltHeight * 2.5f, (BaseSize / 2.0f) * 2.5f); // Get the location of the center of the middle block
         }
         
+    }
+
+    public void PlacePlayerOnRandomBlock()
+    {
+        List<BoardSpace> availableBlocks = new List<BoardSpace> ();
+        for (int x = 0; x < BaseSize; x++)
+        {
+            for (int y = 0; y < 1; y++)
+            {
+                for (int z = 0; z < BaseSize; z++)
+                {
+                    if (BoardSpace_Arr[x, y, z].GetIsBuilt() && BoardSpace_Arr[x, y, z].GetNeighborValue() % 11 != 0)
+                    {
+                        availableBlocks.Add(BoardSpace_Arr[x, y, z]);
+                    }
+                }
+            }
+        }
+        System.Random rand = new System.Random();
+        BoardSpace spaceToSpawn = availableBlocks[rand.Next(availableBlocks.Count)];
+        spaceToSpawn.SetPlayerInSpace(true);
+        Debug.Log("Placing player on block: " + spaceToSpawn.GetSpaceObj().name);
+        Instantiate(GameAssets.i.player_object_, spaceToSpawn.GetWorldPositionOfTop(), Quaternion.identity);
+    }
+
+    public List<BoardSpace> FindPathInGrid()
+    {
+        BoardSpace from = BoardSpace_Arr[(int)start.x, (int)start.y, (int)start.z];
+        BoardSpace to = BoardSpace_Arr[(int)end.x, (int)end.y, (int)end.z];
+        List<BoardSpace> path = new AStarPathfinding(BoardSpace_Arr, from, to).FindPath();
+        if(path == null)
+        {
+            Debug.Log("Could not find path!");
+        }
+        return path;
     }
 
 }

@@ -31,8 +31,13 @@ public class Player : MonoBehaviour
         Score += score;
     }
 
-    public void SetBoardPosition(Vector3 boardPosition)
+    public void MoveToPosition(Vector3 boardPosition)
     {
         currentBoardPosition = boardPosition;
+    }
+
+    public void OnMovePlayer(GameObject blockToMoveTo)
+    {
+
     }
 }

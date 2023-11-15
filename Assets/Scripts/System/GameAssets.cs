@@ -23,6 +23,8 @@ public class GameAssets : MonoBehaviour
     public GameObject player_object_;
 
     [Header("Board Blocks")]
+    [Header("Components")]
+    public GameObject hover_Object_;
     [Header("Buildable")]
     public GameObject buildable_block_;
     [Header("Grass")]
