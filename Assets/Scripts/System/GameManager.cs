@@ -13,7 +13,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public static event System.Action<GameState> OnStateChange;
-    public float TurnLength = 15f;
 
     private Player[] Players;
     private GameState CurrentState;
@@ -43,40 +42,15 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         ProcessGameCondition(); // Updates game state to GameOver if condition found
-
         if (CurrentState == GameState.GameOver)
         {
             // TODO display game over text
         }
-        else
+        else if (CurrentState == GameState.EndPlayerTurn) // if previous player has now ended turn
         {
-            // All below processes update game state to EndPlayerTurn if found
-            ProcessTurnTime();
-            ProcessPlayerTurn();
-            if (CurrentState == GameState.EndPlayerTurn)
-            {
-                UpdateGameState(GameState.StartPlayerTurn); // start new player turn based on the 
-            }
+            UpdateGameState(GameState.StartPlayerTurn);
         }
-    }
-
-    private void ProcessTurnTime()
-    {
-        if (TurnLength <= 0f) // end of turn
-        {
-            UpdateGameState(GameState.EndPlayerTurn);
-        }
-        else
-        {
-            float seconds = Mathf.FloorToInt(TurnLength % 60);
-            //TODO attach to UI timer element timeText.text = string.Format("{0:00}", seconds);
-        }
-        TurnLength -= Time.deltaTime;
-    }
-
-    private void ProcessPlayerTurn()
-    {
-        if (CurrentPlayer.IsTurn == true)
+        else if (CurrentPlayer.IsActiveTurn == false) // current player turn is ended by its own logic
         {
             UpdateGameState(GameState.EndPlayerTurn);
         }
@@ -100,12 +74,12 @@ public class GameManager : MonoBehaviour
             CurrentState = newState;
             switch (newState)
             {
-                case GameState.StartPlayerTurn: // process start player turn
-                    StartPlayerTurn();
+                case GameState.StartPlayerTurn: // allow current player to interact
+                    HandleStartPlayerTurn();
                     break;
 
-                case GameState.EndPlayerTurn: // process ending the players turn
-                    EndPlayerTurn();
+                case GameState.EndPlayerTurn: // switch to the next player and notify all players
+                    HandleEndPlayerTurn();
                     break;
 
                 case GameState.GameOver:
@@ -123,16 +97,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void StartPlayerTurn()
+    private void HandleStartPlayerTurn()
     {
         CurrentPlayer = Players[CurrentPlayerIndex];
-        CurrentPlayer.IsTurn = true;
+        CurrentPlayer.StartTurn();
         Debug.Log("Started turn for player: " + CurrentPlayerIndex);
     }
 
-    private void EndPlayerTurn()
+    private void HandleEndPlayerTurn()
     {
-        CurrentPlayer.IsTurn = false;
+        CurrentPlayer.EndTurn(); // end current player turn
+
         CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Length;
         CurrentPlayer = Players[CurrentPlayerIndex];
         Debug.Log("Ended player turn, new player: " + CurrentPlayerIndex);
