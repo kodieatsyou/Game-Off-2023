@@ -5,28 +5,30 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private GameManager gameManager;
     public string Name;
-    public string Id; // allows backend to track player if same name
     public int Score;
-    public int PlayerIndex;
-    public bool IsCurrentPlayer;
+    public bool IsTurn { get; set; }
+    public int CurrentLevel;
+    public bool TurnState = false;
+
+    private GameManager Game;
 
     // Start is called before the first frame update
     void Start()
     {
-        gameManager = GameManager.Instance;
-        Id = System.Guid.NewGuid().ToString();
-        Name = "Player " + PlayerIndex; // TODO Replace with name from menu
+        Game = GameManager.Instance;
     }
     // Update is called once per frame
     void Update()
     {
-        
+        if (IsTurn)
+        {
+            // TODO Implement turn logic
+        }
     }
 
-    void addScore(int score)
+    private void DetermineTurnCondition()
     {
-        Score += score;
+
     }
 }
