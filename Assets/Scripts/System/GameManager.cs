@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public static event System.Action<GameState> OnStateChange;
     public int MaxPlayerCount = 6;
     public float turnTime = 15.0f;
-    public Player[] PlayerArr { get; private set; }
+    public PlayerController[] PlayerArr { get; private set; }
 
     private GameState CurrentState;
     private BoardManager Board;
@@ -34,13 +34,13 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PlayerArr = new Player[MaxPlayerCount];
+        PlayerArr = new PlayerController[MaxPlayerCount];
         SpawnPlayers(); // populates PlayerArr
         CurrentPlayerIndex = -1;
 
-        foreach (Player p in PlayerArr)
+        foreach (PlayerController p in PlayerArr)
         {
-            Debug.Log("Player: " + p.Name);
+            Debug.Log("Player: " + p.PlayerName);
         }
 
         UpdateGameState(GameState.Menu); // Launch the menu after placing players, let another script handle when to start gameplay by chaning the state to GameState.Gameplay
@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
         }
         else if (CurrentState == GameState.Gameplay)
         {
-            Debug.Log("Current player: " + PlayerArr[CurrentPlayerIndex].Name);
+            Debug.Log("Current player: " + PlayerArr[CurrentPlayerIndex].PlayerName);
             currentTurnTime -= Time.deltaTime;
             if (currentTurnTime <= 0.0f || PlayerArr[CurrentPlayerIndex].currentActions < 0)
             {
