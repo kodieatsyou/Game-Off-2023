@@ -3,47 +3,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+[Serializable]
+public class Player: MonoBehavior
 {
-    public string Name { private set; get; }
-    public int Score { private set; get; }
-    public int CurrentLevel { private set; get; }
-    public bool IsActiveTurn { private set; get; }
+    public int PlayerID { get; set; }
+    public string PlayerName { get; set; }
+    public bool IsActiveTurn { get; set; }
+    public int Score { set; get; }
+    public int CurrentLevel { set; get; }
     public float TurnLength = 15f;
-    public GameObject Object;
+    public GameObject GameObjectPrefab;
+    public Point BoardPosition;
 
     private Coroutine TimerCoroutine;
     private GameManager Game;
+    private BoardManager Board;
 
-    private void Awake()
+    void Spawn(GameObject prefab, String name, Point point)
     {
+        PlayerID = Guid.NewGuid();
+        Board = BoardManager.Instance;
         Game = GameManager.Instance;
-        Name = this.gameObject.name;
+        PlayerName = name;
+        GameObjectPrefab = prefab;
         IsActiveTurn = false;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (IsActiveTurn)
-        {
-            // TODO Implement turn logic
-        }
-        else
-        {
-            // TODO Implement what happens when not player turn
-        }
+        BoardPosition = point;
+        Debug.Log("Awake Player with name: " + Name);
     }
 
     public void StartTurn()
     {
-        TimerCoroutine = StartCoroutine(TurnTimeEnd());
         IsActiveTurn = true;
+        TimerCoroutine = StartCoroutine(TurnTimeEnd());
     }
 
     public void EndTurn()
     {
         StopCoroutine(TimerCoroutine);
+
+        TurnLength = 15f;
     }
 
     private IEnumerator TurnTimeEnd()

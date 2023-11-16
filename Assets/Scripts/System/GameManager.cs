@@ -4,10 +4,8 @@ using UnityEngine;
 
 public enum GameState
 {
-    NewGame,
-    OrderChoosing,
-    StartPlayerTurn,
-    EndPlayerTurn, // Used for updating games where they are not the current player
+    Menu,
+    Gameplay,
     GameOver
 }
 
@@ -15,14 +13,15 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public static event System.Action<GameState> OnStateChange;
+    public int MaxPlayerCount = 6;
+    public float turnTime = 15.0f;
+    public Player[] PlayerArr { get; private set; }
 
-    private Player[] Players;
     private GameState CurrentState;
     private BoardManager Board;
     private int CurrentPlayerIndex;
-    private Player CurrentPlayer;
 
-    private void Awake() 
+    void Awake() 
     {
         if (Instance == null)
         {
@@ -33,44 +32,39 @@ public class GameManager : MonoBehaviour
         }
     }
     // Start is called before the first frame update
-    private void Start()
+    void Start()
     {
-        Board = BoardManager.Instance;
-        UpdateGameState(GameState.OrderChoosing);
+        PlayerArr = new Player[MaxPlayerCount];
+        SpawnPlayers(); // populates PlayerArr
+        CurrentPlayerIndex = -1;
+
+        foreach (Player p in PlayerArr)
+        {
+            Debug.Log("Player: " + p.Name);
+        }
+
+        UpdateGameState(GameState.Menu); // Launch the menu after placing players, let another script handle when to start gameplay by chaning the state to GameState.Gameplay
     }
     
     // Update is called once per frame
-    private void Update()
+    void Update()
     {
-        if (CurrentState != GameState.OrderChoosing)
+        if (CurrentState == GameState.Menu)
         {
-            ProcessGameCondition(); // Updates game state to GameOver if condition found
-            if (CurrentState == GameState.GameOver)
+            // TODO display menu scene
+        }
+        else if (CurrentState == GameState.Gameplay)
+        {
+            Debug.Log("Current player: " + PlayerArr[CurrentPlayerIndex].Name);
+            currentTurnTime -= Time.deltaTime;
+            if (currentTurnTime <= 0.0f || PlayerArr[CurrentPlayerIndex].currentActions < 0)
             {
-                // TODO display game over text
-            }
-            else
-            {
-                if (CurrentState == GameState.EndPlayerTurn) // if previous player has now ended turn
-                {
-                    UpdateGameState(GameState.StartPlayerTurn);
-                }
-                else if (CurrentPlayer.IsActiveTurn == false) // current player turn is ended by its own logic
-                {
-                    UpdateGameState(GameState.EndPlayerTurn);
-                }
+
             }
         }
-    }
-
-    private void ProcessGameCondition()
-    {
-        bool winDetected = false;
-        bool gameOverDetected = false;
-        // TODO Check for win conditions
-        if (winDetected || gameOverDetected)
+        else if (CurrentState == GameState.GameOver)
         {
-            UpdateGameState(GameState.GameOver);
+            // Display the game over screen
         }
     }
 
@@ -82,29 +76,22 @@ public class GameManager : MonoBehaviour
             CurrentState = newState;
             switch (newState)
             {
-                case GameState.OrderChoosing:
-                    Debug.Log("Changing state to OrderChoosing");
-                    ChoosePlayerOrder();
+                case GameState.Menu:
                     break;
 
-                case GameState.StartPlayerTurn: // allow current player to interact
-                    Debug.Log("Changing state to StartPlayerTurn");
-                    CurrentPlayer = Players[CurrentPlayerIndex];
-                    CurrentPlayer.StartTurn();
-                    Debug.Log("Started turn for player: " + CurrentPlayerIndex);
-                    break;
-
-                case GameState.EndPlayerTurn: // switch to the next player and notify all players
-                    Debug.Log("Changing state to EndPlayerTurn");
-                    CurrentPlayer.EndTurn(); // end current player turn
-
-                    CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Length;
-                    CurrentPlayer = Players[CurrentPlayerIndex];
+                case GameState.Gameplay:
+                    Debug.Log("State is now Gameplay");
+                    if (CurrentPlayerIndex == -1) // first move
+                    {
+                        Debug.Log("Starting the first turn.");
+                        CurrentPlayerIndex = 0;
+                        StartNewPlayerTurn();
+                    }
                     Debug.Log("Ended player turn, new player: " + CurrentPlayerIndex);
                     break;
 
                 case GameState.GameOver:
-                    Debug.Log("Changing state to GameOver");
+                    Debug.Log("State is now GameOver");
                     break;
 
                 default:
@@ -121,15 +108,38 @@ public class GameManager : MonoBehaviour
 
     private void ChoosePlayerOrder()
     {
+        Debug.Log("Generating Player Order");
         // TODO Update to the dice rolling game to determine player order
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-        int numPlayers = playerObjects.Length;
-        for(int i=0; i < numPlayers; i++)
+        for (int i = 0; i < playerObjects.Length; i++)
         {
-            Player player = new Player();
-            player.Object = playerObjects[i];
-            Players[i] = player;
+            PlayerArr[i] = playerObjects[i];
         }
-        UpdateGameState(GameState.StartPlayerTurn);
+    }
+
+    void StartNewPlayerTurn()
+    {
+        // Reset turn timer and action count
+        currentTurnTime = turnTime;
+        PlayerArr[CurrentPlayerIndex].StartTurn();
+        // Perform any other initialization for the new turn
+        Debug.Log("Player " + currentPlayerIndex + "'s turn started.");
+    }
+
+    void EndTurn()
+    {
+        // Perform any end-of-turn actions or cleanup
+        Debug.Log("Player " + currentPlayerIndex + "'s turn ended.");
+
+        // Switch to the next player
+        SwitchToNextPlayer();
+    }
+
+    void SwitchToNextPlayer()
+    {
+        currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+
+        // Start a new turn for the next player
+        StartNewPlayerTurn();
     }
 }
