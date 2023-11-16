@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public enum GameState
 {
@@ -9,16 +12,16 @@ public enum GameState
     GameOver
 }
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance;
     public static event System.Action<GameState> OnStateChange;
-    public int MaxPlayerCount = 6;
     public float turnTime = 15.0f;
     public PlayerController[] PlayerArr { get; private set; }
 
+    private static BoardManager Board;
+    private float currentTurnTime;
     private GameState CurrentState;
-    private BoardManager Board;
     private int CurrentPlayerIndex;
 
     void Awake() 
@@ -26,6 +29,8 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(this);
+            Board = BoardManager.Instance;
         }
         else {
             Destroy(this);
@@ -34,16 +39,16 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PlayerArr = new PlayerController[MaxPlayerCount];
-        SpawnPlayers(); // populates PlayerArr
-        CurrentPlayerIndex = -1;
-
-        foreach (PlayerController p in PlayerArr)
-        {
-            Debug.Log("Player: " + p.PlayerName);
-        }
+        CurrentPlayerIndex = 0;
 
         UpdateGameState(GameState.Menu); // Launch the menu after placing players, let another script handle when to start gameplay by chaning the state to GameState.Gameplay
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartNewTurn();
+        }
+
+        PlayerArr = new PlayerController[MaxPlayerCount];
     }
     
     // Update is called once per frame
@@ -55,9 +60,11 @@ public class GameManager : MonoBehaviour
         }
         else if (CurrentState == GameState.Gameplay)
         {
-            Debug.Log("Current player: " + PlayerArr[CurrentPlayerIndex].PlayerName);
+            PlayerController currPlayer = PlayerArr[CurrentPlayerIndex];
+
+            Debug.Log("Current player: " + currPlayer.PlayerName);
             currentTurnTime -= Time.deltaTime;
-            if (currentTurnTime <= 0.0f || PlayerArr[CurrentPlayerIndex].currentActions < 0)
+            if (currentTurnTime <= 0.0f || currPlayer.ActionsRemaining < 0)
             {
 
             }
@@ -106,6 +113,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // A new player has entered the room, instantiate their player prefab
+    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+    {
+        Vector3 spawnPoint = new Vector3(0.0f, 1.0f, 0.0f); // TODO THIS SHOULD COME FROM A METHOD IN THE BOARD MANAGER
+
+        int nick = newPlayer.NickName;
+
+        GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint, Quaternion.identity);
+
+        PlayerController playerControl = new PlayerController();
+        playerControl.Spawn(player, nick, spawnPoint);
+
+        int actorNum = newPlayer.ActorNumber;
+        PlayerArr[actorNum] = playerControl;
+    }
+
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    {
+        // Handle player leaving the room
+    }
+
     private void ChoosePlayerOrder()
     {
         Debug.Log("Generating Player Order");
@@ -113,7 +141,7 @@ public class GameManager : MonoBehaviour
         GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
         for (int i = 0; i < playerObjects.Length; i++)
         {
-            PlayerArr[i] = playerObjects[i];
+            //PlayerArr[i] = playerObjects[i];
         }
     }
 
@@ -123,13 +151,13 @@ public class GameManager : MonoBehaviour
         currentTurnTime = turnTime;
         PlayerArr[CurrentPlayerIndex].StartTurn();
         // Perform any other initialization for the new turn
-        Debug.Log("Player " + currentPlayerIndex + "'s turn started.");
+        Debug.Log("Player " + CurrentPlayerIndex + "'s turn started.");
     }
 
     void EndTurn()
     {
         // Perform any end-of-turn actions or cleanup
-        Debug.Log("Player " + currentPlayerIndex + "'s turn ended.");
+        Debug.Log("Player " + CurrentPlayerIndex + "'s turn ended.");
 
         // Switch to the next player
         SwitchToNextPlayer();
@@ -137,7 +165,7 @@ public class GameManager : MonoBehaviour
 
     void SwitchToNextPlayer()
     {
-        currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+        CurrentPlayerIndex = (CurrentPlayerIndex + 1) % MaxPlayerCount;
 
         // Start a new turn for the next player
         StartNewPlayerTurn();
