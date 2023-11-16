@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8ac47a2615ab9c449ae7a911e4c6855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+  hover_Object_: {fileID: 8711453604450202604, guid: 00a6fffbbc4c6984f849a26a028a5d9f, type: 3}
+  buildable_block_: {fileID: 4408310354143738939, guid: 7006ec61074488646963aa05c112a895, type: 3}
   character_skins_:
   - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}
   - {fileID: 2800000, guid: 79f08f7bb58e9cb42825a70c15f7362f, type: 3}
