@@ -7,12 +7,9 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     public int BaseSize = 10;
+    public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     private static int HeightSize;
     private static int RandomBlockCount;
-    //public GameObject MiddleBlock_Prefab;
-    //public GameObject BaseBlock_Prefab;
-    //public GameObject InvisibleBlock_Prefab;
-    public GameObject[] Detail_Prefabs;
     public static GameObject[,,] BoardCube_Arr;
     public static GameObject[,,] BoardCubeDetail_Arr; // tracks detail gameobjects on blocks
     public static bool[,,] CanBuildOn_Arr; // marks block coordinates as buildable
@@ -22,7 +19,7 @@ public class BoardManager : MonoBehaviour
     void Start()
     {
         HeightSize = BaseSize * 2;
-        RandomBlockCount = BaseSize * 4;
+        RandomBlockCount = BaseSize * RandomBlockScale;
 
         CanBuildOn_Arr = new bool[BaseSize, HeightSize, BaseSize];
         IsBuilt_Arr = new bool[BaseSize, HeightSize, BaseSize];
@@ -32,8 +29,7 @@ public class BoardManager : MonoBehaviour
         bool[,,] isRandom = GenerateRandomGrid();
         Debug.Log(isRandom);
 
-
-        //INITIAL PASS
+        // Fill CanBuildOn_Arr and IsBuilt_Arr with rule-based values
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
@@ -42,19 +38,16 @@ public class BoardManager : MonoBehaviour
                 {
                     if (isRandom[x, y, z])
                     {
-                        Debug.Log("Placing Randomized Block");
                         IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y == 0)
                     {
-                        Debug.Log("Placing Base Block");
                         IsBuilt_Arr[x, y, z] = true;
                         CanBuildOn_Arr[x, y, z] = true;
                     }
                     else if (y >= 1)
                     {
-                        Debug.Log("Placing Invisible Block");
                         IsBuilt_Arr[x, y, z] = false;
                         CanBuildOn_Arr[x, y, z] = false;
                     }
@@ -65,7 +58,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
-        //PLACE INITIAL BLOCK PASS
+
+        // Place blocks
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
@@ -106,9 +100,8 @@ public class BoardManager : MonoBehaviour
             BoardCube_Arr[x, y, z].name = (x + "," + y + "," + z);
             Debug.Log("Placed block at (" + x + "," + y + "," + z + ") marked as built.");
 
-
             System.Random rand = new System.Random();
-            bool chanceForDetail = rand.Next(100) < 20;
+            bool chanceForDetail = rand.Next(100) < 40;
             if (chanceForDetail)
             {
                 PlaceDetail(BoardCube_Arr[x, y, z].transform, x, y, z);
@@ -116,6 +109,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Places a detail prefab on top of a block at the specified coordinate
+    /// </summary>
+    /// <param name="parentTransform">Parent GameObject, should be the block which is getting the detail added to it.</param>
+    /// <param name="x">x coordinate of parent</param>
+    /// <param name="y">y coordinate of parent</param>
+    /// <param name="z">z coordinate of parent</param>
     public void PlaceDetail(Transform parentTransform, int x, int y, int z)
     {
         int topNeighborValue = GetBlockNeighborsBuiltValue(x, y, z) % 11;
