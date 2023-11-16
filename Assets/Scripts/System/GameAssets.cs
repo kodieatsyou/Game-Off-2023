@@ -21,6 +21,13 @@ public class GameAssets : MonoBehaviour
     [Header("Loadable Assets")]
     [Header("Essentials")]
     public GameObject player_object_;
+    [Header("Character")]
+    public Texture[] character_skins_;
+    [SerializedDictionary("Player Name", "Skin")]
+    public SerializedDictionary<string, Texture> character_special_skins_;
+    public Material super_special_material_;
+    public GameObject[] character_head_accessories_;
+    public GameObject[] character_face_accessories_;
 
     [Header("Board Blocks")]
     [Header("Components")]
