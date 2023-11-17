@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             StartNewTurn();
         }
 
-        PlayerArr = new PlayerController[MaxPlayerCount];
+        PlayerArr = new PlayerController[6]; // TODO This should be reference to the variable which controls the 
     }
     
     // Update is called once per frame
