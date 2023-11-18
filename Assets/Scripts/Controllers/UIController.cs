@@ -9,12 +9,19 @@ using Photon.Realtime;
 
 public class UIController : MonoBehaviour
 {
-
+    [Header("UI Sections")]
     public GameObject hotBar;
     public GameObject announcement;
     public GameObject info;
     public GameObject menuScreen;
     public GameObject rulesScreen;
+    public GameObject cardsScreen;
+    [Header("Cards")]
+    public List<GameObject> cards;
+    public float cardsSpacing = 100f;
+    public float cardsAnimationDuration = 0.05f;
+    public GameObject testCard;
+
 
     [SerializeField] TMP_Text playerName;
 
@@ -84,5 +91,105 @@ public class UIController : MonoBehaviour
     public void ToggleRulesScreen()
     {
         rulesScreen.SetActive(!rulesScreen.activeSelf);
+    }
+
+    public void AddCard(GameObject card)
+    {
+        GameObject cardObj = Instantiate(card, Vector3.zero, Quaternion.identity);
+        cardObj.transform.SetParent(cardsScreen.transform, false);
+        cards.Add(cardObj);
+    }
+
+    public void TestAddCard()
+    {
+        GameObject cardObj = Instantiate(testCard, Vector3.zero, Quaternion.identity);
+        cardObj.transform.SetParent(cardsScreen.transform, false);
+        cards.Add(cardObj);
+    }
+
+    public void ToggleCardsScreen()
+    {
+        if(!cardsScreen.activeSelf)
+        {
+            StartCoroutine(SpreadCardsOut());
+        } else
+        {
+            StartCoroutine(PutCardsAway());
+        }
+    }
+
+    IEnumerator SpreadCardsOut()
+    {
+        cardsScreen.SetActive(true);
+        float startX = 0;
+        RectTransform parentRect = cardsScreen.GetComponent<RectTransform>();
+
+        if (cards.Count % 2 == 0)
+        {
+            startX = ((cards.Count - 1) * -cardsSpacing) / 2.0f;
+        }
+        else
+        {
+            startX = Mathf.Floor(cards.Count / 2) * -cardsSpacing;
+        }
+
+
+        float timer = 0f;
+        Vector2 stackPosition = parentRect.anchoredPosition;
+
+        for (int i = 0; i < cards.Count; i++)
+        {
+            RectTransform cardRect = cards[i].GetComponent<RectTransform>();
+            cardRect.anchoredPosition = stackPosition;
+        }
+
+        while (timer < cardsAnimationDuration)
+        {
+            timer += Time.deltaTime;
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RectTransform cardRect = cards[i].GetComponent<RectTransform>();
+                float t = timer / cardsAnimationDuration;
+                cardRect.anchoredPosition = Vector2.Lerp(stackPosition, new Vector2(startX + (i * cardsSpacing), 0f), t);
+            }
+
+            yield return null;
+        }
+
+        for (int i = 0; i < cards.Count; i++)
+        {
+            RectTransform cardRect = cards[i].GetComponent<RectTransform>();
+            cardRect.anchoredPosition = new Vector2(startX + (i * cardsSpacing), 0f);
+        }
+    }
+
+
+    IEnumerator PutCardsAway()
+    {
+        float timer = 0f;
+        RectTransform parentRect = cardsScreen.GetComponent<RectTransform>();
+        Vector2 stackPosition = parentRect.anchoredPosition;
+
+        while (timer < cardsAnimationDuration)
+        {
+            timer += Time.deltaTime;
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                RectTransform cardRect = cards[i].GetComponent<RectTransform>();
+                float t = timer / cardsAnimationDuration;
+                cardRect.anchoredPosition = Vector2.Lerp(new Vector2(cards[i].GetComponent<RectTransform>().anchoredPosition.x, 0f), stackPosition, t);
+            }
+
+            yield return null;
+        }
+
+        for (int i = 0; i < cards.Count; i++)
+        {
+            RectTransform cardRect = cards[i].GetComponent<RectTransform>();
+            cardRect.anchoredPosition = stackPosition;
+        }
+        cardsScreen.SetActive(false);
     }
 }
