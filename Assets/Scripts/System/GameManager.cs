@@ -9,13 +9,10 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance;
-    public Button StartChooseOrderButton;
-    public Button StartGameButton;
-    
-    private const string CurrentTurnNumberPropertyName = "CurrentPlayerTurn";
+
     private int CurrentPlayerTurn = 0;
     private PhotonView photonView;
-    private bool GameOver;
+    private bool GameOver = false;
 
     void Awake() 
     {
@@ -33,28 +30,27 @@ public class GameManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        GameOver = false;
         if (PhotonNetwork.IsConnected)
         {
-            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CurrentTurnNumberPropertyName))
+            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("CurrentPlayerTurn"))
             {
                 // If the turn property is not set, initialize it
                 Hashtable initialProps = new Hashtable
                 {
-                    { CurrentTurnNumberPropertyName, CurrentPlayerTurn }
+                    { "CurrentPlayerTurn", CurrentPlayerTurn }
                 };
 
                 PhotonNetwork.CurrentRoom.SetCustomProperties(initialProps);
             }
 
             // Retrieve the initial value of CurrentPlayerTurn from room custom properties
-            CurrentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties[CurrentTurnNumberPropertyName];
+            CurrentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
         }
     }
     // Update is called once per frame
     void Update()
     {
-
+        Debug.Log($"Current Turn: {CurrentPlayerTurn}");
     }
     #endregion
 
@@ -66,13 +62,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         Debug.Log("End of Turn RPC received.");
 
         // Start the next player's turn on the master client
-        if (PhotonNetwork.IsMasterClient && !gameIsOver)
+        if (PhotonNetwork.IsMasterClient && !GameOver)
         {
             CurrentPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount; // Switch to the next player's turn
             
             Hashtable turnProps = new Hashtable // Update room custom property to synchronize the current turn across the network
             {
-                { CurrentTurnNumberPropertyName, CurrentPlayerTurn }
+                { "CurrentPlayerTurn", CurrentPlayerTurn }
             };
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(turnProps);
@@ -81,10 +77,5 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region Getters
-    public string GetCurrentTurnNumberPropertyName()
-    {
-        return CurrentTurnNumberPropertyName;
-    }
-    #endregion
+
 }

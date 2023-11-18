@@ -20,11 +20,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private int PlayerID;
     private PhotonView photonView;
     private Coroutine TimerCoroutine;
+    private bool TurnDone = false;
 
     void Start()
     {
-        int viewID = photonView.ViewID;
-        PhotonView gameManagerPhotonView = gameManager.GetComponent<PhotonView>();
         photonView = PhotonView.Get(this);
         PlayerID = PhotonNetwork.LocalPlayer.ActorNumber - 1;
         PlayerName = name;
@@ -33,7 +32,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
         ActionsRemaining = 3;
         //BoardPosition = BoardManager.Instance.SetPlayerSpawn();
         Debug.Log("Start player with name: " + PlayerName);
-        TurnDone = false;
     }
 
     // Update is called once per frame
@@ -41,7 +39,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     {
         if (IsActiveTurn == true)
         {
-            if (turnDone)
+            if (TurnDone)
             {
                 photonView.RPC("RpcManagerEndTurn", RpcTarget.All); // after turn is done notify all other players this turn is done.
                 IsActiveTurn = false;
@@ -59,8 +57,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public void RpcPlayerControllerStartTurn() // called by network in game manager
     {
         // Get the playerTurn from the game manager to determine if this is the 
-        string propName = GameManager.Instance.GetCurrentTurnNumberPropertyName();
-        int currentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties[propName];
+        int currentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
         if (PlayerID == currentPlayerTurn)
         {
             IsActiveTurn = true;
