@@ -1,38 +1,108 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 
 public enum DieType
 {
-
+    Number,
+    Action
 }
 
 public class DiceController : MonoBehaviour
 {
-    private bool isClicked = false;
     public Camera renderTextureCamera;
     public float distanceToCamera = 3f;
-    private Rigidbody rb;
     public float goToCameraSpeed = 0.5f;
     public float rollForce = 5f;
-
+    public GameObject dicePrefab;
+    public TMP_Text statusText;
+    public Vector3 diePitPos;
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        StartCoroutine("RollDice", Vector3.zero);
     }
-
     void Update()
     {
-        // Check for mouse click
-        if (Input.GetMouseButtonDown(0) && !isClicked)
+        if (Input.GetMouseButtonDown(0) && EventSystem.current.IsPointerOverGameObject())
         {
-            isClicked = true;
-            JumpAndRoll();
+            Debug.Log("Click");
+
+            // Get the click position in the RenderTexture's coordinate system
+            Vector3 clickPosInViewport = renderTextureCamera.ScreenToViewportPoint(Input.mousePosition);
+
+            // Convert the position from viewport coordinates to the RenderTexture coordinates
+            Vector3 clickPosInRenderTexture = new Vector3(
+                clickPosInViewport.x * GetComponent<RectTransform>().sizeDelta.x,
+                clickPosInViewport.y * GetComponent<RectTransform>().sizeDelta.y,
+                0
+            );
+
+            Debug.Log("RenderTexture Pos: " + clickPosInRenderTexture);
+
+            // Use ViewportPointToRay to create a ray from the click position
+            Ray ray = renderTextureCamera.ViewportPointToRay(new Vector3(
+                clickPosInViewport.x,
+                clickPosInViewport.y,
+                0f
+            ));
+
+            RaycastHit hit;
+
+            int layerMask = 1 << LayerMask.NameToLayer("DiePit");
+
+            // Check if the ray intersects with objects in the world
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+            {
+                Vector3 fingerTipPosition = hit.point;
+                Debug.Log("Finger Tip Pos: " + fingerTipPosition + " Hit: " + hit.collider.name);
+
+                // Perform your logic with the finger tip position in the real world
+                StartCoroutine(RollDice(fingerTipPosition));
+            }
         }
     }
 
+    // Function to roll the dice
+    IEnumerator RollDice(Vector3 position)
+    {
+        Debug.Log("Rolling Dice at: " + position);
+        // Display a message while waiting for the player to click
+        statusText.text = "Rolling Dice...";
+
+        // Once the player clicks, stop the continuous growth and shrinkage
+        statusText.text = "";
+
+        // Simulate dice rolling logic and return the result (always returning 0 for now)
+        int diceResult = 0;
+
+        // Instantiate the dice at the specified position
+        GameObject dice = Instantiate(dicePrefab, position, Quaternion.identity);
+
+        // Give the dice a force in a random direction
+        Vector3 forceDirection = Random.onUnitSphere;
+        dice.GetComponent<Rigidbody>().AddForce(forceDirection * rollForce, ForceMode.Impulse);
+
+        // Give the dice a rotational force in a random direction
+        Vector3 torqueDirection = Random.onUnitSphere;
+        dice.GetComponent<Rigidbody>().AddTorque(torqueDirection * rollForce, ForceMode.Impulse);
+
+        // Wait for a short time to allow the dice to settle before returning the result
+        yield return new WaitForSeconds(5f);
+
+        // Destroy the dice object as it is no longer needed
+        Destroy(dice);
+
+        // Return the simulated dice result
+        yield return diceResult;
+    }
+    /*
     void JumpAndRoll()
     {
         Debug.Log("Rolling");
@@ -51,13 +121,20 @@ public class DiceController : MonoBehaviour
             {
                 Rigidbody rb = GetComponent<Rigidbody>();
 
-                // Add a vertical force to die
+                // Add a vertical force to die based on rollForce
                 rb.AddForce(Vector3.up * rollForce, ForceMode.Impulse);
 
-                // Add a random torque to die
-                float torqueForce = Random.Range(10f, 20f);
+                // Add a torque to die based on rollForce
+                float torqueForce = rollForce * Random.Range(1f, 2f); // Adjust the multiplier as needed
                 Vector3 torque = new Vector3(Random.Range(-torqueForce, torqueForce), Random.Range(-torqueForce, torqueForce), Random.Range(-torqueForce, torqueForce));
                 rb.AddTorque(torque, ForceMode.Impulse);
+
+                // Add a random force in a random direction based on rollForce
+                float horizontalForce = rollForce * Random.Range(1f, 2f); // Adjust the multiplier as needed
+                float verticalForce = rollForce * Random.Range(1f, 2f); // Adjust the multiplier as needed
+                Vector3 randomForce = new Vector3(Random.Range(-horizontalForce, horizontalForce), verticalForce, Random.Range(-horizontalForce, horizontalForce));
+                rb.AddForce(randomForce, ForceMode.Impulse);
+
                 StartCoroutine(LandAnimation());
             }
         }
@@ -65,10 +142,14 @@ public class DiceController : MonoBehaviour
 
     IEnumerator LandAnimation()
     {
-        yield return new WaitForSeconds(3f); // Adjust the delay as needed
+        yield return new WaitForSeconds(5f); // Adjust the delay as needed
+        Vector3 currentRotation = transform.rotation.eulerAngles;
+        Debug.Log("Initial rotation: " + currentRotation);
+        Vector3 closestRotation = GetClosestRotation(currentRotation);
+        Debug.Log("Rounded rotation: " + closestRotation);
 
-        // Record the landed on rotation
-        Quaternion startRotation = RoundToNearest90(transform.rotation.eulerAngles);
+        // Use the rounded rotation as the starting rotation
+        Quaternion startRotation = Quaternion.Euler(closestRotation);
 
         // Spin the die randomly while moving to the camera up to the specified distance
         float distanceThreshold = 0.01f; // Threshold for reaching the specified distance
@@ -88,69 +169,131 @@ public class DiceController : MonoBehaviour
         }
 
         // Ensure the die reaches the final position
-        transform.rotation = RoundToNearest90(transform.rotation.eulerAngles);
+        transform.rotation = Quaternion.Euler(closestRotation);
         transform.position = targetPosition;
 
         // Disable the Rigidbody to freeze the die in place
         rb.isKinematic = true;
-        
 
         // Snap the rotation to the recorded rounded rotation
         transform.rotation = startRotation;
         yield return new WaitForSeconds(5f);
+
+        // Enable the Rigidbody to make the die movable again
         rb.isKinematic = false;
         isClicked = false;
-
     }
 
-    Quaternion RoundToNearest90(Vector3 euler)
+    public Vector3 NormalizeAndRoundEulerAngles(Vector3 eulerAngles)
     {
-        float xRemainder = Mathf.Abs(euler.x % 90);
-        float yRemainder = Mathf.Abs(euler.y % 90);
-        float zRemainder = Mathf.Abs(euler.z % 90);
+        // Normalize the x and y rotations
+        eulerAngles.x = Mathf.Repeat(eulerAngles.x, 360.0f);
+        eulerAngles.y = Mathf.Repeat(eulerAngles.y, 360.0f);
 
-        if (xRemainder < yRemainder && xRemainder < zRemainder)
+        // Round the rotations to the nearest multiple of 90 both positive and negative
+        eulerAngles.x = Mathf.Round(eulerAngles.x / 90.0f) * 90.0f;
+        eulerAngles.y = Mathf.Round(eulerAngles.y / 90.0f) * 90.0f;
+
+        // If the axis rotation is rounded to 360 or -360, round it to 0
+        if (Mathf.Approximately(eulerAngles.z, 360.0f) || Mathf.Approximately(eulerAngles.z, -360.0f))
         {
-            euler.x = Mathf.Round(euler.x / 90) * 90;
-            euler.y = euler.z = 0;
+            eulerAngles.z = 0.0f;
         }
-        else if (yRemainder < xRemainder && yRemainder < zRemainder)
+        // If the axis rotation is rounded to 270, round it to -90
+        else if (Mathf.Approximately(eulerAngles.z, 270.0f))
         {
-            euler.y = Mathf.Round(euler.y / 90) * 90;
-            euler.x = euler.z = 0;
+            eulerAngles.z = -90.0f;
         }
+        // If the axis rotation is rounded to -270, round it to 90
+        else if (Mathf.Approximately(eulerAngles.z, -270.0f))
+        {
+            eulerAngles.z = 90.0f;
+        }
+        // Round other cases to the nearest multiple of 90
         else
         {
-            euler.z = Mathf.Round(euler.z / 90) * 90;
-            euler.x = euler.y = 0;
+            eulerAngles.z = Mathf.Round(eulerAngles.z / 90.0f) * 90.0f;
         }
 
-        return Quaternion.Euler(euler);
+        return eulerAngles;
     }
 
-    /*Quaternion RoundToNearest90(Vector3 euler)
+    public KeyValuePair<Vector3, int> FindClosestAngle(Dictionary<Vector3, int> angleDictionary, Vector3 roundedAngle)
     {
-        euler.x = Mathf.Round(euler.x / 90) * 90;
-        euler.y = Mathf.Round(euler.y / 90) * 90;
-        euler.z = Mathf.Round(euler.z / 90) * 90;
+        float minDistance = float.MaxValue;
+        KeyValuePair<Vector3, int> closestAngle = new KeyValuePair<Vector3, int>();
 
-        // Ensure the result is within the range [-180, 180)
-        euler.x = (euler.x + 360) % 360;
-        euler.y = (euler.y + 360) % 360;
-        euler.z = (euler.z + 360) % 360;
+        foreach (var kvp in angleDictionary)
+        {
+            Vector3 angle = kvp.Key;
 
-        if (euler.x >= 180)
-            euler.x -= 360;
-        if (euler.y >= 180)
-            euler.y -= 360;
-        if (euler.z >= 180)
-            euler.z -= 360;
+            // Calculate the squared distance between angles
+            float distance = Vector3.SqrMagnitude(angle - roundedAngle);
 
-        return Quaternion.Euler(euler);
-    }*/
+            // Update closest angle if the current angle is closer
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestAngle = kvp;
+            }
+        }
 
-    public int checkDiceRoll()
-    {
-        return 0;
+        return closestAngle;
     }
+    */
+
+    /* Angles can be:
+     * 0, 0, 0 - Wind
+     * 90, 0, 0 - Power Card
+     * -90, 0, 0 - Grapple
+     * 0, 0, 90 - Grapple
+     * 0, 0, -90 - Grapple
+     * 180, 0, 0 - Wind
+     * 
+    public Vector3 GetClosestRotation(Vector3 rotationEulerAngles)
+    {
+        float roundedX = RoundToNearestMultiple(rotationEulerAngles.x, 90);
+        float roundedZ = RoundToNearestMultiple(rotationEulerAngles.z, 90);
+
+        // Check for special cases when the angle is closer to 0 than 90
+        roundedX = Mathf.Abs(rotationEulerAngles.x % 360) < 45 ? 0 : roundedX;
+        roundedZ = Mathf.Abs(rotationEulerAngles.z % 360) < 45 ? 0 : roundedZ;
+
+        Vector3 roundedAngles = new Vector3(roundedX, rotationEulerAngles.y, roundedZ);
+
+        Vector3[] predefinedRotations = {
+        Vector3.zero,          // (0, 0, 0)
+        new Vector3(90, 0, 0),  // (90, 0, 0)
+        new Vector3(-90, 0, 0), // (-90, 0, 0)
+        new Vector3(0, 0, 90),  // (0, 0, 90)
+        new Vector3(0, 0, -90), // (0, 0, -90)
+        new Vector3(180, 0, 0)  // (180, 0, 0)
+    };
+
+        Vector3 closestRotation = predefinedRotations
+            .Select(predefinedRotation => NormalizeEulerAngles(predefinedRotation))
+            .OrderBy(normalizedPredefinedRotation =>
+                Mathf.Abs(roundedAngles.x - normalizedPredefinedRotation.x) +
+                Mathf.Abs(roundedAngles.y - normalizedPredefinedRotation.y) +
+                Mathf.Abs(roundedAngles.z - normalizedPredefinedRotation.z))
+            .First();
+
+        return closestRotation;
+    }
+
+    private float RoundToNearestMultiple(float value, float multiple)
+    {
+        return Mathf.Round(value / multiple) * multiple;
+    }
+
+    private Vector3 NormalizeEulerAngles(Vector3 eulerAngles)
+    {
+        float epsilon = 0.01f;
+        return new Vector3(
+            Mathf.Abs(eulerAngles.x % 360) < epsilon ? 0 : eulerAngles.x % 360,
+            Mathf.Abs(eulerAngles.y % 360) < epsilon ? 0 : eulerAngles.y % 360,
+            Mathf.Abs(eulerAngles.z % 360) < epsilon ? 0 : eulerAngles.z % 360
+        );
+    }
+    */
 }
