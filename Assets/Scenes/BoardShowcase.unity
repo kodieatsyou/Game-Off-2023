@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 378698746}
-  m_IndirectSpecularColor: {r: 0.45807365, g: 0.4972164, b: 0.5196748, a: 1}
+  m_IndirectSpecularColor: {r: 0.458074, g: 0.49721646, b: 0.5196748, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4904,7 +4904,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 699902467}
         m_TargetAssemblyTypeName: UIController, Assembly-CSharp
-        m_MethodName: TestAddCard
+        m_MethodName: ToggleHotbar
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
