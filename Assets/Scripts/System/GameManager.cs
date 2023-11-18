@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private const string CurrentTurnNumberPropertyName = "CurrentPlayerTurn";
     private int CurrentPlayerTurn = 0;
     private PhotonView photonView;
+    private bool GameOver;
 
     void Awake() 
     {
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
+        GameOver = false;
         if (PhotonNetwork.IsConnected)
         {
             if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CurrentTurnNumberPropertyName))
@@ -56,25 +58,26 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region TurnFunctions
-    public void EndTurn()
+    #region GameNetwork
+    [PunRPC]
+    public void RpcManagerEndTurn()
     {
-        // Inform other players that the current player has ended their turn
-        photonView.RPC("RpcEndTurn", RpcTarget.All);
+        // RPC called on all clients when a player ends their turn
+        Debug.Log("End of Turn RPC received.");
 
-        // Switch to the next player's turn
-        CurrentPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount;
-
-        // Update room custom property to synchronize the current turn across the network
-        Hashtable turnProps = new Hashtable
+        // Start the next player's turn on the master client
+        if (PhotonNetwork.IsMasterClient && !gameIsOver)
         {
-            { CurrentTurnNumberPropertyName, CurrentPlayerTurn }
-        };
+            CurrentPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount; // Switch to the next player's turn
+            
+            Hashtable turnProps = new Hashtable // Update room custom property to synchronize the current turn across the network
+            {
+                { CurrentTurnNumberPropertyName, CurrentPlayerTurn }
+            };
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(turnProps);
-
-        // Inform other players that another turn has started.
-        photonView.RPC("RpcStartTurn", RpcTarget.All);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(turnProps);
+            photonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
+        }
     }
     #endregion
 
