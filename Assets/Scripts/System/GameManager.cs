@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance;
 
-    private int CurrentPlayerTurn = 0;
+    private int CurrentPlayerTurn;
     private PhotonView photonView;
     private bool GameOver = false;
 
@@ -32,29 +32,21 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
-            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("CurrentPlayerTurn"))
-            {
-                // If the turn property is not set, initialize it
-                Hashtable initialProps = new Hashtable
-                {
-                    { "CurrentPlayerTurn", CurrentPlayerTurn }
-                };
-
-                PhotonNetwork.CurrentRoom.SetCustomProperties(initialProps);
-            }
-
-            // Retrieve the initial value of CurrentPlayerTurn from room custom properties
-            CurrentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
+            SetCurrentPlayerTurn(0);
         }
     }
     // Update is called once per frame
     void Update()
     {
         Debug.Log($"Current Turn: {CurrentPlayerTurn}");
+        // TODO Check for game over conditions
     }
     #endregion
 
     #region GameNetwork
+    /// <summary>
+    /// Handles messages over RPC that a player has ended their turn. Then posts a message to RPC that the next player should start their turn.
+    /// </summary>
     [PunRPC]
     public void RpcManagerEndTurn()
     {
@@ -64,15 +56,38 @@ public class GameManager : MonoBehaviourPunCallbacks
         // Start the next player's turn on the master client
         if (PhotonNetwork.IsMasterClient && !GameOver)
         {
-            CurrentPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount; // Switch to the next player's turn
-            
-            Hashtable turnProps = new Hashtable // Update room custom property to synchronize the current turn across the network
+            int nextPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount; // Switch to the next player's turn
+            SetCurrentPlayerTurn(nextPlayerTurn);
+            photonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
+        }
+    }
+
+    /// <summary>
+    /// Handles messages over RPC that a player has started their turn.
+    /// </summary>
+    [PunRPC]
+    public void RpcManagerStartTurn()
+    {
+        // RPC called on all clients when a player ends their turn
+        Debug.Log("Player started turn RPC message received.");
+    }
+
+    /// <summary>
+    /// Sets the GameManager CurrentPlayerTurn property and updates the CurrentPlayerTurn room property.
+    /// </summary>
+    /// <param name="newPlayerTurn">The number of the newPlayerTurn</param>
+    private void SetCurrentPlayerTurn(int newPlayerTurn)
+    {
+        CurrentPlayerTurn = newPlayerTurn;
+        if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("CurrentPlayerTurn"))
+        {
+            // If the turn property is not set, initialize it
+            Hashtable initialProps = new Hashtable
             {
-                { "CurrentPlayerTurn", CurrentPlayerTurn }
+                { "CurrentPlayerTurn", newPlayerTurn }
             };
 
-            PhotonNetwork.CurrentRoom.SetCustomProperties(turnProps);
-            photonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
+            PhotonNetwork.CurrentRoom.SetCustomProperties(initialProps);
         }
     }
     #endregion
