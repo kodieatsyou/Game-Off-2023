@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
 
-[Serializable]
-public class PlayerController: MonoBehaviour
+public class PlayerController: MonoBehaviourPunCallbacks
 {
-    public Guid PlayerID { get; private set; }
     public string PlayerName { get; set; }
     public bool IsActiveTurn { get; set; }
     public int Score { set; get; }
@@ -16,46 +16,50 @@ public class PlayerController: MonoBehaviour
     public Vector3 BoardPosition;
     public int ActionsRemaining { private set; get; }
 
+    private int PlayerID;
+    private PhotonView photonView;
     private Coroutine TimerCoroutine;
-    private BoardManager Board;
 
-    void Spawn(GameObject prefab, String name, Point Vector3)
+    void Start()
     {
-        PlayerID = Guid.NewGuid();
-        Board = BoardManager.Instance;
+        photonView = PhotonView.Get(this);
+        PlayerID = PhotonNetwork.LocalPlayer.ActorNumber - 1;
         PlayerName = name;
-        GameObjectPrefab = prefab;
+        // GET GAME OBJECT GameObjectPrefab = prefab;
         IsActiveTurn = false;
         ActionsRemaining = 3;
-        BoardPosition = point;
-        Debug.Log("Awake Player with name: " + PlayerName);
+        //BoardPosition = BoardManager.Instance.SetPlayerSpawn();
+        Debug.Log("Start player with name: " + PlayerName);
     }
 
-    public void StartTurn()
+    // Update is called once per frame
+    void Update()
     {
-        IsActiveTurn = true;
-        TimerCoroutine = StartCoroutine(TurnTimeEnd());
-    }
-
-    public void EndTurn()
-    {
-        StopCoroutine(TimerCoroutine);
-
-        TurnLength = 15f;
-    }
-
-    private IEnumerator TurnTimeEnd()
-    {
-        if (TurnLength <= 0f) // end of turn
+        if (IsActiveTurn == true)
         {
-            IsActiveTurn = false;
+            // TODO Render the turn UI
         }
-        else
-        {
-            TurnLength -= Time.deltaTime;
-            float seconds = Mathf.FloorToInt(TurnLength % 60);
-            //TODO attach to UI timer element timeText.text = string.Format("{0:00}", seconds);
-        }
-        yield return null;
     }
+
+    #region Network
+    [PunRPC]
+    private void RpcEndTurn() // RPC called on all clients when a player ends their turn
+    {
+        Debug.Log("End of Turn RPC received.");
+        IsActiveTurn = false;
+        // Perform any remote player updates or turn-specific logic
+    }
+
+    [PunRPC]
+    public void RPCStartTurn() // called by network in game manager
+    {
+        // Get the playerTurn from the game manager to determine if this is the 
+        string propName = GameManager.Instance.GetCurrentTurnNumberPropertyName();
+        int currentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties[propName];
+        if (PlayerID == currentPlayerTurn)
+        {
+            IsActiveTurn = true;
+        }
+    }
+    #endregion
 }
