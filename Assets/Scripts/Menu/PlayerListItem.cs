@@ -20,7 +20,7 @@ public class PlayerListItem : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.NickName == _player.NickName)
         {
-            text.color = Color.black;
+            text.color = Color.white;
         }
     }
 

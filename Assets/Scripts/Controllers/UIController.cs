@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class UIController : MonoBehaviour
 {
@@ -14,11 +16,21 @@ public class UIController : MonoBehaviour
     public GameObject menuScreen;
     public GameObject rulesScreen;
 
+    [SerializeField] TMP_Text playerName;
+
+    Player player;
+
 
     // Start is called before the first frame update
     void Start()
     {
         hotBar.SetActive(false);
+        player = PhotonNetwork.LocalPlayer;
+        if (player == PhotonNetwork.LocalPlayer)
+        {
+            // Just testing setting names
+            playerName.text = player.NickName;
+        }
     }
 
     // Update is called once per frame

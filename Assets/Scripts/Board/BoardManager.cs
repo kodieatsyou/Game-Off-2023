@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using Photon.Pun;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public class BoardSpace
 {
@@ -73,7 +76,11 @@ public class BoardSpace
     {
         try
         {
-            spaceObj = GameObject.Instantiate(GetBlock(), worldPos, Quaternion.identity);
+            string block = GetBlock();
+            if (block != "" && PhotonNetwork.IsMasterClient)
+            {
+                spaceObj = PhotonNetwork.InstantiateRoomObject(GetBlock(), worldPos, Quaternion.identity);
+            }
             if(name == "")
             {
                 spaceObj.name = (boardPos.x + "," + boardPos.y + "," + boardPos.z);
@@ -90,7 +97,7 @@ public class BoardSpace
         }
         catch
         {
-            Debug.Log("Failed creating object for space at: (" + boardPos.x + "," + boardPos.y + "," + boardPos.z + ")!");
+            // Debug.Log("Failed creating object for space at: (" + boardPos.x + "," + boardPos.y + "," + boardPos.z + ")!");
             return false;
         }
     }
@@ -107,13 +114,20 @@ public class BoardSpace
                 int randDetailPrefabIdx = rand.Next(GameAssets.i.block_details_.Length);
                 int rotationAngle = rand.Next(20, 90); // rotate between 20 to 90 degrees
 
-                detailObj = GameObject.Instantiate(
-                    GameAssets.i.block_details_[randDetailPrefabIdx], 
-                    new Vector3((boardPos.x) * worldSpaceScalingFactor, (boardPos.y + 1) * worldSpaceScalingFactor, (boardPos.z) * worldSpaceScalingFactor), 
-                    Quaternion.AngleAxis(rotationAngle, Vector3.up));
-                detailObj.name = spaceObj.name + " DETAIL";
-                detailObj.transform.parent = spaceObj.transform;
-                return true;
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    detailObj = PhotonNetwork.InstantiateRoomObject(string.Format("Environment/Misc/{0}",
+                        GameAssets.i.block_details_[randDetailPrefabIdx].name), 
+                        new Vector3((boardPos.x) * worldSpaceScalingFactor, (boardPos.y + 1) * worldSpaceScalingFactor, (boardPos.z) * worldSpaceScalingFactor), 
+                        Quaternion.AngleAxis(rotationAngle, Vector3.up));
+                    detailObj.name = spaceObj.name + " DETAIL";
+                    detailObj.transform.parent = spaceObj.transform;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             } else
             {
                 return false;
@@ -131,29 +145,41 @@ public class BoardSpace
 
     public bool GetPlayerInSpace() {  return this.playerInSpace; }
 
-    private GameObject GetBlock()
+    private string GetBlock()
     {
         GameObject block = null;
+        string prefab = "";
         if(isBuilt)
         {
             if (neighborValue % 11 == 0 && neighborValue != 0)
             {
                 //Debug.Log("STONE BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
                 block = GameAssets.i.stone_blocks_[neighborValue / 11];
+                if (block.name == "Empty")
+                {
+                    return "";
+                }
+                prefab = string.Format("Environment/Stone_Block/{0}", block.name);
             }
             else
             {
                 //Debug.Log("GRASS BLOCK AT: " + x + "," + y + "," + z + " WITH NEIGHBOR VALUE OF: " + neighborValue);
                 block = GameAssets.i.grass_blocks_[neighborValue];
+                if (block.name == "Empty")
+                {
+                    return "";
+                }
+                prefab = string.Format("Environment/Grass_Block/{0}", block.name);
             }
         } else
         {
             if(isBuildable)
             {
                 block = GameAssets.i.buildable_block_;
+                prefab = "Environment/Buildable_Block";
             }
         }
-        return block;
+        return prefab;
     }
 
 }
@@ -172,6 +198,7 @@ public class BoardManager : MonoBehaviour
     public Vector3 end;
 
     public int currentBuiltHeight = 0; // marks the current highest built y position
+
 
     private void Awake()
     {
@@ -376,21 +403,20 @@ public class BoardManager : MonoBehaviour
         System.Random rand = new System.Random();
         BoardSpace spaceToSpawn = availableBlocks[rand.Next(availableBlocks.Count)];
         spaceToSpawn.SetPlayerInSpace(true);
-        Debug.Log("Placing player on block: " + spaceToSpawn.GetSpaceObj().name);
-        Instantiate(GameAssets.i.player_object_, spaceToSpawn.GetWorldPositionOfTop(), Quaternion.identity);
+        PhotonNetwork.Instantiate("Essential/Yeti", spaceToSpawn.GetWorldPositionOfTop(), Quaternion.identity);
     }
 
-    public List<BoardSpace> FindPathInGrid()
-    {
-        BoardSpace from = BoardSpace_Arr[(int)start.x, (int)start.y, (int)start.z];
-        BoardSpace to = BoardSpace_Arr[(int)end.x, (int)end.y, (int)end.z];
-        List<BoardSpace> path = new AStarPathfinding(BoardSpace_Arr, from, to).FindPath();
-        if(path == null)
-        {
-            Debug.Log("Could not find path!");
-        }
-        return path;
-    }
+    // public List<BoardSpace> FindPathInGrid()
+    // {
+    //     BoardSpace from = BoardSpace_Arr[(int)start.x, (int)start.y, (int)start.z];
+    //     BoardSpace to = BoardSpace_Arr[(int)end.x, (int)end.y, (int)end.z];
+    //     List<BoardSpace> path = new AStarPathfinding(BoardSpace_Arr, from, to).FindPath();
+    //     if(path == null)
+    //     {
+    //         Debug.Log("Could not find path!");
+    //     }
+    //     return path;
+    // }
 
 }
 

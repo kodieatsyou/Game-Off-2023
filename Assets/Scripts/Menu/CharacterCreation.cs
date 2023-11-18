@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using Photon.Pun;
 
 public class CharacterCreation : MonoBehaviour
 {
@@ -16,9 +17,9 @@ public class CharacterCreation : MonoBehaviour
     public GameObject characterPreview;
     public TMP_Text skinName;
     public TMP_InputField characterNameInput;
-    int currentTexture = 0;
-    int currentHeadAccessory = 0;
-    int currentFaceAccessory = 0;
+    public int currentTexture = 0;
+    public int currentHeadAccessory = 0;
+    public int currentFaceAccessory = 0;
 
 
     // Start is called before the first frame update
@@ -44,7 +45,15 @@ public class CharacterCreation : MonoBehaviour
                 characterPreview.transform.Rotate(transform.up, -Vector3.Dot(mousePositionDelta, Camera.main.transform.right), Space.World);
             }
             mousePreviousPos = Input.mousePosition;
-        }
+        }    
+
+        ExitGames.Client.Photon.Hashtable initialProps = new ExitGames.Client.Photon.Hashtable();
+        initialProps["texture"] = currentTexture;
+        initialProps["head"] = currentHeadAccessory;
+        initialProps["face"] = currentFaceAccessory;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(initialProps);
+
+        // Debug.LogWarning(string.Format("Character Creation ---- {0}-texture", PhotonNetwork.NickName)); 
     }
 
     /// <summary>
