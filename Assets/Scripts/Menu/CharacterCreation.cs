@@ -88,7 +88,7 @@ public class CharacterCreation : MonoBehaviour
             currentTexture += 1;
         }
 
-        characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_MainTex", GameAssets.i.character_skins_[currentTexture]);
+        characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[currentTexture]);
         skinName.text = GameAssets.i.character_skins_[currentTexture].name;
     }
 
@@ -107,7 +107,7 @@ public class CharacterCreation : MonoBehaviour
             currentTexture -= 1;
         }
 
-        characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_MainTex", GameAssets.i.character_skins_[currentTexture]);
+        characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[currentTexture]);
         skinName.text = GameAssets.i.character_skins_[currentTexture].name;
     }
 
@@ -121,12 +121,12 @@ public class CharacterCreation : MonoBehaviour
         string currentName = characterNameInput.text;
         if (GameAssets.i.character_special_skins_.ContainsKey(currentName))
         {
-            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_MainTex", GameAssets.i.character_special_skins_[currentName]);
+            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_special_skins_[currentName]);
             skinName.text = GameAssets.i.character_special_skins_[currentName].name;
         }
         else
         {
-            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_MainTex", GameAssets.i.character_skins_[currentTexture]);
+            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[currentTexture]);
             skinName.text = GameAssets.i.character_skins_[currentTexture].name;
         }
     }
