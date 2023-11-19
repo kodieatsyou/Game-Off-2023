@@ -294,7 +294,7 @@ Transform:
   m_GameObject: {fileID: 27134551}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 30, y: 1, z: 30}
+  m_LocalScale: {x: 52, y: 1, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1184557567}
@@ -1006,8 +1006,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 448991461}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 15, z: 9}
-  m_LocalScale: {x: 30, y: 30, z: 1}
+  m_LocalPosition: {x: 0, y: 15, z: 15}
+  m_LocalScale: {x: 60, y: 30, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1184557567}
@@ -1391,8 +1391,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 120
-  orthographic: 0
-  orthographic size: 5.42
+  orthographic: 1
+  orthographic size: 30
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1512,6 +1512,7 @@ GameObject:
   - component: {fileID: 699902464}
   - component: {fileID: 699902463}
   - component: {fileID: 699902467}
+  - component: {fileID: 699902468}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -1624,13 +1625,28 @@ MonoBehaviour:
   announcement: {fileID: 1626260034}
   info: {fileID: 1482876376}
   menuScreen: {fileID: 928931446}
-  rulesScreen: {fileID: 1594623128}
   cardsScreen: {fileID: 1730941458}
+  dieViewer: {fileID: 0}
+  diePit: {fileID: 0}
   cards: []
   cardsSpacing: 110
   cardsAnimationDuration: 0.05
   testCard: {fileID: 0}
+  rollForce: 5
   playerName: {fileID: 995191968}
+--- !u!114 &699902468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699902462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9bf7a04ee0f79644933301eedc43f65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 2132940045}
 --- !u!1 &701279851
 GameObject:
   m_ObjectHideFlags: 0
@@ -1714,7 +1730,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 701279854}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 699902468}
+        m_TargetAssemblyTypeName: DieControllerTester, Assembly-CSharp
+        m_MethodName: TestRollDie
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &701279854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1918,7 +1946,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Your Turn!
+  m_text: Click to roll die!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 93650d4a4fdc72644bfaa0c5e6d190a3, type: 2}
   m_sharedMaterial: {fileID: -1738499076152517382, guid: 93650d4a4fdc72644bfaa0c5e6d190a3, type: 2}
@@ -2020,8 +2048,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 810157105}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 15, z: -9}
-  m_LocalScale: {x: 30, y: 30, z: 1}
+  m_LocalPosition: {x: 0, y: 15, z: -15}
+  m_LocalScale: {x: 60, y: 30, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1184557567}
@@ -2356,7 +2384,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 882772027}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9, y: 15, z: 0}
+  m_LocalPosition: {x: 26, y: 15, z: 0}
   m_LocalScale: {x: 1, y: 30, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3352,6 +3380,141 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1220682827
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1220682828}
+  - component: {fileID: 1220682830}
+  - component: {fileID: 1220682829}
+  m_Layer: 5
+  m_Name: Text (TMP)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1220682828
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220682827}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2132940042}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1220682829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220682827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: Click To Roll Die!
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 3ea8621f0163b2b4abf06e8275d9f59e, type: 2}
+  m_sharedMaterial: {fileID: 2512994999855987807, guid: 3ea8621f0163b2b4abf06e8275d9f59e, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 36
+  m_fontSizeBase: 36
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_enableWordWrapping: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 1
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1220682830
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220682827}
+  m_CullTransparentMesh: 1
 --- !u!1 &1247838055
 GameObject:
   m_ObjectHideFlags: 0
@@ -4075,7 +4238,7 @@ GameObject:
   - component: {fileID: 1626260037}
   - component: {fileID: 1626260036}
   m_Layer: 5
-  m_Name: Announcement
+  m_Name: Middle Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4136,14 +4299,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.57254905}
+  m_Color: {r: 0, g: 0.2, b: 0.5372549, a: 0.78431374}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 5825be541799cde4f9714c27a6c55981, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4665,7 +4828,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1801220260
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4733,7 +4896,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2132940045}
         m_TargetAssemblyTypeName: DiceController, Assembly-CSharp
-        m_MethodName: RollDie
+        m_MethodName: ShowDieView
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4918,7 +5081,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1980218066}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9, y: 15, z: 0}
+  m_LocalPosition: {x: -26, y: 15, z: 0}
   m_LocalScale: {x: 1, y: 30, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5059,14 +5222,15 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1220682828}
   m_Father: {fileID: 699902466}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 700, y: 700}
+  m_SizeDelta: {x: 900, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2132940043
 MonoBehaviour:
@@ -5115,15 +5279,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dd2f135d12035547a21a59be050f8b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderTextureCamera: {fileID: 595121717}
-  distanceToCamera: 3
-  goToCameraSpeed: 0.5
-  rollForce: 30
-  dicePrefab: {fileID: 8648810564663223736, guid: 1dd97c160d8376a46907001a4be84ae2, type: 3}
-  statusText: {fileID: 273731504}
-  rolling: 0
-  dieSpawnBounds: {x: 16, y: 16, z: 16}
+  rollForce: 150
+  diceNumPrefab: {fileID: 8648810564663223736, guid: f92d955a7965207469d545d87f63197f, type: 3}
+  diceActionPrefab: {fileID: 8648810564663223736, guid: 1dd97c160d8376a46907001a4be84ae2, type: 3}
+  dieSpawnBounds: {x: 5, y: 5, z: 5}
   dieSpawnPosition: {fileID: 1184557567}
+  rollDieText: {fileID: 1220682829}
+  testType: 1
+  readyToRoll: 0
 --- !u!1 &2133219505
 GameObject:
   m_ObjectHideFlags: 0

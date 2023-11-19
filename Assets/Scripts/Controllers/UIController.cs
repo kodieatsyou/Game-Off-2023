@@ -9,18 +9,21 @@ using Photon.Realtime;
 
 public class UIController : MonoBehaviour
 {
-    [Header("UI Sections")]
+    [Header("Essential Objects")]
     public GameObject hotBar;
     public GameObject announcement;
     public GameObject info;
     public GameObject menuScreen;
-    public GameObject rulesScreen;
     public GameObject cardsScreen;
+    public GameObject dieViewer;
+    public GameObject diePit;
     [Header("Cards")]
     public List<GameObject> cards;
     public float cardsSpacing = 100f;
     public float cardsAnimationDuration = 0.05f;
     public GameObject testCard;
+    [Header("Dice")]
+    public float rollForce = 5f;
 
 
     [SerializeField] TMP_Text playerName;
@@ -31,7 +34,7 @@ public class UIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        hotBar.SetActive(false);
+        //hotBar.SetActive(false);
         player = PhotonNetwork.LocalPlayer;
         if (player == PhotonNetwork.LocalPlayer)
         {
@@ -86,11 +89,6 @@ public class UIController : MonoBehaviour
     public void ToggleMenuScreen()
     {
         menuScreen.SetActive(!menuScreen.activeSelf);
-    }
-
-    public void ToggleRulesScreen()
-    {
-        rulesScreen.SetActive(!rulesScreen.activeSelf);
     }
 
     public void AddCard(GameObject card)
