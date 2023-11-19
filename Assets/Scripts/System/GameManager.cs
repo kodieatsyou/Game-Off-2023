@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     void Update()
     {
         Debug.Log($"Current Turn: {CurrentPlayerTurn}");
+        CheckForWin();
         // TODO Check for game over conditions
     }
     #endregion
@@ -61,7 +62,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             photonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
         }
     }
-
     /// <summary>
     /// Handles messages over RPC that a player has started their turn.
     /// </summary>
@@ -71,7 +71,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         // RPC called on all clients when a player ends their turn
         Debug.Log("Player started turn RPC message received.");
     }
-
     /// <summary>
     /// Sets the GameManager CurrentPlayerTurn property and updates the CurrentPlayerTurn room property.
     /// </summary>
@@ -88,6 +87,27 @@ public class GameManager : MonoBehaviourPunCallbacks
             };
 
             PhotonNetwork.CurrentRoom.SetCustomProperties(initialProps);
+        }
+    }
+    #endregion
+
+    #region WinLossConditions
+    private void CheckForWin()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            var playerObjs = GameObject.FindGameObjectsWithTag("Enemy");
+            foreach (var player in playerObjs)
+            {
+                float y = player.transform.position.y;
+                if (y >= Settings.Instance.WinHeight)
+                {
+                    // If there is a winner, broadcast to all players that the game is over
+                    GameOver = true;
+                    photonView.RPC("RpcPlayerControllerGameOver", RpcTarget.All, player.GetComponent<PhotonView>().Owner.NickName);
+                }
+            }
+
         }
     }
     #endregion

@@ -9,7 +9,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
 {
     private int PlayerID;
     private string PlayerName;
-    private int CurrentLevel;
     private float TurnLength;
     private int ActionsRemaining;
     private bool IsActiveTurn;
@@ -40,6 +39,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     }
     #endregion
 
+    # region PlayerNetwork
     [PunRPC]
     public void RpcPlayerControllerStartTurn()
     {
@@ -53,6 +53,20 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Handles messages over RPC that the game has ended. Forces the player to end turn (if it hasn't already) and displays the winner's name.
+    /// </summary>
+    /// <param name="winnerNickName">Nickname of the winning player</param>
+    [PunRPC]
+    public void RpcPlayerControllerGameOver(string winnerNickName)
+    {
+        // TODO Display winner's name
+        Debug.Log("Game Over RPC received.");
+        IsActiveTurn = true;
+    }
+    #endregion
+
+    # region PlayerActions
     private void StartTurn()
     {
         IsActiveTurn = true;
@@ -66,6 +80,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         // TODO: Add UI elements to indicate turn has ended
         photonView.RPC("RpcManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
     }
+    # endregion
 
     # region Setters
     /// <summary>
