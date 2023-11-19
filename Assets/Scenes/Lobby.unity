@@ -2954,19 +2954,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 419926874}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1421080903}
-        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
-        m_MethodName: Quickplay
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &419926874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4799,7 +4787,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -20}
   m_SizeDelta: {x: 500, y: 465}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &785297966
@@ -4966,19 +4954,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 797832655}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1421080903}
-        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
-        m_MethodName: Quickplay
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &797832655
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10518,7 +10494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1e752c476b1435cb67fa767561b941, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuName: room
+  menuName: error
   open: 0
 --- !u!114 &1935554104
 MonoBehaviour:
@@ -10776,19 +10752,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1939971548}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1421080903}
-        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
-        m_MethodName: Quickplay
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1939971548
 MonoBehaviour:
   m_ObjectHideFlags: 0
