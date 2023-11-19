@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class Lobby : MonoBehaviourPunCallbacks
 {
@@ -130,16 +131,16 @@ public class Lobby : MonoBehaviourPunCallbacks
     // Refresh list of players
     public void RefreshPlayerList()
     {
-        Player[] players = PhotonNetwork.PlayerList;
+        Dictionary<int, Player> players = PhotonNetwork.CurrentRoom.Players;
 
 		foreach(Transform child in playerListContent)
 		{
 			Destroy(child.gameObject);
 		}
 
-		for(int i = 0; i < players.Length; i++)
+		foreach(KeyValuePair<int, Player> p in players)
 		{
-			Instantiate(playerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetInfo(players[i]);
+			Instantiate(playerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetInfo(p.Value);
 		}
     }
 
@@ -184,13 +185,14 @@ public class Lobby : MonoBehaviourPunCallbacks
         // Debug.Log("OnCreatedRoom() called, a new room has been created");
     }
 
+
     public override void OnJoinedRoom()
     {
         // Debug.Log("OnJoinedRoom() called, client is connected to a room");
 
         RefreshPlayerList();
 
-        serverSettingMaxPlayers.text = PhotonNetwork.CurrentRoom.MaxPlayers.ToString();
+        serverSettingMaxPlayers.text = PhotonNetwork.CurrentRoom.PlayerCount + "/" + PhotonNetwork.CurrentRoom.MaxPlayers.ToString();
         serverSettingRoomName.text = PhotonNetwork.CurrentRoom.Name;
 
         MenuManager.Instance.OpenMenu("room");
@@ -262,8 +264,13 @@ public class Lobby : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        // Debug.Log("OnLeftRoom() called, client left room");
+        StartCoroutine(WaitToLeave());
+    }
 
+    IEnumerator WaitToLeave()
+    {
+        while (PhotonNetwork.InRoom)
+            yield return null;
         MenuManager.Instance.OpenMenu("lobby");
     }
 
