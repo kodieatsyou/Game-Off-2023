@@ -22,14 +22,8 @@ public delegate void RollDieCallback(int result);
 public class DiceController : MonoBehaviour
 {
     public float rollForce = 5f;
-    public GameObject diceNumPrefab;
-    public GameObject diceActionPrefab;
-    public Vector3 dieSpawnBounds = new Vector3(16, 16, 16);
     public Transform dieSpawnPosition;
     public TMP_Text rollDieText;
-    public DieType testType;
-
-    public Queue<GameObject> dieQueue;
 
     public Boolean readyToRoll = false;
 
@@ -37,10 +31,6 @@ public class DiceController : MonoBehaviour
     void Start()
     {
         StopRoller();
-    }
-    void Update()
-    {
-
     }
 
     public void StopRoller()

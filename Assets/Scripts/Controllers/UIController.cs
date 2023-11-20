@@ -7,24 +7,47 @@ using System;
 using Photon.Pun;
 using Photon.Realtime;
 
+public enum AnnouncementType
+{
+    ScrollLR,
+    DropBounce,
+    StaticBreathing
+}
+
 public class UIController : MonoBehaviour
 {
     [Header("Essential Objects")]
-    public GameObject hotBar;
-    public GameObject announcement;
-    public GameObject info;
-    public GameObject menuScreen;
-    public GameObject cardsScreen;
-    public GameObject dieViewer;
-    public GameObject diePit;
-    [Header("Cards")]
-    public List<GameObject> cards;
-    public float cardsSpacing = 100f;
-    public float cardsAnimationDuration = 0.05f;
-    public GameObject testCard;
-    [Header("Dice")]
-    public float rollForce = 5f;
+    [SerializeField] GameObject hotBar;
+    [SerializeField] GameObject info;
+    [SerializeField] GameObject menuScreen;
+    [SerializeField] GameObject cardsScreen;
+    [SerializeField] GameObject announcementBar;
+    [SerializeField] GameObject dieViewer;
+    [SerializeField] GameObject gameOverScreenHost;
+    [SerializeField] GameObject gameOverScreenNonHost;
+    [SerializeField] GameObject chatPanel;
+    [Header("Card")]
+    [SerializeField] float cardsSpacing = 100f;
+    [SerializeField] float cardsAnimationDuration = 0.05f;
+    [Header("Announcement")]
+    [SerializeField] TMP_Text announcementText;
+    [SerializeField] float announcementSpeed = 5f;
+    [SerializeField] float announcementPauseTime = 3f;
+    [SerializeField] int announcementPos = 900;
+    [Header("Game Over Screen")]
+    [SerializeField] GameObject gameOverPlayerListObject;
+    [Header("Chat")]
+    [SerializeField] GameObject chatMessageObject;
+    [SerializeField] GameObject chatContent;
+    [SerializeField] GameObject chatTypeBox;
+    [SerializeField] GameObject unreadChatIco;
 
+    #region Non Serialized Variables
+    List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
+    List<GameObject> cards = new List<GameObject>();
+    bool unreadChats = false;
+    Coroutine currentAnnouncement;
+    #endregion
 
     [SerializeField] TMP_Text playerName;
 
@@ -48,11 +71,163 @@ public class UIController : MonoBehaviour
     {
         
     }
-
-    public void PlayUIAnnouncement(string text)
+    public void ToggleChat()
     {
-        announcement.GetComponentInChildren<TMP_Text>().text = text;
-        announcement.GetComponent<Animator>().SetTrigger("PlayAnnouncement");
+        if (unreadChatIco.activeSelf)
+        {
+            unreadChatIco.SetActive(false);
+        }
+        chatPanel.SetActive(!chatPanel.activeSelf);
+    }
+
+    public void AddPlayertoGameOverBoard(string name, int heightClimbed, bool isWinner)
+    {
+        GameObject listContent = null;
+        if(player.IsMasterClient)
+        {
+            listContent = gameOverScreenHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
+        } else
+        {
+            listContent = gameOverScreenNonHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
+        }
+        GameObject playerListItem = Instantiate(gameOverPlayerListObject, listContent.transform);
+        playerListItem.GetComponent<GameOverPlayerListItem>().SetInfo(name, heightClimbed, isWinner);
+        gameOverPlayerListObjects.Add(playerListItem);
+    }
+
+    public void ShowGameOverScreen()
+    {
+        if(player.IsMasterClient)
+        {
+            gameOverScreenHost.SetActive(true);
+        } else
+        {
+            gameOverScreenNonHost.SetActive(true);
+        }
+
+    }
+
+    public void HideGameOverScreen()
+    {
+        if (player.IsMasterClient)
+        {
+            gameOverScreenHost.SetActive(false);
+        } else
+        {
+            gameOverScreenNonHost.SetActive(false);
+        }
+
+        foreach(GameObject g in gameOverPlayerListObjects)
+        {
+            Destroy(g);
+        }
+        gameOverPlayerListObjects.Clear();
+    }
+
+    public void PlayAnnouncement(string message, AnnouncementType type)
+    {
+        if (currentAnnouncement != null)
+        {
+            StopCoroutine(currentAnnouncement);
+        }
+
+        announcementBar.SetActive(true);
+
+        announcementText.text = message;
+
+        switch(type)
+        {
+            case AnnouncementType.ScrollLR:
+                currentAnnouncement = StartCoroutine(ScrollTextLR());
+                break;
+            case AnnouncementType.DropBounce:
+                currentAnnouncement = StartCoroutine(FallAndBounceText(1.0f));
+                break;
+        }
+    }
+
+    public void StopAnnouncement()
+    {
+        if (currentAnnouncement != null)
+        {
+            StopCoroutine(currentAnnouncement);
+        }
+        announcementBar.SetActive(false);
+    }
+
+    IEnumerator ScrollTextLR(float targetPositionX = 900, float speed = 500)
+    {
+        // Set text to left side
+        announcementText.rectTransform.anchoredPosition = new Vector2(-targetPositionX, 0);
+
+        // Go to the middle
+        while (Mathf.Abs(announcementText.rectTransform.anchoredPosition.x) > 0.1f)
+        {
+            float step = speed * Time.deltaTime;
+            float newX = Mathf.MoveTowards(announcementText.rectTransform.anchoredPosition.x, 0, step);
+            announcementText.rectTransform.anchoredPosition = new Vector2(newX, 0);
+            yield return null;
+        }
+
+        // Set text to the middle position
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+
+        // Wait for the pause time
+        yield return new WaitForSeconds(announcementPauseTime);
+
+        // Scroll to the positive target position
+        while (announcementText.rectTransform.anchoredPosition.x < targetPositionX - 0.1f)
+        {
+            float step = speed * Time.deltaTime;
+            float newX = Mathf.MoveTowards(announcementText.rectTransform.anchoredPosition.x, targetPositionX, step);
+
+            // Ensure that the movement does not exceed the target position
+            if (newX > targetPositionX)
+            {
+                newX = targetPositionX;
+            }
+
+            announcementText.rectTransform.anchoredPosition = new Vector2(newX, 0);
+            yield return null;
+        }
+
+        // Ensure that the final position is exactly at the target position
+        announcementText.rectTransform.anchoredPosition = new Vector2(targetPositionX, 0);
+        StopAnnouncement();
+    }
+
+    IEnumerator FallAndBounceText(float timeShownAfterBounce, float targetPositionY = 3000, float speed = 6000, float bounciness = 0.05f)
+    {
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, targetPositionY);
+
+        //Fall to middle
+        while (Mathf.Abs(announcementText.rectTransform.anchoredPosition.y) > 0.1f)
+        {
+            float step = speed * Time.deltaTime;
+            float newY = Mathf.MoveTowards(announcementText.rectTransform.anchoredPosition.y, 0, step);
+            announcementText.rectTransform.anchoredPosition = new Vector2(0, newY);
+            yield return null;
+        }
+
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+
+        // Bounce
+        float bounceHeight = targetPositionY * bounciness;
+        float timeToBounce = 0.5f;
+        float elapsedTime = 0.0f;
+
+        while (elapsedTime < timeToBounce)
+        {
+            float bounceY = Mathf.Sin(elapsedTime / timeToBounce * Mathf.PI) * bounceHeight;
+            announcementText.rectTransform.anchoredPosition = new Vector2(0, bounceY);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+        yield return new WaitForSeconds(timeShownAfterBounce);
+        StopAnnouncement();
     }
 
     public void SetTurnTime()
@@ -94,13 +269,6 @@ public class UIController : MonoBehaviour
     public void AddCard(GameObject card)
     {
         GameObject cardObj = Instantiate(card, Vector3.zero, Quaternion.identity);
-        cardObj.transform.SetParent(cardsScreen.transform, false);
-        cards.Add(cardObj);
-    }
-
-    public void TestAddCard()
-    {
-        GameObject cardObj = Instantiate(testCard, Vector3.zero, Quaternion.identity);
         cardObj.transform.SetParent(cardsScreen.transform, false);
         cards.Add(cardObj);
     }
