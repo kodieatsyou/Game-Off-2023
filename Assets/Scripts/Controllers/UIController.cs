@@ -16,7 +16,7 @@ public enum AnnouncementType
 
 public class UIController : MonoBehaviour
 {
-    [Header("Essential Objects")]
+    [Header("Regions")]
     [SerializeField] GameObject hotBar;
     [SerializeField] GameObject info;
     [SerializeField] GameObject menuScreen;
@@ -26,6 +26,8 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject gameOverScreenHost;
     [SerializeField] GameObject gameOverScreenNonHost;
     [SerializeField] GameObject chatPanel;
+    [Header("Info")]
+    [SerializeField] TMP_Text playerName;
     [Header("Card")]
     [SerializeField] float cardsSpacing = 100f;
     [SerializeField] float cardsAnimationDuration = 0.05f;
@@ -41,18 +43,19 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject chatContent;
     [SerializeField] GameObject chatTypeBox;
     [SerializeField] GameObject unreadChatIco;
+    [Header("Hotbar")]
+    [SerializeField] GameObject rollButton;
+    [SerializeField] GameObject buildButton;
+    [SerializeField] GameObject moveButton;
+    [SerializeField] GameObject cardsButton;
 
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
-    bool unreadChats = false;
     Coroutine currentAnnouncement;
-    #endregion
-
-    [SerializeField] TMP_Text playerName;
-
+    float originalAnnouncementTextSize;
     Player player;
-
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -66,11 +69,18 @@ public class UIController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Test()
     {
-        
+        if (currentAnnouncement != null)
+        {
+            StopAnnouncement();
+        } else
+        {
+            PlayAnnouncement("Test breath", AnnouncementType.StaticBreathing);
+        }
     }
+
+    #region Chat
     public void ToggleChat()
     {
         if (unreadChatIco.activeSelf)
@@ -80,6 +90,9 @@ public class UIController : MonoBehaviour
         chatPanel.SetActive(!chatPanel.activeSelf);
     }
 
+    #endregion
+
+    #region Game Over Screen
     public void AddPlayertoGameOverBoard(string name, int heightClimbed, bool isWinner)
     {
         GameObject listContent = null;
@@ -124,6 +137,9 @@ public class UIController : MonoBehaviour
         gameOverPlayerListObjects.Clear();
     }
 
+    #endregion
+
+    #region Announcement
     public void PlayAnnouncement(string message, AnnouncementType type)
     {
         if (currentAnnouncement != null)
@@ -143,6 +159,9 @@ public class UIController : MonoBehaviour
             case AnnouncementType.DropBounce:
                 currentAnnouncement = StartCoroutine(FallAndBounceText(1.0f));
                 break;
+            case AnnouncementType.StaticBreathing:
+                currentAnnouncement = StartCoroutine(BreatheText());
+                break;
         }
     }
 
@@ -151,7 +170,10 @@ public class UIController : MonoBehaviour
         if (currentAnnouncement != null)
         {
             StopCoroutine(currentAnnouncement);
+            currentAnnouncement = null;
         }
+        announcementText.GetComponent<TextMeshProUGUI>().fontSize = originalAnnouncementTextSize;
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
         announcementBar.SetActive(false);
     }
 
@@ -230,6 +252,36 @@ public class UIController : MonoBehaviour
         StopAnnouncement();
     }
 
+    IEnumerator BreatheText()
+    {
+        originalAnnouncementTextSize = announcementText.GetComponent<TextMeshProUGUI>().fontSize;
+        while (true)
+        {
+            // Grow the text
+            yield return ScaleTextAnimation(originalAnnouncementTextSize, originalAnnouncementTextSize * 1.2f, 0.5f);
+
+            // Shrink the text
+            yield return ScaleTextAnimation(originalAnnouncementTextSize * 1.2f, originalAnnouncementTextSize, 0.5f);
+        }
+    }
+
+    IEnumerator ScaleTextAnimation(float startScale, float endScale, float duration)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            announcementText.GetComponent<TextMeshProUGUI>().fontSize = Mathf.Lerp(startScale, endScale, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        announcementText.GetComponent<TextMeshProUGUI>().fontSize = endScale;
+    }
+
+    #endregion
+
+    #region Hotbar
     public void SetTurnTime()
     {
         int seconds = 65;
@@ -256,16 +308,35 @@ public class UIController : MonoBehaviour
         hotBar.transform.GetChild(4).GetComponent<TMP_Text>().text = minutesString + ":" + secondsString;
     }
 
+    public void ToggleRollButton(bool toggle)
+    {
+        rollButton.GetComponent<Button>().interactable = toggle;
+    }
+
+    public void ToggleBuildButton(bool toggle)
+    {
+        buildButton.GetComponent<Button>().interactable = toggle;
+    }
+
+    public void ToggleMoveButton(bool toggle)
+    {
+        moveButton.GetComponent<Button>().interactable = toggle;
+    }
+
     public void ToggleHotbar()
     {
         hotBar.SetActive(!hotBar.activeSelf);
     }
+    #endregion
 
+    #region Menu
     public void ToggleMenuScreen()
     {
         menuScreen.SetActive(!menuScreen.activeSelf);
     }
+    #endregion
 
+    #region Cards
     public void AddCard(GameObject card)
     {
         GameObject cardObj = Instantiate(card, Vector3.zero, Quaternion.identity);
@@ -329,8 +400,6 @@ public class UIController : MonoBehaviour
             cardRect.anchoredPosition = new Vector2(startX + (i * cardsSpacing), 0f);
         }
     }
-
-
     IEnumerator PutCardsAway()
     {
         float timer = 0f;
@@ -358,4 +427,5 @@ public class UIController : MonoBehaviour
         }
         cardsScreen.SetActive(false);
     }
+    #endregion
 }

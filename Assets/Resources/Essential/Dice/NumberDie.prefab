@@ -399,7 +399,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6040690137458270889}
-  - component: {fileID: 6040690137458270887}
   m_Layer: 6
   m_Name: DIeUI
   m_TagString: Untagged
@@ -423,18 +422,6 @@ Transform:
   m_Father: {fileID: 8245443695575104155}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6040690137458270887
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6040690137458270890}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34a0eee73bf2e3e4cb445662f3cbbf23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6806248160725133669
 GameObject:
   m_ObjectHideFlags: 0
@@ -529,8 +516,9 @@ GameObject:
   - component: {fileID: 8245443695575104155}
   - component: {fileID: 3331571460550806940}
   - component: {fileID: 3399625208679154000}
-  - component: {fileID: -5416699129307349405}
-  - component: {fileID: 2527205357594050643}
+  - component: {fileID: 3052466843348548202}
+  - component: {fileID: -3744470368405995445}
+  - component: {fileID: 3216578883131057812}
   m_Layer: 6
   m_Name: NumberDie
   m_TagString: Untagged
@@ -576,7 +564,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8648810564663223736}
   serializedVersion: 2
-  m_Mass: 6
+  m_Mass: 5
   m_Drag: 0
   m_AngularDrag: 0
   m_UseGravity: 1
@@ -584,7 +572,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-5416699129307349405
+--- !u!114 &3052466843348548202
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -603,11 +591,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 2527205357594050643}
+  - {fileID: -3744470368405995445}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &2527205357594050643
+--- !u!114 &-3744470368405995445
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -623,3 +611,16 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &3216578883131057812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8648810564663223736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34a0eee73bf2e3e4cb445662f3cbbf23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gui: {fileID: 6040690137458270890}

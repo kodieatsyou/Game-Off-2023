@@ -1,15 +1,12 @@
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public enum DieType
 {
@@ -21,69 +18,56 @@ public delegate void RollDieCallback(int result);
 
 public class DiceController : MonoBehaviour
 {
-    public float rollForce = 5f;
-    public Transform dieSpawnPosition;
-    public TMP_Text rollDieText;
+    [SerializeField] float rollForce = 5f;
+    [SerializeField] Transform dieSpawnPosition;
+    [SerializeField] GameObject diePanel;
 
-    public Boolean readyToRoll = false;
+    public bool readyToRoll = false;
+    private bool rolling = false;
 
     private RollDieCallback rollDieCallback;
-    void Start()
+
+    public GameObject diceActionPrefab;
+
+    /*
+     * This is how rolling needs to be handled. pass function to handle roll result
+    private void Update()
     {
-        StopRoller();
+        if (Input.GetMouseButtonDown(0) && readyToRoll)
+        {
+            RollDie(DieType.Action, HandleRollResult);
+        }
+    }
+    */
+
+    private void Start()
+    {
+        //diePanel.GetComponent<RawImage>().enabled = false;
+        readyToRoll = false;
+        rolling = false;
     }
 
-    public void StopRoller()
+    public void ReadyRoller()
     {
-        this.GetComponent<RawImage>().enabled = false;
-        rollDieText.gameObject.SetActive(false);
+        Debug.Log("Ready to roll!");
+        if (!rolling)
+        {
+            this.GetComponent<UIController>().PlayAnnouncement("Click to Roll Dice!", AnnouncementType.StaticBreathing);
+            readyToRoll = true;
+        }
     }
-
-    public void StartRoller()
-    {
-        this.GetComponent<RawImage>().enabled = true;
-        rollDieText.gameObject.SetActive(true);
-        readyToRoll = true;
-        StartCoroutine(ScaleText());
-    }
-
     public void RollDie(DieType type, RollDieCallback callback)
     {
         if(readyToRoll)
         {
             Debug.Log("Rolling!");
-            rollDieCallback = callback;
+            rolling = true;
             readyToRoll = false;
-            StopCoroutine(ScaleText());
-            rollDieText.gameObject.SetActive(false);
+            rollDieCallback = callback;
+            this.GetComponent<UIController>().StopAnnouncement();
+            this.GetComponent<UIController>().ToggleRollButton(false);
             StartCoroutine(StartRolling(type));
         }
-    }
-
-    IEnumerator ScaleText()
-    {
-        while(readyToRoll)
-        {
-            // Grow the text
-            yield return ScaleTextAnimation(rollDieText.transform.localScale, Vector3.one * 1.2f, 0.5f);
-
-            // Shrink the text
-            yield return ScaleTextAnimation(rollDieText.transform.localScale, Vector3.one, 0.5f);
-        }
-    }
-
-    IEnumerator ScaleTextAnimation(Vector3 startScale, Vector3 endScale, float duration)
-    {
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            rollDieText.transform.localScale = Vector3.Lerp(startScale, endScale, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        rollDieText.transform.localScale = endScale;
     }
 
     IEnumerator StartRolling(DieType type)
@@ -103,13 +87,12 @@ public class DiceController : MonoBehaviour
         } else if(type == DieType.Number)
         {
             dice = PhotonNetwork.Instantiate("Essential/Dice/NumberDie", spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
-            //dice = Instantiate(diceNumPrefab, spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
+            //dice = Instantiate(diceActionPrefab, spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
         } else
         {
             Debug.Log("ERROR ROLLING DIE");
             yield return -1;
         }
-        
 
         Rigidbody rb = dice.GetComponent<Rigidbody>();
 
@@ -133,6 +116,7 @@ public class DiceController : MonoBehaviour
 
         if (rollDieCallback != null)
         {
+            rolling = false;
             rollDieCallback(result);
         }
     }

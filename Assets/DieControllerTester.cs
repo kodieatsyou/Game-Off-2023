@@ -13,11 +13,6 @@ public class DieControllerTester : MonoBehaviour
     {
     }
 
-    public void TestRollDie()
-    {
-        controller.StartRoller();
-    }
-
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && controller.readyToRoll)
@@ -29,6 +24,5 @@ public class DieControllerTester : MonoBehaviour
     void HandleRollResult(int result)
     {
         Debug.Log("Roll result from tester: " + result);
-        controller.StopRoller();
     }
 }
