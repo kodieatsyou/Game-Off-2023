@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Board
   - Camera
+  - UI
   layers:
   - Default
   - TransparentFX

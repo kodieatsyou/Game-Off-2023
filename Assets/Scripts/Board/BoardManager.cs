@@ -8,7 +8,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
 
-public class BoardSpace
+/*public class BoardSpace
 {
     private Vector3 boardPos;
     private Vector3 worldPos;
@@ -19,7 +19,7 @@ public class BoardSpace
     private GameObject spaceObj;
     private GameObject detailObj;
     private bool playerInSpace;
-
+    private bool isSelectable;
     public BoardSpace(Vector3 boardPos, float worldSpaceScalingFactor, bool isBuilt, bool isBuildable)
     {
         this.boardPos = boardPos;
@@ -92,7 +92,7 @@ public class BoardSpace
             {
                 spaceObj.transform.parent = parent;
             }
-            spaceObj.AddComponent<Block>().SetSpaceObj(this);
+            //spaceObj.AddComponent<Block>().SetSpaceObj(this);
             return true;
         }
         catch
@@ -419,3 +419,4 @@ public class BoardManager : MonoBehaviour
     // }
 
 }
+*/

@@ -6,36 +6,23 @@ public class CameraController : MonoBehaviour
     public float rotationSpeed = 10f;
     public float maxZoomIn = 10f;
     public float maxZoomOut = 100f;
-
-    GameObject board;
     Vector3 mousePreviousPos = Vector3.zero;
     Vector3 mousePositionDelta = Vector3.zero;
-
-    private void OnEnable()
-    {
-        EventManager.StartListening("OnBoardDoneInitializing", OnGameBoardInitialized);
-    }
-
-    private void OnDisable()
-    {
-        EventManager.StopListening("OnBoardDoneInitializing", OnGameBoardInitialized);
-    }
+    int cameraHeight = 1;
 
     // Start is called before the first frame update
     void Start()
     {
+        Vector3 boardMiddlePos = BoardManagerNew.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(board != null)
-        {
-            transform.LookAt(board.GetComponent<BoardManager>().GetBoardMiddlePos());
-            DoZoom();
-            DoRotate();
-        }
-
+        transform.LookAt(BoardManagerNew.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
+        DoZoom();
+        DoRotate();
     }
 
     /// <summary>
@@ -43,7 +30,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoRotate()
     {
-        Vector3 target = board.GetComponent<BoardManager>().GetBoardMiddlePos();
+        Vector3 target = BoardManagerNew.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         if (Input.GetMouseButton(0))
         {
@@ -74,7 +61,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoZoom()
     {
-        Vector3 target = board.GetComponent<BoardManager>().GetBoardMiddlePos();
+        Vector3 target = BoardManagerNew.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         float scrollDelta = -Input.mouseScrollDelta.y;
 
@@ -89,15 +76,31 @@ public class CameraController : MonoBehaviour
         transform.position = newPosition;
     }
 
-    /// <summary>
-    /// Function is triggered with the onGameBoardInitialized game event and sets up the initial camera position
-    /// </summary>
-    public void OnGameBoardInitialized(GameObject caller)
+    public int MoveCameraUpOneBoardLevel()
     {
-        board = caller;
-        //Set Initial Camera Position
-        Vector3 boardMiddlePos = board.GetComponent<BoardManager>().GetBoardMiddlePos();
-        transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);
+        if (cameraHeight + 1 >= BoardManagerNew.Instance.yOfCurrentHeighestBuiltBlock)
+        {
+            cameraHeight = BoardManagerNew.Instance.yOfCurrentHeighestBuiltBlock;
+        }
+        else
+        {
+            cameraHeight += 1;
+        }
+
+        return cameraHeight;
     }
 
+    public int MoveCameraDownOneBoardLevel()
+    {
+        if (cameraHeight - 1 <= 1)
+        {
+            cameraHeight = 1;
+        }
+        else
+        {
+            cameraHeight -= 1;
+        }
+
+        return cameraHeight;
+    }
 }

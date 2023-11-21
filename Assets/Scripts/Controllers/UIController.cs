@@ -22,10 +22,10 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject menuScreen;
     [SerializeField] GameObject cardsScreen;
     [SerializeField] GameObject announcementBar;
-    [SerializeField] GameObject dieViewer;
     [SerializeField] GameObject gameOverScreenHost;
     [SerializeField] GameObject gameOverScreenNonHost;
     [SerializeField] GameObject chatPanel;
+    [SerializeField] GameObject buildPanel;
     [Header("Info")]
     [SerializeField] TMP_Text playerName;
     [Header("Card")]
@@ -44,16 +44,21 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject chatTypeBox;
     [SerializeField] GameObject unreadChatIco;
     [Header("Hotbar")]
-    [SerializeField] GameObject rollButton;
-    [SerializeField] GameObject buildButton;
-    [SerializeField] GameObject moveButton;
-    [SerializeField] GameObject cardsButton;
+    [SerializeField] Button rollButton;
+    [SerializeField] Button buildButton;
+    [SerializeField] Button moveButton;
+    [SerializeField] Button cardsButton;
+    [Header("Camera Position")]
+    [SerializeField] TMP_Text cameraHeightText;
+    [Header("Other")]
+    [SerializeField] GameObject playerCamera;
 
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
     Coroutine currentAnnouncement;
     float originalAnnouncementTextSize;
+    GameObject currentBlockCursor;
     Player player;
     #endregion
 
@@ -67,17 +72,29 @@ public class UIController : MonoBehaviour
             // Just testing setting names
             playerName.text = player.NickName;
         }
+
+        ToggleChat();
     }
 
     public void Test()
     {
-        if (currentAnnouncement != null)
-        {
-            StopAnnouncement();
-        } else
-        {
-            PlayAnnouncement("Test breath", AnnouncementType.StaticBreathing);
-        }
+        AddPlayertoGameOverBoard("Player name", 10, true);
+        AddPlayertoGameOverBoard("Player name", 5, false);
+        AddPlayertoGameOverBoard("Player name", 8, false);
+        AddPlayertoGameOverBoard("Player name", 7, false);
+        AddPlayertoGameOverBoard("Player name", 1, false);
+
+        ShowGameOverScreen();
+    }
+
+    public void SetBlockCursor(GameObject cursor)
+    {
+        currentBlockCursor = cursor;
+    }
+
+    public GameObject GetBlockCursor()
+    {
+        return currentBlockCursor;
     }
 
     #region Chat
@@ -96,13 +113,14 @@ public class UIController : MonoBehaviour
     public void AddPlayertoGameOverBoard(string name, int heightClimbed, bool isWinner)
     {
         GameObject listContent = null;
-        if(player.IsMasterClient)
+        listContent = gameOverScreenHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
+        /*if (player.IsMasterClient)
         {
             listContent = gameOverScreenHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
         } else
         {
             listContent = gameOverScreenNonHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
-        }
+        }*/
         GameObject playerListItem = Instantiate(gameOverPlayerListObject, listContent.transform);
         playerListItem.GetComponent<GameOverPlayerListItem>().SetInfo(name, heightClimbed, isWinner);
         gameOverPlayerListObjects.Add(playerListItem);
@@ -110,13 +128,15 @@ public class UIController : MonoBehaviour
 
     public void ShowGameOverScreen()
     {
-        if(player.IsMasterClient)
+        /*if(player.IsMasterClient)
         {
             gameOverScreenHost.SetActive(true);
         } else
         {
             gameOverScreenNonHost.SetActive(true);
-        }
+        }*/
+
+        gameOverScreenHost.SetActive(true);
 
     }
 
@@ -310,17 +330,51 @@ public class UIController : MonoBehaviour
 
     public void ToggleRollButton(bool toggle)
     {
-        rollButton.GetComponent<Button>().interactable = toggle;
+        rollButton.interactable = toggle;
     }
 
     public void ToggleBuildButton(bool toggle)
     {
-        buildButton.GetComponent<Button>().interactable = toggle;
+        buildButton.interactable = toggle;
+    }
+
+    public void BuildButtonOnClick()
+    {
+        if(currentBlockCursor == GameAssets.i.build_cursor_)
+        {
+            currentBlockCursor = null;
+            buildPanel.SetActive(false);
+            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(false);
+        } else
+        {
+            buildPanel.SetActive(true);
+            SetBlockCursor(GameAssets.i.build_cursor_);
+            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(true);
+        }
+    }
+
+    public void SetBlocksLeft(int blocks)
+    {
+        buildPanel.GetComponentInChildren<TMP_Text>().text = "X" + blocks;
+    }
+
+    public void MoveButtonOnClick()
+    {
+        if (currentBlockCursor == GameAssets.i.move_cursor_)
+        {
+            currentBlockCursor = null;
+            BoardManagerNew.Instance.ToggleMoveableBlocksIsSelectable(new Vector3(0, 0, 0), false);
+        }
+        else
+        {
+            SetBlockCursor(GameAssets.i.move_cursor_);
+            BoardManagerNew.Instance.ToggleMoveableBlocksIsSelectable(new Vector3(0, 0, 0), true);
+        }
     }
 
     public void ToggleMoveButton(bool toggle)
     {
-        moveButton.GetComponent<Button>().interactable = toggle;
+        moveButton.interactable = toggle;
     }
 
     public void ToggleHotbar()
@@ -428,4 +482,17 @@ public class UIController : MonoBehaviour
         cardsScreen.SetActive(false);
     }
     #endregion
+
+
+    public void MoveCameraUp()
+    {
+        int level = playerCamera.GetComponent<CameraController>().MoveCameraUpOneBoardLevel();
+        cameraHeightText.text = level.ToString();
+    }
+
+    public void MoveCameraDown()
+    {
+        int level = playerCamera.GetComponent<CameraController>().MoveCameraDownOneBoardLevel();
+        cameraHeightText.text = level.ToString();
+    }
 }
