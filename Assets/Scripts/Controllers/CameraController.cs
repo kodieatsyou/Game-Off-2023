@@ -59,7 +59,7 @@ public class CameraController : MonoBehaviour
 
             float newRotationX = currentRotation.x - rotationX;
 
-            if (newRotationX >= 0f && newRotationX <= 80f)
+            if (newRotationX >= 2f && newRotationX <= 80f)
             {
                 transform.RotateAround(target, transform.right, -rotationX);
                 transform.RotateAround(target, Vector3.up, rotationY);
