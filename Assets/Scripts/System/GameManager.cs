@@ -11,15 +11,20 @@ public class GameManager : MonoBehaviourPunCallbacks
     public static GameManager Instance;
 
     private int CurrentPlayerTurn;
-    private PhotonView photonView;
+    private PhotonView GCPhotonView;
     private bool GameOver = false;
+    private Settings settingsInstance;
+    private UIController UI;
 
     void Awake() 
     {
         if (Instance == null)
         {
             Instance = this;
-            photonView = PhotonView.Get(this);
+            GCPhotonView = gameObject.AddComponent<PhotonView>();
+            GCPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
+            settingsInstance = new Settings();
+            UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
         }
         else {
             Destroy(this);
@@ -39,8 +44,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     void Update()
     {
         Debug.Log($"Current Turn: {CurrentPlayerTurn}");
-        CheckForWin();
-        // TODO Check for game over conditions
+        CheckForWin(); // Maybe this should be called on a timer instead of every frame?
+        if (GameOver)
+        {
+            ShowGameOver();
+        }
     }
     #endregion
 
@@ -59,7 +67,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             int nextPlayerTurn = (CurrentPlayerTurn + 1) % PhotonNetwork.CurrentRoom.PlayerCount; // Switch to the next player's turn
             SetCurrentPlayerTurn(nextPlayerTurn);
-            photonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
+            GCPhotonView.RPC("RpcPlayerControllerStartTurn", RpcTarget.All); // Inform other players that another turn has started.
         }
     }
     /// <summary>
@@ -91,24 +99,38 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region WinLossConditions
+    #region GameCondition
     private void CheckForWin()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient) // only the master client should check for win conditions
         {
-            var playerObjs = GameObject.FindGameObjectsWithTag("Enemy");
+            var playerObjs = GameObject.FindGameObjectsWithTag("Player");
             foreach (var player in playerObjs)
             {
                 float y = player.transform.position.y;
-                if (y >= Settings.Instance.WinHeight)
+                if (y >= settingsInstance.boardHeight)
                 {
                     // If there is a winner, broadcast to all players that the game is over
-                    GameOver = true;
-                    photonView.RPC("RpcPlayerControllerGameOver", RpcTarget.All, player.GetComponent<PhotonView>().Owner.NickName);
+                    var nickName = player.GetComponent<PhotonView>().Owner.NickName;
+                    GCPhotonView.RPC("RpcPlayerControllerGameOver", RpcTarget.All, nickName);
+
+                    GameOver = true; // mark the game as over
                 }
             }
-
         }
     }
+    private void ShowGameOver()
+    {
+        if (PhotonNetwork.IsMasterClient) // only the master client should spawn the game over screen for everyone
+        {
+            var playerObjs = GameObject.FindGameObjectsWithTag("Player");
+            foreach (var player in playerObjs)
+            {
+                var nickName = player.GetComponent<PhotonView>().Owner.NickName;
+                // UI.addPlayerToGameOver(player.GetComponent<PhotonView>().Owner.NickName);
+            }
+        }
+    }
+    
     #endregion
 }

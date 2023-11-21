@@ -12,7 +12,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private float TurnLength;
     private int ActionsRemaining;
     private bool IsActiveTurn;
-    private PhotonView photonView;
+    private PhotonView PCPhotonView;
+    private UIController UI;
 
     #region UnityFrameFunctions
     void Start()
@@ -22,7 +23,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
         Debug.Log("Awake Player with name: " + PlayerName);
         ActionsRemaining = 3; // move, roll, build
         IsActiveTurn = false;
-        PhotonView photonView = PhotonView.Get(this);
+        PCPhotonView = gameObject.AddComponent<PhotonView>();
+        UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
 
         setTurnLength(); // set turn length at the start of the game
     }
@@ -33,6 +35,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             TurnLength -= Time.deltaTime;
             if (TurnLength < 0f || ActionsRemaining < 0)
             {
+                UI.SetTurnTime(); // SetTurnTime(TurnLength) Bug, currently SetTurnTime does not take in an argument
                 EndTurn();
             }
         }
@@ -71,14 +74,15 @@ public class PlayerController: MonoBehaviourPunCallbacks
     {
         IsActiveTurn = true;
         // TODO: Add UI elements to indicate turn has started
-        photonView.RPC("RpcManagerStartTurn", RpcTarget.All); // Inform game manager turn has started.
+        PCPhotonView.RPC("RpcManagerStartTurn", RpcTarget.All); // Inform game manager turn has started.
+        PCPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
     }
 
     private void EndTurn()
     {
         IsActiveTurn = false;
         // TODO: Add UI elements to indicate turn has ended
-        photonView.RPC("RpcManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
+        PCPhotonView.RPC("RpcManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
     }
     # endregion
 
