@@ -113,14 +113,13 @@ public class UIController : MonoBehaviour
     public void AddPlayertoGameOverBoard(string name, int heightClimbed, bool isWinner)
     {
         GameObject listContent = null;
-        listContent = gameOverScreenHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
-        /*if (player.IsMasterClient)
+        if (player.IsMasterClient)
         {
             listContent = gameOverScreenHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
         } else
         {
             listContent = gameOverScreenNonHost.transform.GetChild(1).GetChild(0).GetChild(0).gameObject;
-        }*/
+        }
         GameObject playerListItem = Instantiate(gameOverPlayerListObject, listContent.transform);
         playerListItem.GetComponent<GameOverPlayerListItem>().SetInfo(name, heightClimbed, isWinner);
         gameOverPlayerListObjects.Add(playerListItem);
@@ -302,9 +301,8 @@ public class UIController : MonoBehaviour
     #endregion
 
     #region Hotbar
-    public void SetTurnTime()
+    public void SetTurnTime(float seconds)
     {
-        int seconds = 65;
 
         int minutes = TimeSpan.FromSeconds(seconds).Minutes;
         seconds = TimeSpan.FromSeconds(seconds).Seconds;
