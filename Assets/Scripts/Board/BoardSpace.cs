@@ -25,6 +25,9 @@ public class BoardSpace : MonoBehaviour
     private BoardSpace blockBelow;
     private bool isSelectable;
     private bool isSelected;
+    private bool isBeingHovered;
+    private bool clicked;
+    private BoxCollider bCollider;
 
     public BoardSpace InitializeSpace(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
     {
@@ -43,6 +46,8 @@ public class BoardSpace : MonoBehaviour
         isSelectable = false;
         isSelected = false;
         needsUpdate = true;
+        isBeingHovered = false;
+        clicked = false;
 
         //Set the meshes for the block, details, and cursors
         blockMesh = null;
@@ -63,10 +68,10 @@ public class BoardSpace : MonoBehaviour
         //Attach a collider to the block to handle clicking it
         if (GetComponent<BoxCollider>() == null)
         {
-            BoxCollider c = this.AddComponent<BoxCollider>();
-            c.size = new Vector3(2.7f, 2.7f, 2.7f);
-            c.center = new Vector3(0, 1.25f, 0);
-            c.enabled = false;
+            bCollider = this.AddComponent<BoxCollider>();
+            bCollider.size = new Vector3(2f, 2f, 2f);
+            bCollider.center = new Vector3(0, 1.25f, 0);
+            bCollider.enabled = false;
         }
 
         return this;
@@ -80,7 +85,7 @@ public class BoardSpace : MonoBehaviour
         //Check if there is a block below and we havent saved it yet
         if(blockBelow == null)
         {
-            if ((int)posInBoard.y - 1 > 0 && BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
+            if ((int)posInBoard.y - 1 >= 0 && BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
             {
                 blockBelow = BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
             }
@@ -110,7 +115,33 @@ public class BoardSpace : MonoBehaviour
             needsUpdate = false;
         }
 
+        UpdateSelectability();
+
+        HandleClick();
+
         wasBuiltLastFrame = isBuilt;
+    }
+
+    private void HandleClick()
+    {
+        if(isSelectable && isBeingHovered)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                clicked = true;
+            }
+
+            // Check if the right mouse button was just clicked (not held down indicating camera panning)
+            if (clicked && !Input.GetMouseButton(0))
+            {
+                isSelected = !isSelected;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            clicked = false;
+        }
     }
 
     private void UpdateBlockMesh()
@@ -179,7 +210,12 @@ public class BoardSpace : MonoBehaviour
             case SelectionMode.Build:
                 if (!isBuilt && (blockBelow.GetIsBuilt() || blockBelow.GetIsSelected()))
                 {
+                    bCollider.enabled = true;
                     isSelectable = true;
+                } else
+                {
+                    bCollider.enabled = false;
+                    isSelectable = false;
                 }
                 break;
         }
@@ -211,5 +247,22 @@ public class BoardSpace : MonoBehaviour
     public bool GetIsBuilt() => isBuilt;
 
     public bool GetIsSelected() {  return isSelected; }
+
+    public bool GetIsBeingHovered() { return isBeingHovered; }
+
+    public bool GetIsSelectable() {  return isSelectable; }
+
+    private void OnMouseEnter()
+    {
+        if(isSelectable)
+        {
+            isBeingHovered = true;
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        isBeingHovered = false;
+    }
 
 }
