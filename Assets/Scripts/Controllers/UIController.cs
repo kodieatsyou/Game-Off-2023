@@ -6,6 +6,7 @@ using TMPro;
 using System;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.EventSystems;
 
 public enum AnnouncementType
 {
@@ -58,7 +59,6 @@ public class UIController : MonoBehaviour
     List<GameObject> cards = new List<GameObject>();
     Coroutine currentAnnouncement;
     float originalAnnouncementTextSize;
-    GameObject currentBlockCursor;
     Player player;
     #endregion
 
@@ -73,7 +73,69 @@ public class UIController : MonoBehaviour
             playerName.text = player.NickName;
         }
 
+        InitializeUI();
+    }
+
+    void Update()
+    {
+        DisableCameraOnUIHover();
+    }
+
+    private void DisableCameraOnUIHover()
+    {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            bool isOverDiePanel = false;
+            Vector2 mousePosition = Input.mousePosition;
+
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = mousePosition;
+
+            var results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            foreach (var result in results)
+            {
+                // Check if the mouse is over a specific part of the UI (replace "YourSpecificUIPart" with the actual name or tag of your UI part)
+                if (result.gameObject.CompareTag("UIDiePanel"))
+                {
+                    isOverDiePanel = true;
+                    break;
+                }
+            }
+            if(!isOverDiePanel)
+            {
+                playerCamera.GetComponent<CameraController>().ToggleCameraCanMove(false);
+            } else
+            {
+                playerCamera.GetComponent<CameraController>().ToggleCameraCanMove(true);
+            }
+        } else
+        {
+            playerCamera.GetComponent<CameraController>().ToggleCameraCanMove(true);
+        }
+            
+    }
+
+    private void InitializeUI()
+    {
         ToggleChat();
+        ToggleHotbar(false);
+        ToggleRollButton(false);
+        ToggleBuildButton(false);
+        ToggleMoveButton(false);
+        SetTurnTime(0);
+        StopAnnouncement();
+        ToggleGameOverScreen(false);
+        ToggleMenuScreen(false);
+    }
+
+    public void StartTurn()
+    {
+        ToggleHotbar(true);
+        ToggleRollButton(true);
+        ToggleBuildButton(true);
+        ToggleMoveButton(true);
     }
 
     #region Chat
@@ -104,31 +166,24 @@ public class UIController : MonoBehaviour
         gameOverPlayerListObjects.Add(playerListItem);
     }
 
-    public void ShowGameOverScreen()
+    public void ToggleGameOverScreen(bool toggle)
     {
-        /*if(player.IsMasterClient)
+        if(toggle == false)
         {
-            gameOverScreenHost.SetActive(true);
+            ClearGameOverScreenPlayerList();
+        }
+        if(player.IsMasterClient)
+        {
+            gameOverScreenHost.SetActive(toggle);
         } else
         {
-            gameOverScreenNonHost.SetActive(true);
-        }*/
-
-        gameOverScreenHost.SetActive(true);
-
+            gameOverScreenNonHost.SetActive(toggle);
+        }
     }
 
-    public void HideGameOverScreen()
+    private void ClearGameOverScreenPlayerList()
     {
-        if (player.IsMasterClient)
-        {
-            gameOverScreenHost.SetActive(false);
-        } else
-        {
-            gameOverScreenNonHost.SetActive(false);
-        }
-
-        foreach(GameObject g in gameOverPlayerListObjects)
+        foreach (GameObject g in gameOverPlayerListObjects)
         {
             Destroy(g);
         }
@@ -281,14 +336,10 @@ public class UIController : MonoBehaviour
 
     #region Hotbar
 
-    public void SetBlockCursor(GameObject cursor)
+    public void ToggleHotbar(bool toggle)
     {
-        currentBlockCursor = cursor;
-    }
-
-    public GameObject GetBlockCursor()
-    {
-        return currentBlockCursor;
+        hotBar.SetActive(toggle);
+        actionInfoPanel.SetActive(toggle);
     }
 
     public void SetTurnTime(float seconds)
@@ -326,40 +377,16 @@ public class UIController : MonoBehaviour
         buildButton.interactable = toggle;
     }
 
-    public void BuildButtonOnClick()
-    {
-       
-    }
-    public void SetBlocksLeft(int blocks)
-    {
-        actionInfoPanel.GetComponentInChildren<TMP_Text>().text = "X" + blocks;
-    }
-
-    public void MoveButtonOnClick()
-    {
-
-    }
-
     public void ToggleMoveButton(bool toggle)
     {
         moveButton.interactable = toggle;
     }
-
-    public void ToggleHotbar()
-    {
-        hotBar.SetActive(!hotBar.activeSelf);
-    }
-
-    public void ClearSelectedBlocks()
-    {
-        
-    }
     #endregion
 
     #region Menu
-    public void ToggleMenuScreen()
+    public void ToggleMenuScreen(bool toggle)
     {
-        menuScreen.SetActive(!menuScreen.activeSelf);
+        menuScreen.SetActive(toggle);
     }
     #endregion
 
@@ -456,7 +483,7 @@ public class UIController : MonoBehaviour
     }
     #endregion
 
-
+    #region Camera
     public void MoveCameraUp()
     {
         int level = playerCamera.GetComponent<CameraController>().MoveCameraUpOneBoardLevel();
@@ -468,4 +495,5 @@ public class UIController : MonoBehaviour
         int level = playerCamera.GetComponent<CameraController>().MoveCameraDownOneBoardLevel();
         cameraHeightText.text = level.ToString();
     }
+    #endregion
 }

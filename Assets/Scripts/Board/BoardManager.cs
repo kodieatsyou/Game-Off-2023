@@ -36,9 +36,6 @@ public class BoardManager : MonoBehaviour
     public int yOfCurrentHeighestBuiltBlock = 0;
     public SelectionMode selectionMode;
 
-    public Vector3 start;
-    public Vector3 end;
-
     private void Awake()
     {
         if (Instance == null)
@@ -47,13 +44,14 @@ public class BoardManager : MonoBehaviour
         }
         else
         {
-            Destroy(this);
+            Destroy(gameObject);
         }
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        PhotonNetwork.OfflineMode = true;
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
 
@@ -142,4 +140,27 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public BoardSpace GetViableSpawnPosition()
+    {
+        List<BoardSpace> viableLocations = new List<BoardSpace>();
+        for (int x = 0; x < BaseSize; x++)
+        {
+            for (int y = 0; y < 1; y++)
+            {
+                for (int z = 0; z < BaseSize; z++)
+                {
+                    if(BoardSpace_Arr[x, y, z] != null)
+                    {
+                        BoardSpace space = BoardSpace_Arr[x, y, z].GetComponent<BoardSpace>();
+                        if(space.GetIsBuilt() && space.GetValueOfNeighbors() % 11 != 0 && space.GetPlayerOnSpace() == null)
+                        {
+                            viableLocations.Add(space);
+                        }
+                    }
+                }
+            }
+        }
+        System.Random rand = new System.Random();
+        return viableLocations[rand.Next(0, viableLocations.Count)];
+    }
 }

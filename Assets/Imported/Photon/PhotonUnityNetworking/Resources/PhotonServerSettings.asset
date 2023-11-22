@@ -41,6 +41,8 @@ MonoBehaviour:
   - RpcPlayerControllerStartTurn
   - PostChatMessage
   - RpcPlayerControllerGameOver
+  - RpcGameBoardInitialized
+  - RpcBoardInitialized
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

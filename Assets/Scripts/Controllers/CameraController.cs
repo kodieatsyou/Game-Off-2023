@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    private bool canMove = true;
     public float zoomSpeed = 9f;
     public float rotationSpeed = 10f;
     public float maxZoomIn = 10f;
@@ -21,8 +22,11 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         transform.LookAt(BoardManager.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
-        DoZoom();
-        DoRotate();
+        if(canMove)
+        {
+            DoZoom();
+            DoRotate();
+        }
     }
 
     /// <summary>
@@ -75,6 +79,8 @@ public class CameraController : MonoBehaviour
 
         transform.position = newPosition;
     }
+
+    public void ToggleCameraCanMove(bool toggle) { canMove = toggle; }
 
     public int MoveCameraUpOneBoardLevel()
     {

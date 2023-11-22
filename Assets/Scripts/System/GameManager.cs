@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (Instance == null)
         {
             Instance = this;
-            GCPhotonView = gameObject.AddComponent<PhotonView>();
+            GCPhotonView = GetComponent<PhotonView>();
             GCPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
             settingsInstance = new Settings();
             UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
@@ -37,13 +37,14 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
+            Debug.Log("Setting turns");
             SetCurrentPlayerTurn(0);
         }
     }
     // Update is called once per frame
     void Update()
     {
-        Debug.Log($"Current Turn: {CurrentPlayerTurn}");
+        //Debug.Log($"Current Turn: {CurrentPlayerTurn}");
         CheckForWin(); // Maybe this should be called on a timer instead of every frame?
         if (GameOver)
         {
@@ -53,6 +54,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region GameNetwork
+
+    /// <summary>
+    /// Handles messages over RPC that the game board was initialized then spawns the player objects
+    /// </summary>
+    [PunRPC]
+    public void RpcBoardInitialized()
+    {
+        Debug.Log("Game board initialized!");
+    }
+
     /// <summary>
     /// Handles messages over RPC that a player has ended their turn. Then posts a message to RPC that the next player should start their turn.
     /// </summary>
@@ -133,4 +144,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     
     #endregion
+
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.CreateRoom("Offline Room", null, null, null);
+    }
 }

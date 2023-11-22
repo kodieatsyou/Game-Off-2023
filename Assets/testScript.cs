@@ -21,21 +21,18 @@ public class testScript : MonoBehaviourPunCallbacks
                 int headIndex = (int)PhotonNetwork.PlayerList[i].CustomProperties["face"]-1;
                 int faceIndex = (int)PhotonNetwork.PlayerList[i].CustomProperties["head"]-1;
 
-                if (headIndex == -1)
-                {
-                    headIndex = 0;
-                }
-                if (faceIndex == -1)
-                {
-                    faceIndex = 0;
-                }
-
                 GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[textureIndex]);
-                GameObject face = PhotonNetwork.Instantiate(string.Format("Props/Accessories/Face/{0}", GameAssets.i.character_face_accessories_[faceIndex].name), Vector3.zero, Quaternion.Euler(-90f, 90f, 0f));
-                GameObject head = PhotonNetwork.Instantiate(string.Format("Props/Accessories/Head/{0}", GameAssets.i.character_head_accessories_[headIndex].name), Vector3.zero, Quaternion.Euler(-90f, 90f, 0f));
 
-                face.transform.SetParent(faceAccessory, false);
-                head.transform.SetParent(headAccessory, false);
+                if (headIndex != -1)
+                {
+                    GameObject head = PhotonNetwork.Instantiate(string.Format("Props/Accessories/Head/{0}", GameAssets.i.character_head_accessories_[headIndex].name), Vector3.zero, Quaternion.Euler(-90f, 90f, 0f));
+                    head.transform.SetParent(headAccessory, false);
+                }
+                if (faceIndex != -1)
+                {
+                    GameObject face = PhotonNetwork.Instantiate(string.Format("Props/Accessories/Face/{0}", GameAssets.i.character_face_accessories_[faceIndex].name), Vector3.zero, Quaternion.Euler(-90f, 90f, 0f));
+                    face.transform.SetParent(faceAccessory, false);
+                }
             }
         }
     }

@@ -20,7 +20,6 @@ public class BoardSpace : MonoBehaviour
     private int valueOfNeighbors;
     private GameObject blockMesh;
     private GameObject detailMesh;
-    private GameObject cursorMesh;
     private GameObject playerOnSpace;
     private BoardSpace blockBelow;
     private bool isSelectable;
@@ -52,7 +51,6 @@ public class BoardSpace : MonoBehaviour
         //Set the meshes for the block, details, and cursors
         blockMesh = null;
         detailMesh = null;
-        cursorMesh = null;
         blockBelow = null;
 
         //Check for random detail and add it if needed
@@ -111,6 +109,10 @@ public class BoardSpace : MonoBehaviour
         //If we need to update then we update the block mesh
         if(needsUpdate)
         {
+            if(isBuilt && (int)posInBoard.y > BoardManager.Instance.yOfCurrentHeighestBuiltBlock)
+            {
+                BoardManager.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
+            }
             UpdateBlockMesh();
             needsUpdate = false;
         }
@@ -251,6 +253,13 @@ public class BoardSpace : MonoBehaviour
     public bool GetIsBeingHovered() { return isBeingHovered; }
 
     public bool GetIsSelectable() {  return isSelectable; }
+
+    public GameObject GetPlayerOnSpace() { return playerOnSpace; }
+
+    public void PlacePlayerOnSpace(GameObject player)
+    {
+        this.playerOnSpace = player;
+    }
 
     private void OnMouseEnter()
     {
