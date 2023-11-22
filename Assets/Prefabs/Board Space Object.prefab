@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2176545935313610478}
   - component: {fileID: 7581321309412992204}
-  - component: {fileID: 6981375731045232475}
   m_Layer: 0
   m_Name: Board Space Object
   m_TagString: Untagged
@@ -45,15 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87e6661f125e052448c554adc6bf017f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6981375731045232475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6650280991801686592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6e08f66d25a45647811d7d7dc4e28b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  isBuilt: 0

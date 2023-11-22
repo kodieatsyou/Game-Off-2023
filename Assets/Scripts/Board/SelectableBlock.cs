@@ -13,15 +13,7 @@ public class SelectableBlock : MonoBehaviour
     bool clicked = false;
 
     // Start is called before the first frame update
-    void Start()
-    {
-        if(GetComponent<BoxCollider>() == null)
-        {
-            BoxCollider c = this.AddComponent<BoxCollider>();
-            c.size = new Vector3(2.7f, 2.7f, 2.7f);
-            c.center = new Vector3(0, 1.25f, 0);
-        }
-    }
+    
 
     public void SetIsSelectable(bool isSelectable)
     {

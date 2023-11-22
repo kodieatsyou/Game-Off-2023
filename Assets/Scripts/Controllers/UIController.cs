@@ -328,18 +328,7 @@ public class UIController : MonoBehaviour
 
     public void BuildButtonOnClick()
     {
-        if(currentBlockCursor == GameAssets.i.build_cursor_)
-        {
-            currentBlockCursor = null;
-            actionInfoPanel.SetActive(false);
-            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(false);
-        } else
-        {
-            actionInfoPanel.SetActive(true);
-            SetBlockCursor(GameAssets.i.build_cursor_);
-            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(true);
-            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
-        }
+       
     }
     public void SetBlocksLeft(int blocks)
     {
@@ -348,19 +337,7 @@ public class UIController : MonoBehaviour
 
     public void MoveButtonOnClick()
     {
-        if (currentBlockCursor == GameAssets.i.move_cursor_)
-        {
-            currentBlockCursor = null;
-            actionInfoPanel.SetActive(false);
-            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(false);
-        }
-        else
-        {
-            actionInfoPanel.SetActive(true);
-            SetBlockCursor(GameAssets.i.move_cursor_);
-            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(true);
-            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
-        }
+
     }
 
     public void ToggleMoveButton(bool toggle)
@@ -375,7 +352,7 @@ public class UIController : MonoBehaviour
 
     public void ClearSelectedBlocks()
     {
-        BoardManagerNew.Instance.ClearSelectedBlocks();
+        
     }
     #endregion
 
