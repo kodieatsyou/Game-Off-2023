@@ -33,6 +33,11 @@ public class SelectableBlock : MonoBehaviour
         isSelected = true;
     }
 
+    public void ClearSelection()
+    {
+        this.isSelected = false;
+    }
+
     private void Update()
     {
         GetComponent<BoxCollider>().enabled = isSelectable;

@@ -125,7 +125,7 @@ public class Lobby : MonoBehaviourPunCallbacks
     // Starts game loop
     public void StartGame()
     {
-        PhotonNetwork.LoadLevel("BoardShowcase");
+        PhotonNetwork.LoadLevel("MainGameScene");
     }
 
     // Refresh list of players

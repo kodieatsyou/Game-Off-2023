@@ -25,7 +25,7 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject gameOverScreenHost;
     [SerializeField] GameObject gameOverScreenNonHost;
     [SerializeField] GameObject chatPanel;
-    [SerializeField] GameObject buildPanel;
+    [SerializeField] GameObject actionInfoPanel;
     [Header("Info")]
     [SerializeField] TMP_Text playerName;
     [Header("Card")]
@@ -74,27 +74,6 @@ public class UIController : MonoBehaviour
         }
 
         ToggleChat();
-    }
-
-    public void Test()
-    {
-        AddPlayertoGameOverBoard("Player name", 10, true);
-        AddPlayertoGameOverBoard("Player name", 5, false);
-        AddPlayertoGameOverBoard("Player name", 8, false);
-        AddPlayertoGameOverBoard("Player name", 7, false);
-        AddPlayertoGameOverBoard("Player name", 1, false);
-
-        ShowGameOverScreen();
-    }
-
-    public void SetBlockCursor(GameObject cursor)
-    {
-        currentBlockCursor = cursor;
-    }
-
-    public GameObject GetBlockCursor()
-    {
-        return currentBlockCursor;
     }
 
     #region Chat
@@ -301,6 +280,17 @@ public class UIController : MonoBehaviour
     #endregion
 
     #region Hotbar
+
+    public void SetBlockCursor(GameObject cursor)
+    {
+        currentBlockCursor = cursor;
+    }
+
+    public GameObject GetBlockCursor()
+    {
+        return currentBlockCursor;
+    }
+
     public void SetTurnTime(float seconds)
     {
 
@@ -341,19 +331,19 @@ public class UIController : MonoBehaviour
         if(currentBlockCursor == GameAssets.i.build_cursor_)
         {
             currentBlockCursor = null;
-            buildPanel.SetActive(false);
+            actionInfoPanel.SetActive(false);
             BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(false);
         } else
         {
-            buildPanel.SetActive(true);
+            actionInfoPanel.SetActive(true);
             SetBlockCursor(GameAssets.i.build_cursor_);
             BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(true);
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
         }
     }
-
     public void SetBlocksLeft(int blocks)
     {
-        buildPanel.GetComponentInChildren<TMP_Text>().text = "X" + blocks;
+        actionInfoPanel.GetComponentInChildren<TMP_Text>().text = "X" + blocks;
     }
 
     public void MoveButtonOnClick()
@@ -361,12 +351,15 @@ public class UIController : MonoBehaviour
         if (currentBlockCursor == GameAssets.i.move_cursor_)
         {
             currentBlockCursor = null;
-            BoardManagerNew.Instance.ToggleMoveableBlocksIsSelectable(new Vector3(0, 0, 0), false);
+            actionInfoPanel.SetActive(false);
+            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(false);
         }
         else
         {
+            actionInfoPanel.SetActive(true);
             SetBlockCursor(GameAssets.i.move_cursor_);
-            BoardManagerNew.Instance.ToggleMoveableBlocksIsSelectable(new Vector3(0, 0, 0), true);
+            BoardManagerNew.Instance.ToggleBuildableBlocksIsSelectable(true);
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
         }
     }
 
@@ -378,6 +371,11 @@ public class UIController : MonoBehaviour
     public void ToggleHotbar()
     {
         hotBar.SetActive(!hotBar.activeSelf);
+    }
+
+    public void ClearSelectedBlocks()
+    {
+        BoardManagerNew.Instance.ClearSelectedBlocks();
     }
     #endregion
 

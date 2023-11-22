@@ -125,6 +125,20 @@ public class BoardManagerNew : MonoBehaviour
         }
     }
 
+    public void ClearSelectedBlocks()
+    {
+        for (int x = 0; x < BaseSize; x++)
+        {
+            for (int y = 0; y < HeightSize; y++)
+            {
+                for (int z = 0; z < BaseSize; z++)
+                {
+                    BoardSpace_Arr[x, y, z].gameObject.GetComponent<SelectableBlock>().ClearSelection();
+                }
+            }
+        }
+    }
+
     /// <summary>
     ///  Generates a bool 3d array of coordinates in the field that determine if a block should be random or not.
     ///  Max height of a random coord is 2 currently
