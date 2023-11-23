@@ -53,7 +53,7 @@ public class Cursor : MonoBehaviour
 
     private void SetCursorMode()
     {
-        switch (BoardManager.Instance.selectionMode)
+        switch (LocalBoardManager.Instance.selectionMode)
         {
             case SelectionMode.Move:
                 buildScaffold.SetActive(false);

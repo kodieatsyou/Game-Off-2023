@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager Instance;
 
+    public bool offlineMode = false;
+
     private int CurrentPlayerTurn;
     private PhotonView GCPhotonView;
     private bool GameOver = false;
@@ -35,10 +37,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
+        PhotonNetwork.OfflineMode = offlineMode;
         if (PhotonNetwork.IsConnected)
         {
             Debug.Log("Setting turns");
-            SetCurrentPlayerTurn(0);
+            SetCurrentPlayerTurn(1);
         }
     }
     // Update is called once per frame

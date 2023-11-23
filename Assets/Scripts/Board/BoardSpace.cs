@@ -83,9 +83,9 @@ public class BoardSpace : MonoBehaviour
         //Check if there is a block below and we havent saved it yet
         if(blockBelow == null)
         {
-            if ((int)posInBoard.y - 1 >= 0 && BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
+            if ((int)posInBoard.y - 1 >= 0 && LocalBoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
             {
-                blockBelow = BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
+                blockBelow = LocalBoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
             }
         }
 
@@ -109,18 +109,28 @@ public class BoardSpace : MonoBehaviour
         //If we need to update then we update the block mesh
         if(needsUpdate)
         {
-            if(isBuilt && (int)posInBoard.y > BoardManager.Instance.yOfCurrentHeighestBuiltBlock)
+            if(isBuilt && (int)posInBoard.y > LocalBoardManager.Instance.yOfCurrentHeighestBuiltBlock)
             {
-                BoardManager.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
+                LocalBoardManager.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
             }
             UpdateBlockMesh();
             needsUpdate = false;
+            if(LocalBoardManager.Instance.initialized)
+            {
+                if(!LocalBoardManager.Instance.spacesChanged.Contains(this))
+                {
+                    LocalBoardManager.Instance.spacesChanged.Add(this);
+                }
+            }
         }
 
         UpdateSelectability();
 
         HandleClick();
+    }
 
+    private void LateUpdate()
+    {
         wasBuiltLastFrame = isBuilt;
     }
 
@@ -136,7 +146,9 @@ public class BoardSpace : MonoBehaviour
             // Check if the right mouse button was just clicked (not held down indicating camera panning)
             if (clicked && !Input.GetMouseButton(0))
             {
-                isSelected = !isSelected;
+                //isSelected = !isSelected;
+                isBuilt = false;
+                needsUpdate = true;
             }
         }
 
@@ -177,29 +189,29 @@ public class BoardSpace : MonoBehaviour
         int y = (int)posInBoard.y;
         int z = (int)posInBoard.z;
 
-        if (z + 1 < BoardManager.Instance.BaseSize && BoardManager.BoardSpace_Arr[x, y, z + 1] != null)
+        if (z + 1 < LocalBoardManager.Instance.BaseSize && LocalBoardManager.BoardSpace_Arr[x, y, z + 1] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
+            if(LocalBoardManager.BoardSpace_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
         } 
 
-        if (z - 1 >= 0 && BoardManager.BoardSpace_Arr[x, y, z - 1] != null)
+        if (z - 1 >= 0 && LocalBoardManager.BoardSpace_Arr[x, y, z - 1] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
+            if(LocalBoardManager.BoardSpace_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
         }
 
-        if (x + 1 < BoardManager.Instance.BaseSize && BoardManager.BoardSpace_Arr[x + 1, y, z] != null)
+        if (x + 1 < LocalBoardManager.Instance.BaseSize && LocalBoardManager.BoardSpace_Arr[x + 1, y, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
+            if(LocalBoardManager.BoardSpace_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
         } 
 
-        if (x - 1 >= 0 && BoardManager.BoardSpace_Arr[x - 1, y, z] != null)
+        if (x - 1 >= 0 && LocalBoardManager.BoardSpace_Arr[x - 1, y, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
+            if(LocalBoardManager.BoardSpace_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
         }
 
-        if (y + 1 < BoardManager.Instance.HeightSize && BoardManager.BoardSpace_Arr[x, y + 1, z] != null)
+        if (y + 1 < LocalBoardManager.Instance.HeightSize && LocalBoardManager.BoardSpace_Arr[x, y + 1, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
+            if(LocalBoardManager.BoardSpace_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
         }
 
         return neighborValue;
@@ -207,7 +219,7 @@ public class BoardSpace : MonoBehaviour
 
     public void UpdateSelectability()
     {
-        switch (BoardManager.Instance.selectionMode)
+        switch (LocalBoardManager.Instance.selectionMode)
         {
             case SelectionMode.Build:
                 if (!isBuilt && (blockBelow.GetIsBuilt() || blockBelow.GetIsSelected()))
@@ -215,6 +227,18 @@ public class BoardSpace : MonoBehaviour
                     bCollider.enabled = true;
                     isSelectable = true;
                 } else
+                {
+                    bCollider.enabled = false;
+                    isSelectable = false;
+                }
+                break;
+            case SelectionMode.Move:
+                if(posInBoard.y == 0)
+                {
+                    bCollider.enabled = true;
+                    isSelectable = true;
+                }
+                else
                 {
                     bCollider.enabled = false;
                     isSelectable = false;
@@ -261,6 +285,8 @@ public class BoardSpace : MonoBehaviour
         this.playerOnSpace = player;
     }
 
+    public void SetIsBuilt(bool isBuilt) { this.isBuilt = isBuilt; if (isBuilt != wasBuiltLastFrame) { needsUpdate = true; } }
+
     private void OnMouseEnter()
     {
         if(isSelectable)
@@ -273,5 +299,4 @@ public class BoardSpace : MonoBehaviour
     {
         isBeingHovered = false;
     }
-
 }

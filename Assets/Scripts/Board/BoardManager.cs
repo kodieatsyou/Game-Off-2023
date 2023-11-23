@@ -7,6 +7,9 @@ using UnityEngine.Events;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
+using Unity.VisualScripting;
+using static UnityEngine.RuleTile.TilingRuleOutput;
+using System.Linq;
 
 /// <summary>
 /// Will only be attached to the initial board object!
@@ -15,32 +18,37 @@ using ExitGames.Client.Photon;
 ///  Move Mode: Sets board spaces to selectable if they are able to be moved from
 ///  Player Mode: Sets board spaces to selectable if they have a player on them
 /// </summary>
-
-public enum SelectionMode
-{
-    None,
-    Build,
-    Move,
-    Player
-}
+/// 
 
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager Instance;
 
+    public bool OfflineMode = false;
+
     public int BaseSize = 10;
     public int RandomBlockScale = 4; // pick scale of random blocks to the board size. Ex: 4 means BaseSize * 4 = 40 random blocks
     public int HeightSize;
     private static int RandomBlockCount;
-    public static BoardSpace[,,] BoardSpace_Arr;
+    public static string[] BoardSpace_Arr;
     public int yOfCurrentHeighestBuiltBlock = 0;
-    public SelectionMode selectionMode;
+    public PhotonView BMPhotonView;
+
+    public bool[] playersBoardsDoneInitializing;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            if(GetComponent<PhotonView>() != null)
+            {
+                BMPhotonView = GetComponent<PhotonView>();
+            } else
+            {
+                transform.AddComponent<PhotonView>();
+                BMPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
+            }
         }
         else
         {
@@ -51,38 +59,39 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PhotonNetwork.OfflineMode = true;
+        PhotonNetwork.OfflineMode = OfflineMode;
+
+        playersBoardsDoneInitializing = new bool[PhotonNetwork.CurrentRoom.PlayerCount];
+
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
 
-        BoardSpace_Arr = new BoardSpace[BaseSize, HeightSize, BaseSize];
-
-        selectionMode = SelectionMode.None;
-
         bool[,,] isRandom = GenerateRandomGrid();
 
-        // Fill CanBuildOn_Arr and IsBuilt_Arr with rule-based values
+        BoardSpace_Arr = new string[BaseSize * HeightSize * BaseSize];
         for (int x = 0; x < BaseSize; x++)
         {
             for (int y = 0; y < HeightSize; y++)
             {
                 for (int z = 0; z < BaseSize; z++)
                 {
+                    int index = x + BaseSize * (y + HeightSize * z);
                     if (isRandom[x, y, z])
                     {
-                        BoardSpace_Arr[x, y, z] = Instantiate(GameAssets.i.test_Space_Object_, transform).GetComponent<BoardSpace>().InitializeSpace(new Vector3(x, y, z), 2.5f, true);
+                        BoardSpace_Arr[index] = new BoardSpaceNetwork(new Vector3(x, y, z), 2.5f, true).ToJson();
                     }
                     else if (y == 0)
                     {
-                        BoardSpace_Arr[x, y, z] = Instantiate(GameAssets.i.test_Space_Object_, transform).GetComponent<BoardSpace>().InitializeSpace(new Vector3(x, y, z), 2.5f, true);
+                        BoardSpace_Arr[index] = new BoardSpaceNetwork(new Vector3(x, y, z), 2.5f, true).ToJson();
                     }
                     else
                     {
-                        BoardSpace_Arr[x, y, z] = Instantiate(GameAssets.i.test_Space_Object_, transform).GetComponent<BoardSpace>().InitializeSpace(new Vector3(x, y, z), 2.5f, false);
+                        BoardSpace_Arr[index] = new BoardSpaceNetwork(new Vector3(x, y, z), 2.5f, false).ToJson();
                     }
                 }
             }
         }
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "InitialBoard", BoardSpace_Arr }, { "BoardHeightSize", HeightSize }, { "BoardBaseSize", BaseSize } });
     }
 
     /// <summary>
@@ -127,20 +136,7 @@ public class BoardManager : MonoBehaviour
         return randomCoords;
     }
 
-    public Vector3 GetBoardMiddlePosAtYLevel(int yLevel)
-    {
-        if (Math.Floor(BaseSize / 2.0f) == BaseSize / 2.0f) //Check if the middle of the grid is a float or not. If its a whole number the middle is between 2 blocks else the middle is a whole block. 
-        {
-            return new Vector3(((BaseSize / 2.0f) * 2.5f) - 1, yLevel * 2.5f, ((BaseSize / 2.0f) * 2.5f) - 1); // Subtract one to get the location between the two "middle" blocks
-
-        }
-        else
-        {
-            return new Vector3((BaseSize / 2.0f) * 2.5f, yLevel * 2.5f, (BaseSize / 2.0f) * 2.5f); // Get the location of the center of the middle block
-        }
-    }
-
-    public BoardSpace GetViableSpawnPosition()
+    /*public BoardSpace GetViableSpawnPosition()
     {
         List<BoardSpace> viableLocations = new List<BoardSpace>();
         for (int x = 0; x < BaseSize; x++)
@@ -162,5 +158,25 @@ public class BoardManager : MonoBehaviour
         }
         System.Random rand = new System.Random();
         return viableLocations[rand.Next(0, viableLocations.Count)];
+    }*/
+
+    [PunRPC]
+    public void RPCBoardManagerBoardInitialized(int playerID)
+    {
+        playersBoardsDoneInitializing[playerID - 1] = true;
+        if(!playersBoardsDoneInitializing.Contains(false))
+        {
+            Debug.Log("All players have initialized!");
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "InitialBoard", null }, { "BoardHeightSize", null }, { "BoardBaseSize", null } });
+        }
     }
+
+    [PunRPC]
+    public void RPCBoardManagerPushChangesFromLocalBoard(string blocksChanged, int playerID)
+    {
+        string[] changes = blocksChanged.Split('~');
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "BoardChanges", changes }, { "BoardChanges-FromPlayer", playerID } });
+    }
+
+
 }

@@ -102,4 +102,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
     }
     #endregion
+
+    #region Getters
+    public int GetPlayerID() { return PlayerID; }
+    #endregion
+
+
 }
