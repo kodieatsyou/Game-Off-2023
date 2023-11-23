@@ -404,6 +404,8 @@ public class BoardManager : MonoBehaviour
         BoardSpace spaceToSpawn = availableBlocks[rand.Next(availableBlocks.Count)];
         spaceToSpawn.SetPlayerInSpace(true);
         PhotonNetwork.Instantiate("Essential/Yeti", spaceToSpawn.GetWorldPositionOfTop(), Quaternion.identity);
+
+        Debug.Log(PhotonNetwork.CurrentRoom.CustomProperties["TurnTime"]);
     }
 
     // public List<BoardSpace> FindPathInGrid()
