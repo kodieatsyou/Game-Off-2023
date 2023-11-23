@@ -9,10 +9,11 @@ public class PlayerController: MonoBehaviourPunCallbacks
 {
     private int PlayerID;
     private string PlayerName;
-    private float TurnLength;
+    private float NetworkTurnLength;
+    private float CurrTurnLength;
     private int ActionsRemaining;
     private bool IsActiveTurn;
-    private PhotonView PCPhotonView;
+    private GameManager GM = GameManager.Instance;
     private UIController UI;
 
     #region UnityFrameFunctions
@@ -20,86 +21,55 @@ public class PlayerController: MonoBehaviourPunCallbacks
     {
         PlayerID = PhotonNetwork.LocalPlayer.ActorNumber;
         PlayerName = PhotonNetwork.LocalPlayer.NickName;
-        Debug.Log("Awake Player with name: " + PlayerName);
+        NetworkTurnLength = (float)PhotonNetwork.CurrentRoom.CustomProperties["WinHeight"];
+        CurrTurnLength = NetworkTurnLength;
         ActionsRemaining = 3; // move, roll, build
         IsActiveTurn = false;
-        PCPhotonView = gameObject.AddComponent<PhotonView>();
         UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
-
-        setTurnLength(); // set turn length at the start of the game
+        Debug.Log("Awake Player with name: " + PlayerName);
     }
     void Update()
     {
         if (IsActiveTurn)
         {
-            TurnLength -= Time.deltaTime;
-            if (TurnLength < 0f || ActionsRemaining < 0)
+            CurrTurnLength -= Time.deltaTime;
+            if (CurrTurnLength < 0f || ActionsRemaining < 0)
             {
-                UI.SetTurnTime(TurnLength); // SetTurnTime(TurnLength) Bug, currently SetTurnTime does not take in an argument
+                UI.SetTurnTime(CurrTurnLength); // SetTurnTime(CurrTurnLength) Bug, currently SetTurnTime does not take in an argument
                 EndTurn();
             }
         }
     }
     #endregion
 
-    # region PlayerNetwork
-    [PunRPC]
-    public void RpcPlayerControllerStartTurn()
+    #region PlayerNetwork
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
-        // RPC called on all clients when a player ends their turn
-        Debug.Log("Start of Turn RPC received.");
-        int CurrentPlayerTurn = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
-        if (CurrentPlayerTurn == PlayerID)
+        if (propertiesThatChanged.ContainsKey("CurrentPlayerTurn"))
         {
-            setTurnLength(); // reset turn length at the start of the turn
-            StartTurn();
+            Debug.Log("CurrentPlayerTurn change detected");
+            int networkPlayerValue = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
+            if (networkPlayerValue == PlayerID)
+            {
+                StartTurn();
+            }
         }
-    }
-
-    /// <summary>
-    /// Handles messages over RPC that the game has ended. Forces the player to end turn (if it hasn't already) and displays the winner's name.
-    /// </summary>
-    /// <param name="winnerNickName">Nickname of the winning player</param>
-    [PunRPC]
-    public void RpcPlayerControllerGameOver(string winnerNickName)
-    {
-        // TODO Display winner's name
-        Debug.Log("Game Over RPC received.");
-        IsActiveTurn = true;
     }
     #endregion
 
-    # region PlayerActions
+    #region PlayerActions
     private void StartTurn()
     {
         IsActiveTurn = true;
-        // TODO: Add UI elements to indicate turn has started
-        PCPhotonView.RPC("RpcManagerStartTurn", RpcTarget.All); // Inform game manager turn has started.
-        PCPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
+        // TODO: Add UI elements to indicate turn has started, enable UI
     }
 
     private void EndTurn()
     {
         IsActiveTurn = false;
-        // TODO: Add UI elements to indicate turn has ended
-        PCPhotonView.RPC("RpcManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
+        CurrTurnLength = NetworkTurnLength; // reset turn length at the end of the turn
+        // TODO: Add UI elements to indicate turn has ended, disable UI
+        GM.GMPhotonView.RPC("RPCGameManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
     }
     # endregion
-
-    # region Setters
-    /// <summary>
-    /// Set TurnLength by calling the Photon Network to get the TurnLength from the room custom properties or set it to 15f if it doesn't exist.
-    /// </summary>
-    private void setTurnLength()
-    {
-        if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("TurnLength", out var value))
-        {
-            TurnLength = (float)value;
-        }
-        else
-        {
-            TurnLength = 15f;
-        }
-    }
-    #endregion
 }
