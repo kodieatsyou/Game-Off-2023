@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8ac47a2615ab9c449ae7a911e4c6855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  test_Space_Object_: {fileID: 6650280991801686592, guid: 6cdb1a142ea4dd04c8555727e564b75f, type: 3}
   player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
   character_skins_:
   - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}
@@ -96,7 +97,8 @@ MonoBehaviour:
   - {fileID: 1776885312876451402, guid: c7c2b8fed47f0bc4889a4f1f6a6ba7a4, type: 3}
   - {fileID: 2194824439739574541, guid: 0733c91aaae06b545ad4a7069051a0ae, type: 3}
   - {fileID: 8938123118380925807, guid: 0a1dfd31a9ee5ec4b8f7e656872a5702, type: 3}
-  hover_Object_: {fileID: 8711453604450202604, guid: 00a6fffbbc4c6984f849a26a028a5d9f, type: 3}
+  move_cursor_: {fileID: 7122937265594706975, guid: 00a6fffbbc4c6984f849a26a028a5d9f, type: 3}
+  build_cursor_: {fileID: 7438039708764123742, guid: b9bb081a9ac4f354f893e7fc26fc2f16, type: 3}
   buildable_block_: {fileID: 4408310354143738939, guid: 7006ec61074488646963aa05c112a895, type: 3}
   grass_blocks_:
     _serializedList:

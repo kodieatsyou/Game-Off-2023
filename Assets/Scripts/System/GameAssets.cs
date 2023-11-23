@@ -18,6 +18,9 @@ public class GameAssets : MonoBehaviour
         }
     }
 
+    [Header("TEST")]
+    public GameObject test_Space_Object_;
+
     [Header("Loadable Assets")]
     [Header("Essentials")]
     public GameObject player_object_;
@@ -30,8 +33,9 @@ public class GameAssets : MonoBehaviour
     public GameObject[] character_face_accessories_;
 
     [Header("Board Blocks")]
-    [Header("Components")]
-    public GameObject hover_Object_;
+    [Header("Cursors")]
+    public GameObject move_cursor_;
+    public GameObject build_cursor_;
     [Header("Buildable")]
     public GameObject buildable_block_;
     [Header("Grass")]

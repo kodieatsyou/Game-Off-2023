@@ -35,7 +35,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             TurnLength -= Time.deltaTime;
             if (TurnLength < 0f || ActionsRemaining < 0)
             {
-                UI.SetTurnTime(); // SetTurnTime(TurnLength) Bug, currently SetTurnTime does not take in an argument
+                UI.SetTurnTime(TurnLength); // SetTurnTime(TurnLength) Bug, currently SetTurnTime does not take in an argument
                 EndTurn();
             }
         }
