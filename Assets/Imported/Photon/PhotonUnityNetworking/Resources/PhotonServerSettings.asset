@@ -40,6 +40,12 @@ MonoBehaviour:
   - RpcManagerStartTurn
   - RpcPlayerControllerStartTurn
   - RpcPlayerControllerGameOver
+  - RpcGameBoardInitialized
+  - RpcBoardInitialized
+  - RPCBoardManagerSetSelectionMode
+  - RPCBoardManagerConfirmSelection
+  - RPCBoardManagerPushChangesFromLocalBoard
+  - RPCBoardManagerBoardInitialized
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -5,6 +5,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using Unity.VisualScripting;
 
 public enum GameState
 {
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public PhotonView GMPhotonView;
 
     //private BoardManager BM = BoardManager.Instance;
+    public bool offlineMode = false;
     private UIController UI;
 
     private int CurrentPlayerTurnIndex;
@@ -70,6 +72,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
+        PhotonNetwork.OfflineMode = offlineMode;
         if (PhotonNetwork.IsConnected)
         {
             if (PhotonNetwork.IsMasterClient)
