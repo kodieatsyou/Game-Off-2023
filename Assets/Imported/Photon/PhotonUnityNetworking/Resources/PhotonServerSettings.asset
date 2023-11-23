@@ -39,7 +39,6 @@ MonoBehaviour:
   - RpcManagerEndTurn
   - RpcManagerStartTurn
   - RpcPlayerControllerStartTurn
-  - PostChatMessage
   - RpcPlayerControllerGameOver
   - RpcGameBoardInitialized
   - RpcBoardInitialized
