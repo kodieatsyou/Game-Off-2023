@@ -136,24 +136,37 @@ public class BoardSpaceLocal: MonoBehaviour
     {
         if (isBuilt && valueOfNeighbors != 0)
         {
+            // Store a reference to the blockMesh before destroying it
+            GameObject previousBlockMesh = blockMesh?.gameObject;
+
+            // Destroy the previous blockMesh
+            Destroy(previousBlockMesh);
+
+            // Check if the original object is not null before instantiating
             if (valueOfNeighbors % 11 == 0)
             {
-                Destroy(blockMesh?.gameObject);
-                blockMesh = Instantiate(GameAssets.i.stone_blocks_[valueOfNeighbors / 11], transform);
-                detailMesh?.SetActive(false);
+                if(GameAssets.i.stone_blocks_[valueOfNeighbors / 11] != null)
+                {
+                    blockMesh = Instantiate(GameAssets.i.stone_blocks_[valueOfNeighbors / 11], transform);
+                    detailMesh?.SetActive(false);
+                }
+               
             }
-            else
+            else 
             {
-                Destroy(blockMesh?.gameObject);
-                blockMesh = Instantiate(GameAssets.i.grass_blocks_[valueOfNeighbors], transform);
-                detailMesh?.SetActive(true);
+                if (GameAssets.i.grass_blocks_[valueOfNeighbors] != null)
+                {
+                    blockMesh = Instantiate(GameAssets.i.grass_blocks_[valueOfNeighbors], transform);
+                    detailMesh?.SetActive(true);
+                }
             }
-        } else
+        }
+        else
         {
+            // Destroy the blockMesh if it exists
             Destroy(blockMesh?.gameObject);
             detailMesh?.SetActive(false);
         }
-        
     }
 
     private int CalculateValueOfNeighbors()
