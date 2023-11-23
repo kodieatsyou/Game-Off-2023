@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Board
+  - Camera
+  - UI
+  - UIDiePanel
   layers:
   - Default
   - TransparentFX
@@ -14,7 +17,7 @@ TagManager:
   - UI
   - DiePit
   - Dice
-  - 
+  - DiePanel
   - 
   - 
   - 

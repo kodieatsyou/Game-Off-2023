@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class AStarPathfinding
 {
-    private BoardSpace[,,] boardSpaceGrid;
+    /*private BoardSpace[,,] boardSpaceGrid;
     private BoardSpace start;
     private BoardSpace end;
     private Vector3 gridSize;
@@ -169,5 +169,5 @@ public class AStarPathfinding
         {
             get { return gCost + hCost; }
         }
-    }
+    }*/
 }
