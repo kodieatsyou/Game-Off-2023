@@ -166,6 +166,7 @@ public class BoardManagerNetwork : MonoBehaviourPunCallbacks, IPunInstantiateMag
         playersOnBoard[id] = PhotonNetwork.InstantiateRoomObject("NetworkObjects/Player", spawnSpace.GetWorldPositionOfTopOfSpace(), Quaternion.identity);
         playersOnBoard[id].transform.SetParent(transform, true);
         playersOnBoard[id].transform.name = "Player: " + (id + 1);
+        playersOnBoard[id].GetComponent<PlayerControllerNetwork>().SetupPlayer(id + 1);
     }
 
     [PunRPC]

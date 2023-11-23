@@ -46,6 +46,11 @@ MonoBehaviour:
   - RPCBoardManagerConfirmSelection
   - RPCBoardManagerPushChangesFromLocalBoard
   - RPCBoardManagerBoardInitialized
+  - PostChatMessage
+  - RPCGameManagerEndTurn
+  - RPCGameManagerSyncGameState
+  - RPCGameManagerSyncPlayerTurnIndex
+  - RPCSetPlayerOrder
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
