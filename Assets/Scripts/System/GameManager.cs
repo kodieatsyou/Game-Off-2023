@@ -1,7 +1,7 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+//using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -18,17 +18,18 @@ public class GameManager : MonoBehaviourPunCallbacks
     public static GameManager Instance;
     public PhotonView GMPhotonView;
 
-    private BoardManager BM = BoardManager.Instance;
+    //private BoardManager BM = BoardManager.Instance;
     private UIController UI;
 
     private int CurrentPlayerTurnIndex;
     private int winHeight;
     private int PlayerCount;
     private bool[] PlayerActorLeft; // false if still in lobby, true if left
+    private int PlayerRollCount; // tracks number of players who have rolled for turn positioning
 
     private Hashtable CustomRoomProperties = new Hashtable();
-    private Dictionary<int, int> PlayerTurnOrderRolls = new Dictionary<int, int>();
     private int[] PlayerTurnOrder;
+    private Dictionary<int, int> PlayerTurnOrderRolls = new Dictionary<int, int>();
     private GameState CurrentGameState = GameState.GameWaiting;
 
     void Awake() 
@@ -48,7 +49,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             PlayerActorLeft = new bool[PlayerCount];
             PlayerTurnOrder = new int[PlayerCount];
             for (int i = 0; i < PlayerTurnOrder.Length; i++) { PlayerTurnOrder[i] = -1; } // set all playerTurnOrders to -1
-               
+            PlayerRollCount = 0;
 
             // If the GameManager properies are not set, initialize them
             if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("CurrentPlayerTurnIndex") ||
@@ -82,8 +83,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (CurrentGameState == GameState.GameWaiting)
         {
-            if (!PlayerTurnOrder.Contains(-1))
+            if (PlayerRollCount == PlayerCount)
             {
+                PlayerTurnOrder = PlayerTurnOrderRolls.OrderBy(kv => kv.Value).Select(kv => kv.Key).ToArray(); // get player order
                 if (PhotonNetwork.IsMasterClient)
                 {
                     photonView.RPC("RPCGameManagerSyncGameState", RpcTarget.All, GameState.GameStarted); // notify all clients game has started
@@ -107,6 +109,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region GameNetwork
+    /// <summary>
+    /// RPC designated function that takes state update for each local player and determines how to handle the switches.
+    /// </summary>
+    /// <param name="newState">GameState enum </param>
     [PunRPC]
     public void RPCGameManagerSyncGameState(GameState newState)
     {
@@ -126,7 +132,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                         photonView.RPC("RPCGameManagerSyncPlayerTurnIndex", RpcTarget.All, true); // send all local players a game
                     }
                     break;
-
 
                 case GameState.GameEnded:
                     Debug.Log("Game has switched to 'Ended'.");
@@ -150,20 +155,23 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPCGameManagerSyncPlayerTurnIndex(bool isFirstTurn)
     {
-        int nextPlayerTurn = 1;
+        int nextPlayerTurnIdx = 0;
         if (!isFirstTurn)
         {
-            Debug.Log("Finding new PlayerTurnIndex!");
+            Debug.Log("Finding new PlayerTurnIndex");
             // skip over players who have left the room
-            nextPlayerTurn = (CurrentPlayerTurnIndex + 1) % PlayerCount;
-            while (PlayerActorLeft[nextPlayerTurn] == true)
+            nextPlayerTurnIdx = (CurrentPlayerTurnIndex + 1) % PlayerCount;
+            while (PlayerActorLeft[nextPlayerTurnIdx] == true)
             {
-                nextPlayerTurn = (CurrentPlayerTurnIndex + 1) % PlayerCount;
+                nextPlayerTurnIdx = (CurrentPlayerTurnIndex + 1) % PlayerCount;
             }
         }
-        CurrentPlayerTurnIndex = nextPlayerTurn;
-        CustomRoomProperties["CurrentPlayerTurnIndex"] = nextPlayerTurn;
+
+        int PlayerTurnID = PlayerTurnOrder[nextPlayerTurnIdx];
+        CustomRoomProperties["CurrentPlayerTurnIndex"] = PlayerTurnID;
         PhotonNetwork.CurrentRoom.SetCustomProperties(CustomRoomProperties); // Set the updated custom properties
+
+        CurrentPlayerTurnIndex = nextPlayerTurnIdx;
     }
 
     /// <summary>
@@ -181,17 +189,24 @@ public class GameManager : MonoBehaviourPunCallbacks
             photonView.RPC("RPCGameManagerSyncPlayerTurnIndex", RpcTarget.All, false); // send all local players a game
         }
     }
+    /// <summary>
+    /// Recieves RPC events that add items to the ordering dict
+    /// </summary>
+    /// <param name="playerActorID">playerActorID</param>
+    /// <param name="roll">Amount that was rolled</param>
     [PunRPC]
     public void RPCSetPlayerOrder(int playerActorID, int roll)
     {
-        Debug.Log("Received new player order roll.");
-
-        // TODO Set the order of the players based on their roll, 
-
+        PlayerTurnOrderRolls.Add(playerActorID, roll);
+        PlayerRollCount++;
     }
     #endregion
 
     #region GameCondition
+    /// <summary>
+    /// Check for win based on player height relative to the room's winHeight
+    /// </summary>
+    /// <returns>(bool) True if win is detected, false if not.</returns>
     private bool CheckForWin()
     {
         var playerObjs = GameObject.FindGameObjectsWithTag("Player");
@@ -203,12 +218,15 @@ public class GameManager : MonoBehaviourPunCallbacks
                 // If there is a winner, broadcast to all players that the game is over
                 var nickName = player.GetComponent<PhotonView>().Owner.NickName;
                 GMPhotonView.RPC("RpcPlayerControllerGameOver", RpcTarget.All, nickName);
-
-                return true; // mark the game as over
+                return true;
             }
         }
         return false;
     }
+
+    /// <summary>
+    /// Show game over for the local player based on the level standings
+    /// </summary>
     private void ShowGameOver()
     {
         var playerObjs = GameObject.FindGameObjectsWithTag("Player");
@@ -229,12 +247,14 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         int playerLeftID = playerLeft.ActorNumber;
         PlayerActorLeft[playerLeftID] = true; // mark player as left.
+        // TODO UI element that player left?
 
     }
     public override void OnPlayerEnteredRoom(Player playerLeft)
     {
         int playerEnterID = playerLeft.ActorNumber;
         PlayerActorLeft[playerEnterID] = false; // mark player as re-entered
+        // TODO UI element that player rejoined?
     }
     #endregion
 }
