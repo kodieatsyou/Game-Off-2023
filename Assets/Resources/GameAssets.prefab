@@ -44,62 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8ac47a2615ab9c449ae7a911e4c6855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  test_Space_Object_: {fileID: 6650280991801686592, guid: 6cdb1a142ea4dd04c8555727e564b75f, type: 3}
-  player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
-  character_skins_:
-  - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}
-  - {fileID: 2800000, guid: 79f08f7bb58e9cb42825a70c15f7362f, type: 3}
-  - {fileID: 2800000, guid: d48bad5035e58a14cb474cb259df7633, type: 3}
-  - {fileID: 2800000, guid: a6262f8aa44279c41ad95024d871469f, type: 3}
-  - {fileID: 2800000, guid: 96a51e49797a56549aed61a2c3c51a80, type: 3}
-  - {fileID: 2800000, guid: 033af09360a429645bd95d5208c4fdcb, type: 3}
-  - {fileID: 2800000, guid: 1e4db58321a5bf34a942047f6ff7d568, type: 3}
-  - {fileID: 2800000, guid: 5c658758963c8a448a2285f50526372b, type: 3}
-  - {fileID: 2800000, guid: 7a112f6f3877a0e45a933e57491ddd1c, type: 3}
-  - {fileID: 2800000, guid: 4279638439feef0499c075b17885b921, type: 3}
-  - {fileID: 2800000, guid: 937e75014562beb409a5fe559989d0af, type: 3}
-  - {fileID: 2800000, guid: f837256a62daeed4c90b0bf318f73a06, type: 3}
-  - {fileID: 2800000, guid: d7286b310adc75e4baacc6bf04a21129, type: 3}
-  - {fileID: 2800000, guid: 4bb9bc52f90f26f43ad17738bba825d3, type: 3}
-  - {fileID: 2800000, guid: 7a7083df3f2324a4aa4f2c1a97694de2, type: 3}
-  - {fileID: 2800000, guid: 31581ea5b7cc0974c81f78376d9968ca, type: 3}
-  character_special_skins_:
-    _serializedList:
-    - Key: Jared
-      Value: {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
-    - Key: Ryan
-      Value: {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
-  super_special_material_: {fileID: 0}
-  character_head_accessories_:
-  - {fileID: 8612011285689394938, guid: babe59df5349a414688420f8b0a9bd56, type: 3}
-  - {fileID: 3892474611726344953, guid: ee421e983430cd24e805fb356c97e1c2, type: 3}
-  - {fileID: 3968446395008536629, guid: ef651927a3bb9fa4dbe68fb317603338, type: 3}
-  - {fileID: 6199891265962519858, guid: b186ce71e90370046922e7f09ba659cf, type: 3}
-  - {fileID: 927583354916052173, guid: df43b299d7cf36643bcdcf565cd6efab, type: 3}
-  - {fileID: 4355489709410355739, guid: a47133c650578f1408735865158d12aa, type: 3}
-  - {fileID: 4108874803027207112, guid: 55019e3ba76eaf54c92362040078997f, type: 3}
-  - {fileID: 664483203964363204, guid: d2ae8502cb672c9419ca2849fe801f62, type: 3}
-  - {fileID: 2743862608619562554, guid: 7301af4f16daa2445a486d758f23d60f, type: 3}
-  - {fileID: 3023439401811726803, guid: 8ccf0fe5166de014ca7b71cd70fe588d, type: 3}
-  - {fileID: 4074812879083543374, guid: 7392d36a9a6ab984c86760ff5e797275, type: 3}
-  - {fileID: 7316320060410529340, guid: f2a472ae615bfdd4781d6638f4c6abc4, type: 3}
-  - {fileID: 4320050569215112642, guid: 2bf67133d690b2846bbf3becbb93a8e4, type: 3}
-  - {fileID: 145808182868055518, guid: b81b3b5cbb2031f4dbce5f9f13340c9d, type: 3}
-  - {fileID: 4517445072287582538, guid: 98f080e8b9e766b448f72b11f1e177ab, type: 3}
-  - {fileID: 1608241737879241523, guid: f18144f110e34ac47b3ac84a4b8cd046, type: 3}
-  character_face_accessories_:
-  - {fileID: 7716263173258796531, guid: 1a1d836d8787b1b45874817f2f23e82e, type: 3}
-  - {fileID: 9154213586675595882, guid: f7fa25204bf940c43899cd249153078d, type: 3}
-  - {fileID: 7682555372806521479, guid: a09a4cb67188cac4782ac21418399245, type: 3}
-  - {fileID: 1979015564043975876, guid: 0a92edda7af11e94cb0cfb2d898cf5db, type: 3}
-  - {fileID: 7504534488995731771, guid: 977f911d0fd058e4a8435eb70633e888, type: 3}
-  - {fileID: 8942306456095499986, guid: 30f3eaad59eab5c488a36661033f8b98, type: 3}
-  - {fileID: 1776885312876451402, guid: c7c2b8fed47f0bc4889a4f1f6a6ba7a4, type: 3}
-  - {fileID: 2194824439739574541, guid: 0733c91aaae06b545ad4a7069051a0ae, type: 3}
-  - {fileID: 8938123118380925807, guid: 0a1dfd31a9ee5ec4b8f7e656872a5702, type: 3}
-  move_cursor_: {fileID: 7122937265594706975, guid: 00a6fffbbc4c6984f849a26a028a5d9f, type: 3}
-  build_cursor_: {fileID: 7438039708764123742, guid: b9bb081a9ac4f354f893e7fc26fc2f16, type: 3}
-  buildable_block_: {fileID: 4408310354143738939, guid: 7006ec61074488646963aa05c112a895, type: 3}
+  board_space_object_: {fileID: 6650280991801686592, guid: 6cdb1a142ea4dd04c8555727e564b75f, type: 3}
+  board_cursor_: {fileID: 0}
   grass_blocks_:
     _serializedList:
     - Key: 1
@@ -187,3 +133,55 @@ MonoBehaviour:
   - {fileID: 2845986319323596710, guid: 834c20e5642bdd0499203f44141d07bc, type: 3}
   - {fileID: 9140929216165335027, guid: b1d993a8fb6e8c548945466e9d06cec6, type: 3}
   - {fileID: 7032300123889191275, guid: 4555e72be0f10fb4c82be345712de8e6, type: 3}
+  player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+  character_skins_:
+  - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}
+  - {fileID: 2800000, guid: 79f08f7bb58e9cb42825a70c15f7362f, type: 3}
+  - {fileID: 2800000, guid: d48bad5035e58a14cb474cb259df7633, type: 3}
+  - {fileID: 2800000, guid: a6262f8aa44279c41ad95024d871469f, type: 3}
+  - {fileID: 2800000, guid: 96a51e49797a56549aed61a2c3c51a80, type: 3}
+  - {fileID: 2800000, guid: 033af09360a429645bd95d5208c4fdcb, type: 3}
+  - {fileID: 2800000, guid: 1e4db58321a5bf34a942047f6ff7d568, type: 3}
+  - {fileID: 2800000, guid: 5c658758963c8a448a2285f50526372b, type: 3}
+  - {fileID: 2800000, guid: 7a112f6f3877a0e45a933e57491ddd1c, type: 3}
+  - {fileID: 2800000, guid: 4279638439feef0499c075b17885b921, type: 3}
+  - {fileID: 2800000, guid: 937e75014562beb409a5fe559989d0af, type: 3}
+  - {fileID: 2800000, guid: f837256a62daeed4c90b0bf318f73a06, type: 3}
+  - {fileID: 2800000, guid: d7286b310adc75e4baacc6bf04a21129, type: 3}
+  - {fileID: 2800000, guid: 4bb9bc52f90f26f43ad17738bba825d3, type: 3}
+  - {fileID: 2800000, guid: 7a7083df3f2324a4aa4f2c1a97694de2, type: 3}
+  - {fileID: 2800000, guid: 31581ea5b7cc0974c81f78376d9968ca, type: 3}
+  character_special_skins_:
+    _serializedList:
+    - Key: Jared
+      Value: {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
+    - Key: Ryan
+      Value: {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
+  super_special_material_: {fileID: 0}
+  character_head_accessories_:
+  - {fileID: 8612011285689394938, guid: babe59df5349a414688420f8b0a9bd56, type: 3}
+  - {fileID: 3892474611726344953, guid: ee421e983430cd24e805fb356c97e1c2, type: 3}
+  - {fileID: 3968446395008536629, guid: ef651927a3bb9fa4dbe68fb317603338, type: 3}
+  - {fileID: 6199891265962519858, guid: b186ce71e90370046922e7f09ba659cf, type: 3}
+  - {fileID: 927583354916052173, guid: df43b299d7cf36643bcdcf565cd6efab, type: 3}
+  - {fileID: 4355489709410355739, guid: a47133c650578f1408735865158d12aa, type: 3}
+  - {fileID: 4108874803027207112, guid: 55019e3ba76eaf54c92362040078997f, type: 3}
+  - {fileID: 664483203964363204, guid: d2ae8502cb672c9419ca2849fe801f62, type: 3}
+  - {fileID: 2743862608619562554, guid: 7301af4f16daa2445a486d758f23d60f, type: 3}
+  - {fileID: 3023439401811726803, guid: 8ccf0fe5166de014ca7b71cd70fe588d, type: 3}
+  - {fileID: 4074812879083543374, guid: 7392d36a9a6ab984c86760ff5e797275, type: 3}
+  - {fileID: 7316320060410529340, guid: f2a472ae615bfdd4781d6638f4c6abc4, type: 3}
+  - {fileID: 4320050569215112642, guid: 2bf67133d690b2846bbf3becbb93a8e4, type: 3}
+  - {fileID: 145808182868055518, guid: b81b3b5cbb2031f4dbce5f9f13340c9d, type: 3}
+  - {fileID: 4517445072287582538, guid: 98f080e8b9e766b448f72b11f1e177ab, type: 3}
+  - {fileID: 1608241737879241523, guid: f18144f110e34ac47b3ac84a4b8cd046, type: 3}
+  character_face_accessories_:
+  - {fileID: 7716263173258796531, guid: 1a1d836d8787b1b45874817f2f23e82e, type: 3}
+  - {fileID: 9154213586675595882, guid: f7fa25204bf940c43899cd249153078d, type: 3}
+  - {fileID: 7682555372806521479, guid: a09a4cb67188cac4782ac21418399245, type: 3}
+  - {fileID: 1979015564043975876, guid: 0a92edda7af11e94cb0cfb2d898cf5db, type: 3}
+  - {fileID: 7504534488995731771, guid: 977f911d0fd058e4a8435eb70633e888, type: 3}
+  - {fileID: 8942306456095499986, guid: 30f3eaad59eab5c488a36661033f8b98, type: 3}
+  - {fileID: 1776885312876451402, guid: c7c2b8fed47f0bc4889a4f1f6a6ba7a4, type: 3}
+  - {fileID: 2194824439739574541, guid: 0733c91aaae06b545ad4a7069051a0ae, type: 3}
+  - {fileID: 8938123118380925807, guid: 0a1dfd31a9ee5ec4b8f7e656872a5702, type: 3}

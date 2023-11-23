@@ -18,8 +18,18 @@ public class GameAssets : MonoBehaviour
         }
     }
 
-    [Header("TEST")]
-    public GameObject test_Space_Object_;
+    [Header("Board")]
+    public GameObject board_space_object_;
+    [Header("Cursors")]
+    public GameObject board_cursor_;
+    [Header("Grass")]
+    [SerializedDictionary("Value", "Block Prefab")]
+    public SerializedDictionary<int, GameObject> grass_blocks_;
+    [Header("Stone")]
+    [SerializedDictionary("Value", "Block Prefab")]
+    public SerializedDictionary<int, GameObject> stone_blocks_;
+    [Header("Detail")]
+    public GameObject[] block_details_;
 
     [Header("Loadable Assets")]
     [Header("Essentials")]
@@ -31,20 +41,4 @@ public class GameAssets : MonoBehaviour
     public Material super_special_material_;
     public GameObject[] character_head_accessories_;
     public GameObject[] character_face_accessories_;
-
-    [Header("Board Blocks")]
-    [Header("Cursors")]
-    public GameObject move_cursor_;
-    public GameObject build_cursor_;
-    [Header("Buildable")]
-    public GameObject buildable_block_;
-    [Header("Grass")]
-    [SerializedDictionary("Value", "Block Prefab")]
-    public SerializedDictionary<int, GameObject> grass_blocks_;
-    [Header("Stone")]
-    [SerializedDictionary("Value", "Block Prefab")]
-    public SerializedDictionary<int, GameObject> stone_blocks_;
-    [Header("Detail")]
-    public GameObject[] block_details_;
-
 }

@@ -14,14 +14,14 @@ public class CameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Vector3 boardMiddlePos = LocalBoardManager.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 boardMiddlePos = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
         transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.LookAt(LocalBoardManager.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
+        transform.LookAt(BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
         if(canMove)
         {
             DoZoom();
@@ -34,7 +34,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoRotate()
     {
-        Vector3 target = LocalBoardManager.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 target = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         if (Input.GetMouseButton(0))
         {
@@ -65,7 +65,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoZoom()
     {
-        Vector3 target = LocalBoardManager.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 target = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         float scrollDelta = -Input.mouseScrollDelta.y;
 
@@ -84,9 +84,9 @@ public class CameraController : MonoBehaviour
 
     public int MoveCameraUpOneBoardLevel()
     {
-        if (cameraHeight + 1 >= LocalBoardManager.Instance.yOfCurrentHeighestBuiltBlock)
+        if (cameraHeight + 1 >= BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock)
         {
-            cameraHeight = LocalBoardManager.Instance.yOfCurrentHeighestBuiltBlock;
+            cameraHeight = BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock;
         }
         else
         {

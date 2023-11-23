@@ -8,16 +8,26 @@ public class BoardSpaceNetwork
     public bool isBuilt;
     public Vector3 posInBoard;
     public Vector3 posInWorld;
-    public float worldSpaceScalingFactor;
     public int playerIDOnSpace;
 
     // Constructor
-    public BoardSpaceNetwork(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
+    public BoardSpaceNetwork(Vector3 posInBoard, bool isBuilt)
     {
         this.isBuilt = isBuilt;
-        this.worldSpaceScalingFactor = worldSpaceScalingFactor;
+        posInWorld = new Vector3(posInBoard.x * 2.5f, posInBoard.y * 2.5f, posInBoard.z * 2.5f);
         this.posInBoard = posInBoard;
+        this.playerIDOnSpace = -1;
     }
+
+    public BoardSpaceNetwork(string json)
+    {
+        this.isBuilt = FromJson(json).isBuilt;
+        this.posInBoard = FromJson(json).posInBoard;
+        this.posInWorld = FromJson(json).posInWorld;
+        this.playerIDOnSpace = FromJson(json).playerIDOnSpace;
+    }
+
+    public Vector3 GetWorldPositionOfTopOfSpace() => new Vector3(posInWorld.x, posInWorld.y + 2.5f, posInWorld.z);
 
     // Method to serialize the class to JSON
     public string ToJson()
