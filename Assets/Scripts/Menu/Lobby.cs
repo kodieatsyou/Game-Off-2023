@@ -130,11 +130,11 @@ public class Lobby : MonoBehaviourPunCallbacks
         Debug.Log("MaxPlayer: " + maxPlayerInput.value);
         if(string.IsNullOrEmpty(roomNameInput.text))
         {
-            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions { MaxPlayers = maxPlayerInput.value + 1, BroadcastPropsChangeToAll = true }, TypedLobby.Default);
+            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.options[maxPlayerInput.value].text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
         }
         else
         {
-            PhotonNetwork.CreateRoom(roomNameInput.text, new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.captionText.text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
+            PhotonNetwork.CreateRoom(roomNameInput.text, new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.options[maxPlayerInput.value].text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
         }
         MenuManager.Instance.OpenMenu("loading");
     }

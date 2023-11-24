@@ -51,7 +51,7 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PhotonNetwork.OfflineMode = true;
+        //PhotonNetwork.OfflineMode = true;
         HeightSize = BaseSize * 2;
         RandomBlockCount = BaseSize * RandomBlockScale;
 
