@@ -10,7 +10,6 @@ public class BoardSpaceNetwork
     public Vector3 posInWorld;
     public int playerIDOnSpace;
 
-    // Constructor
     public BoardSpaceNetwork(Vector3 posInBoard, bool isBuilt)
     {
         this.isBuilt = isBuilt;

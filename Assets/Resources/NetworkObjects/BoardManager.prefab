@@ -54,7 +54,6 @@ MonoBehaviour:
   numPlayersBoardsDoneInitializing: 0
   playerIDsWhoHaveInitialized: 
   potentialSpawnLocations: []
-  playersOnBoard: []
 --- !u!114 &2942845710340658666
 MonoBehaviour:
   m_ObjectHideFlags: 0

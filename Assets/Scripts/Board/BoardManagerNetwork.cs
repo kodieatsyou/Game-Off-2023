@@ -38,7 +38,7 @@ public class BoardManagerNetwork : MonoBehaviourPunCallbacks, IPunInstantiateMag
     public List<int> playerIDsWhoHaveInitialized;
     public List<BoardSpaceNetwork> potentialSpawnLocations = new List<BoardSpaceNetwork>();
 
-    public GameObject[] playersOnBoard;
+    public KeyValuePair<GameObject, BoardSpaceNetwork>[] playersOnBoard;
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
@@ -163,44 +163,69 @@ public class BoardManagerNetwork : MonoBehaviourPunCallbacks, IPunInstantiateMag
         spawnSpace.playerIDOnSpace = id;
         Debug.Log("Spawning player on block: " + spawnSpace.posInBoard);
         PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "BoardChanges", spawnSpace.ToJson() }, { "BoardChanges-FromPlayer", -1 } });
-        playersOnBoard[id] = PhotonNetwork.InstantiateRoomObject("NetworkObjects/Player", spawnSpace.GetWorldPositionOfTopOfSpace(), Quaternion.identity);
-        playersOnBoard[id].transform.SetParent(transform, true);
-        playersOnBoard[id].transform.name = "Player: " + (id + 1);
-        playersOnBoard[id].GetComponent<PlayerControllerNetwork>().SetupPlayer(id + 1);
+        playersOnBoard[id] = new KeyValuePair<GameObject, BoardSpaceNetwork>(PhotonNetwork.InstantiateRoomObject("NetworkObjects/Player", spawnSpace.GetWorldPositionOfTopOfSpace(), Quaternion.identity), spawnSpace);
+        playersOnBoard[id].Key.transform.name = "Player: " + (id + 1);
+        playersOnBoard[id].Key.GetComponent<PhotonView>().RPC("RPCPlayerControllerNetworkInitialize", RpcTarget.AllBuffered, id + 1);
     }
 
     [PunRPC]
-    public void RPCBoardManagerBoardInitialized(int playerID)
+    public void RPCBoardManagerNetworkMovePlayerTo(int playerID, Vector3 pos)
     {
-        if (!playerIDsWhoHaveInitialized.Contains(playerID))
+        if(BMPhotonView.IsMine)
         {
-            playerIDsWhoHaveInitialized.Add(playerID);
-        }
-        Debug.Log("Initialized Player Count: " +  playerIDsWhoHaveInitialized.Count + " all player count: " + PhotonNetwork.CurrentRoom.PlayerCount);
-        if(playerIDsWhoHaveInitialized.Count == PhotonNetwork.CurrentRoom.PlayerCount)
-        {
-            Debug.Log("All players have initialized!");
-            //PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "InitialBoard", null }, { "BoardHeightSize", null }, { "BoardBaseSize", null } });
-            playersOnBoard = new GameObject[PhotonNetwork.CurrentRoom.PlayerCount];
-            for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+            //Debug.Log("Moving player " + playersOnBoard[playerID - 1].name + " to: " + pos);
+            List<Vector3> path = new AStarPathfinding(BoardSpace_Arr, playersOnBoard[playerID - 1].Value, BoardSpace_Arr[(int)pos.x, (int)pos.y, (int)pos.z]).FindPath();
+            if (path != null)
             {
-                PlacePlayerOnViableSpawnPosition(i);
+                Debug.Log("ID: " + playerID);
+                playersOnBoard[playerID - 1].Key.GetComponent<PlayerControllerNetwork>().PCPhotonView.RPC("RPCPlayerControllerNetworkMoveThroughPath", RpcTarget.All, path.ToArray());
+                playersOnBoard[playerID - 1] = new KeyValuePair<GameObject, BoardSpaceNetwork>(playersOnBoard[playerID - 1].Key, BoardSpace_Arr[(int)pos.x, (int)pos.y, (int)pos.z]);
+            }
+            else
+            {
+                Debug.Log("NO PATH FOUND!!!");
             }
         }
     }
 
     [PunRPC]
+    public void RPCBoardManagerBoardInitialized(int playerID)
+    {
+        if(BMPhotonView.IsMine)
+        {
+            if (!playerIDsWhoHaveInitialized.Contains(playerID))
+            {
+                playerIDsWhoHaveInitialized.Add(playerID);
+            }
+            Debug.Log("Initialized Player Count: " + playerIDsWhoHaveInitialized.Count + " all player count: " + PhotonNetwork.CurrentRoom.PlayerCount);
+            if (playerIDsWhoHaveInitialized.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+            {
+                Debug.Log("All players have initialized!");
+                playersOnBoard = new KeyValuePair<GameObject, BoardSpaceNetwork>[PhotonNetwork.CurrentRoom.PlayerCount];
+                for (int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+                {
+                    PlacePlayerOnViableSpawnPosition(i);
+                }
+            }
+        }
+        
+    }
+
+    [PunRPC]
     public void RPCBoardManagerPushChangesFromLocalBoard(string blockChanged, int playerID)
     {
-        //Debug.Log("Changed recieved from player: " + playerID);
-        if (playerIDsWhoHaveInitialized.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+        if(BMPhotonView.IsMine)
         {
-            //Debug.Log("Updating board on network");
-            BoardSpaceNetwork changedSpace = new BoardSpaceNetwork(blockChanged);
-            BoardSpace_Arr[(int)changedSpace.posInBoard.x, (int)changedSpace.posInBoard.y, (int)changedSpace.posInBoard.z].isBuilt = changedSpace.isBuilt;
+            //Debug.Log("Changed recieved from player: " + playerID);
+            if (playerIDsWhoHaveInitialized.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+            {
+                //Debug.Log("Updating board on network");
+                BoardSpaceNetwork changedSpace = new BoardSpaceNetwork(blockChanged);
+                BoardSpace_Arr[(int)changedSpace.posInBoard.x, (int)changedSpace.posInBoard.y, (int)changedSpace.posInBoard.z].isBuilt = changedSpace.isBuilt;
 
-            PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "BoardChanges", blockChanged }, { "BoardChanges-FromPlayer", playerID } });
-            //Debug.Log("Pushed changes from player: " + playerID + " to props");
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "BoardChanges", blockChanged }, { "BoardChanges-FromPlayer", playerID } });
+                //Debug.Log("Pushed changes from player: " + playerID + " to props");
+            }
         }
     }
 }

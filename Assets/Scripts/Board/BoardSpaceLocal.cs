@@ -122,7 +122,8 @@ public class BoardSpaceLocal: MonoBehaviour
             if (clicked && !Input.GetMouseButton(0))
             {
                 //isSelected = !isSelected;
-                SetIsBuiltPushUpdate(false);
+                //SetIsBuiltPushUpdate(false);
+                BoardManagerNetwork.Instance.BMPhotonView.RPC("RPCBoardManagerNetworkMovePlayerTo", Photon.Pun.RpcTarget.All, BoardManagerLocal.Instance.player.ActorNumber, posInBoard);
             }
         }
 

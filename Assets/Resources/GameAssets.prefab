@@ -152,11 +152,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 7a7083df3f2324a4aa4f2c1a97694de2, type: 3}
   - {fileID: 2800000, guid: 31581ea5b7cc0974c81f78376d9968ca, type: 3}
   character_special_skins_:
-    _serializedList:
-    - Key: Jared
-      Value: {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
-    - Key: Ryan
-      Value: {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
+  - {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
+  - {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
   super_special_material_: {fileID: 0}
   character_head_accessories_:
   - {fileID: 8612011285689394938, guid: babe59df5349a414688420f8b0a9bd56, type: 3}

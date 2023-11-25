@@ -51,6 +51,12 @@ MonoBehaviour:
   - RPCGameManagerSyncGameState
   - RPCGameManagerSyncPlayerTurnIndex
   - RPCSetPlayerOrder
+  - ChangeMaterial
+  - RPCPlayerControllerNetworkInitialize
+  - RPCPlayerControllerNetworkCreateAccessories
+  - RPCBoardManagerNetworkMovePlayerTo
+  - RPCPlayerControllerNetworkMoveThroughPath
+  - RPCPlayerControllerNetworkSetAnimatorState
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

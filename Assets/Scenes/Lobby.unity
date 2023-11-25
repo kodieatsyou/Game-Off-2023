@@ -3093,6 +3093,7 @@ MonoBehaviour:
   skinName: {fileID: 706804978}
   characterNameInput: {fileID: 117781094}
   currentTexture: 0
+  specialTexture: 0
   currentHeadAccessory: 0
   currentFaceAccessory: 0
 --- !u!1 &480718755

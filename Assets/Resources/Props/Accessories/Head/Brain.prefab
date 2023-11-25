@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3475506898942904786}
   - component: {fileID: 1720247882197089560}
   - component: {fileID: -7104402845709776233}
+  - component: {fileID: 4792884493881150651}
   m_Layer: 0
   m_Name: Brain
   m_TagString: Untagged
@@ -106,3 +107,19 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &4792884493881150651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 927583354916052173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1

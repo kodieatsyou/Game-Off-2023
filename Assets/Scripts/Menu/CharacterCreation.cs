@@ -18,6 +18,7 @@ public class CharacterCreation : MonoBehaviour
     public TMP_Text skinName;
     public TMP_InputField characterNameInput;
     public int currentTexture = 0;
+    public int specialTexture = 0;
     public int currentHeadAccessory = 0;
     public int currentFaceAccessory = 0;
 
@@ -48,7 +49,13 @@ public class CharacterCreation : MonoBehaviour
         }    
 
         ExitGames.Client.Photon.Hashtable initialProps = new ExitGames.Client.Photon.Hashtable();
-        initialProps["texture"] = currentTexture;
+        if(specialTexture != 0)
+        {
+            initialProps["texture"] = specialTexture;
+        } else
+        {
+            initialProps["texture"] = currentTexture;
+        }
         initialProps["head"] = currentHeadAccessory;
         initialProps["face"] = currentFaceAccessory;
         PhotonNetwork.LocalPlayer.SetCustomProperties(initialProps);
@@ -128,16 +135,21 @@ public class CharacterCreation : MonoBehaviour
     public void CheckForSpecialSkin()
     {
         string currentName = characterNameInput.text;
-        if (GameAssets.i.character_special_skins_.ContainsKey(currentName))
+        for (int i = 0; i < GameAssets.i.character_special_skins_.Length; i++)
         {
-            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_special_skins_[currentName]);
-            skinName.text = GameAssets.i.character_special_skins_[currentName].name;
+            if (currentName.ToLower().Contains(GameAssets.i.character_special_skins_[i].name.ToLower()))
+            {
+                characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_special_skins_[i]);
+                specialTexture = (i + 1) * 100;
+                Debug.Log(specialTexture);
+                skinName.text = GameAssets.i.character_special_skins_[i].name;
+                return;
+            }
         }
-        else
-        {
-            characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[currentTexture]);
-            skinName.text = GameAssets.i.character_skins_[currentTexture].name;
-        }
+
+        specialTexture = 0;
+        characterPreview.GetComponentInChildren<SkinnedMeshRenderer>().material.SetTexture("_BaseMap", GameAssets.i.character_skins_[currentTexture]);
+        skinName.text = GameAssets.i.character_skins_[currentTexture].name;
     }
 
     /// <summary>

@@ -24,6 +24,7 @@ public class BoardManagerLocal : MonoBehaviourPunCallbacks
     public SelectionMode selectionMode;
     public bool initialized = false;
     public bool syncing = false;
+    public Player player;
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class BoardManagerLocal : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        player = PhotonNetwork.LocalPlayer;
         selectionMode = SelectionMode.Move;
     }
 

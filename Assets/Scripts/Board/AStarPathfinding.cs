@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class AStarPathfinding
 {
-    /*private BoardSpace[,,] boardSpaceGrid;
-    private BoardSpace start;
-    private BoardSpace end;
+    private BoardSpaceNetwork[,,] boardSpaceGrid;
+    private BoardSpaceNetwork start;
+    private BoardSpaceNetwork end;
     private Vector3 gridSize;
     private Node[,,] nodeGrid;
 
-    public AStarPathfinding(BoardSpace[,,] boardSpaceGrid, BoardSpace start, BoardSpace end)
+    public AStarPathfinding(BoardSpaceNetwork[,,] boardSpaceGrid, BoardSpaceNetwork start, BoardSpaceNetwork end)
     {
         this.start = start;
         this.end = end;
@@ -24,7 +24,7 @@ public class AStarPathfinding
                 for (int z = 0; z < gridSize.z; z++)
                 {
                     bool isWalkable = false;
-                    if(boardSpaceGrid[x, y, z].GetIsBuilt() && boardSpaceGrid[x, y, z].GetNeighborValue() % 11 != 0)
+                    if(boardSpaceGrid[x, y, z].isBuilt && !boardSpaceGrid[x, y + 1, z].isBuilt)
                     {
                         isWalkable = true;
                     }
@@ -34,11 +34,11 @@ public class AStarPathfinding
         }
     }
 
-    public List<BoardSpace> FindPath()
+    public List<Vector3> FindPath()
     {
         Debug.Log(nodeGrid.GetLength(1));
-        Node startNode = nodeGrid[(int)start.GetBoardPosition().x, (int)start.GetBoardPosition().y, (int)start.GetBoardPosition().z];
-        Node targetNode = nodeGrid[(int)end.GetBoardPosition().x, (int)end.GetBoardPosition().y, (int)end.GetBoardPosition().z];
+        Node startNode = nodeGrid[(int)start.posInBoard.x, (int)start.posInBoard.y, (int)start.posInBoard.z];
+        Node targetNode = nodeGrid[(int)end.posInBoard.x, (int)end.posInBoard.y, (int)end.posInBoard.z];
 
         List<Node> openSet = new List<Node>();
         HashSet<Node> closedSet = new HashSet<Node>();
@@ -82,14 +82,14 @@ public class AStarPathfinding
         return null;
     }
 
-    private List<BoardSpace> RetracePath(Node startNode, Node endNode)
+    private List<Vector3> RetracePath(Node startNode, Node endNode)
     {
-        List<BoardSpace> path = new List<BoardSpace>();
+        List<Vector3> path = new List<Vector3>();
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            path.Add(boardSpaceGrid[currentNode.gridX, currentNode.gridY, currentNode.gridZ]);
+            path.Add(boardSpaceGrid[currentNode.gridX, currentNode.gridY, currentNode.gridZ].GetWorldPositionOfTopOfSpace());
             currentNode = currentNode.parent;
         }
 
@@ -100,7 +100,6 @@ public class AStarPathfinding
     private List<Node> GetNeighbors(Node node)
     {
         List<Node> neighbors = new List<Node>();
-
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
@@ -108,17 +107,28 @@ public class AStarPathfinding
                 for (int z = -1; z <= 1; z++)
                 {
                     if (x == 0 && y == 0 && z == 0)
-                    {
                         continue;
-                    }
+
+                    // Exclude diagonal movement horizontally
+                    if (x != 0 && z != 0)
+                        continue;
 
                     int checkX = node.gridX + x;
                     int checkY = node.gridY + y;
                     int checkZ = node.gridZ + z;
 
+                    // Check if the position is within the grid boundaries
                     if (checkX >= 0 && checkX < gridSize.x && checkY >= 0 && checkY < gridSize.y && checkZ >= 0 && checkZ < gridSize.z)
                     {
-                        neighbors.Add(nodeGrid[checkX, checkY, checkZ]);
+                        // Check if the node at the position is walkable
+                        if (nodeGrid[checkX, checkY, checkZ].isWalkable)
+                        {
+                            // Check for clear vertical path
+                            if (Mathf.Abs(node.gridY - checkY) <= 1 && Mathf.Abs(node.gridZ - checkZ) <= 1)
+                            {
+                                neighbors.Add(nodeGrid[checkX, checkY, checkZ]);
+                            }
+                        }
                     }
                 }
             }
@@ -132,8 +142,6 @@ public class AStarPathfinding
         int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
         int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
         int dstZ = Mathf.Abs(nodeA.gridZ - nodeB.gridZ);
-
-        // Use Manhattan distance for simplicity (can be replaced with Euclidean or other distance measures)
         return dstX + dstY + dstZ;
     }
 
@@ -169,5 +177,5 @@ public class AStarPathfinding
         {
             get { return gCost + hCost; }
         }
-    }*/
+    }
 }
