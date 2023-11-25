@@ -1,32 +1,26 @@
-using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-/// <summary>
-/// Will be attached to each space
-///  This script is responsible for handling behavior for each board space.
-///  Updates the spaces mesh to show the correct block
-///  Handles selecting and mouse hovering
-/// </summary>
-
-public class BoardSpaceLocal: MonoBehaviour
+public class BoardSpace : MonoBehaviour
 {
     [SerializeField] private bool isBuilt;
     private Vector3 posInBoard;
     private Vector3 posInWorld;
     private float worldSpaceScalingFactor;
-    private int valueOfNeighbors;
+    [SerializeField] private int valueOfNeighbors;
     private GameObject blockMesh;
     private GameObject detailMesh;
     private GameObject playerOnSpace;
-    private BoardSpaceLocal blockBelow;
+    [SerializeField] private BoardSpace blockBelow;
     private bool isSelectable;
     private bool isSelected;
     private bool isBeingHovered;
     private bool clicked;
     private BoxCollider bCollider;
 
-    public BoardSpaceLocal InitializeSpace(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
+    public BoardSpace InitializeSpace(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
     {
         //Set in-board and in-world positions
         this.posInBoard = posInBoard;
@@ -74,32 +68,33 @@ public class BoardSpaceLocal: MonoBehaviour
     private void Update()
     {
         //Check if there is a block below and we havent saved it yet
-        if(blockBelow == null)
+        if (blockBelow == null)
         {
-            if ((int)posInBoard.y - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
+            if ((int)posInBoard.y - 1 >= 0 && Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
             {
-                blockBelow = BoardManagerLocal.BoardSpaceLocal_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
+                blockBelow = Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
             }
         }
 
         //Calculate updated neighbor values
-        if(CalculateValueOfNeighbors() != valueOfNeighbors)
+        if (CalculateValueOfNeighbors() != valueOfNeighbors)
         {
             valueOfNeighbors = CalculateValueOfNeighbors();
         }
-        
+
         //Check if block below this one exists and is built if not set this block to not built
         if (blockBelow != null && !blockBelow.GetIsBuilt())
         {
-            if(isBuilt)
+            if (isBuilt)
             {
                 isBuilt = false;
             }
         }
 
-        if (isBuilt && (int)posInBoard.y > BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock)
+        //Check if this is the highest built block and update board if it is
+        if (isBuilt && (int)posInBoard.y > Board.Instance.yOfCurrentHeighestBuiltBlock)
         {
-            BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
+            Board.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
         }
 
         UpdateBlockMesh();
@@ -111,7 +106,7 @@ public class BoardSpaceLocal: MonoBehaviour
 
     private void HandleClick()
     {
-        if(isSelectable && isBeingHovered)
+        if (isSelectable && isBeingHovered)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -122,8 +117,7 @@ public class BoardSpaceLocal: MonoBehaviour
             if (clicked && !Input.GetMouseButton(0))
             {
                 //isSelected = !isSelected;
-                //SetIsBuiltPushUpdate(false);
-                BoardManagerNetwork.Instance.BMPhotonView.RPC("RPCBoardManagerNetworkMovePlayerTo", Photon.Pun.RpcTarget.All, BoardManagerLocal.Instance.player.ActorNumber, posInBoard);
+                BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", Photon.Pun.RpcTarget.All, posInBoard, true);
             }
         }
 
@@ -146,14 +140,14 @@ public class BoardSpaceLocal: MonoBehaviour
             // Check if the original object is not null before instantiating
             if (valueOfNeighbors % 11 == 0)
             {
-                if(GameAssets.i.stone_blocks_[valueOfNeighbors / 11] != null)
+                if (GameAssets.i.stone_blocks_[valueOfNeighbors / 11] != null)
                 {
                     blockMesh = Instantiate(GameAssets.i.stone_blocks_[valueOfNeighbors / 11], transform);
                     detailMesh?.SetActive(false);
                 }
-               
+
             }
-            else 
+            else
             {
                 if (GameAssets.i.grass_blocks_[valueOfNeighbors] != null)
                 {
@@ -177,29 +171,29 @@ public class BoardSpaceLocal: MonoBehaviour
         int y = (int)posInBoard.y;
         int z = (int)posInBoard.z;
 
-        if (z + 1 < BoardManagerLocal.Instance.BaseSize && BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z + 1] != null)
+        if (z + 1 < Board.Instance.baseSize && Board.Instance.boardArray[x, y, z + 1] != null)
         {
-            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
-        } 
-
-        if (z - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z - 1] != null)
-        {
-            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
+            if (Board.Instance.boardArray[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
         }
 
-        if (x + 1 < BoardManagerLocal.Instance.BaseSize && BoardManagerLocal.BoardSpaceLocal_Arr[x + 1, y, z] != null)
+        if (z - 1 >= 0 && Board.Instance.boardArray[x, y, z - 1] != null)
         {
-            if(BoardManagerLocal.BoardSpaceLocal_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
-        } 
-
-        if (x - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[x - 1, y, z] != null)
-        {
-            if(BoardManagerLocal.BoardSpaceLocal_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
+            if (Board.Instance.boardArray[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
         }
 
-        if (y + 1 < BoardManagerLocal.Instance.HeightSize && BoardManagerLocal.BoardSpaceLocal_Arr[x, y + 1, z] != null)
+        if (x + 1 < Board.Instance.baseSize && Board.Instance.boardArray[x + 1, y, z] != null)
         {
-            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
+            if (Board.Instance.boardArray[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
+        }
+
+        if (x - 1 >= 0 && Board.Instance.boardArray[x - 1, y, z] != null)
+        {
+            if (Board.Instance.boardArray[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
+        }
+
+        if (y + 1 < Board.Instance.heightSize && Board.Instance.boardArray[x, y + 1, z] != null)
+        {
+            if (Board.Instance.boardArray[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
         }
 
         return neighborValue;
@@ -207,21 +201,22 @@ public class BoardSpaceLocal: MonoBehaviour
 
     public void UpdateSelectability()
     {
-        switch (BoardManagerLocal.Instance.selectionMode)
+        switch (Board.Instance.selectionMode)
         {
             case SelectionMode.Build:
                 if (!isBuilt && (blockBelow.GetIsBuilt() || blockBelow.GetIsSelected()))
                 {
                     bCollider.enabled = true;
                     isSelectable = true;
-                } else
+                }
+                else
                 {
                     bCollider.enabled = false;
                     isSelectable = false;
                 }
                 break;
             case SelectionMode.Move:
-                if(posInBoard.y == 0)
+                if (posInBoard.y == 0)
                 {
                     bCollider.enabled = true;
                     isSelectable = true;
@@ -260,11 +255,13 @@ public class BoardSpaceLocal: MonoBehaviour
 
     public bool GetIsBuilt() => isBuilt;
 
-    public bool GetIsSelected() {  return isSelected; }
+    public void SetIsBuilt(bool isBuilt) { this.isBuilt = isBuilt; } 
+
+    public bool GetIsSelected() { return isSelected; }
 
     public bool GetIsBeingHovered() { return isBeingHovered; }
 
-    public bool GetIsSelectable() {  return isSelectable; }
+    public bool GetIsSelectable() { return isSelectable; }
 
     public GameObject GetPlayerOnSpace() { return playerOnSpace; }
 
@@ -273,28 +270,9 @@ public class BoardSpaceLocal: MonoBehaviour
         this.playerOnSpace = player;
     }
 
-    public void SetIsBuiltNoUpdate(bool isBuilt)
-    {
-        if (isBuilt != this.isBuilt)
-        {
-            this.isBuilt = isBuilt;
-        }
-    }
-
-    public void SetIsBuiltPushUpdate(bool isBuilt) { 
-        if(isBuilt != this.isBuilt)
-        {
-            this.isBuilt = isBuilt;
-            if (BoardManagerLocal.Instance.initialized)
-            {
-                BoardManagerLocal.Instance.PushSyncFromLocalBoard(this);
-            }
-        }
-    }
-
     private void OnMouseEnter()
     {
-        if(isSelectable)
+        if (isSelectable)
         {
             isBeingHovered = true;
         }

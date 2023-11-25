@@ -5,12 +5,26 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    PhotonView BMPhotonView;
+    public static BoardManager Instance;
+
+    public PhotonView BMPhotonView;
     public int baseSize;
     public int heightSize;
     public int randomBlockScale = 4;
     private static int randomBlockCount;
     public bool[,,] board;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+    }
 
     private void Start()
     {
@@ -128,11 +142,11 @@ public class BoardManager : MonoBehaviour
         baseSize = initialBaseSize;
         heightSize = initialHeightSize;
         board = InflateBoardArray(initialFlattenedBoard);
-        Instantiate(GameAssets.i.board_, Vector3.zero, Quaternion.identity).GetComponent<Board>().InitializeBoard(this, board, baseSize, heightSize);
+        Instantiate(GameAssets.i.board_, Vector3.zero, Quaternion.identity).GetComponent<Board>().InitializeBoard(board, baseSize, heightSize);
     }
 
     [PunRPC]
-    public void BoardManagerFlipSpaceIsBuilt(Vector3 pos, bool newValue)
+    public void BoardManagerSetSpaceIsBuilt(Vector3 pos, bool newValue)
     {
         board[(int)pos.x, (int)pos.y, (int)pos.z] = newValue;
         Board.Instance.boardArray[(int)pos.x, (int)pos.y, (int)pos.z].SetIsBuilt(newValue);

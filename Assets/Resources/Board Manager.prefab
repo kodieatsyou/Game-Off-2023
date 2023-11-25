@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e0ee98afc7410846bb9e8e60de372af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BMPhotonView: {fileID: 0}
   baseSize: 10
   heightSize: 10
   randomBlockScale: 4

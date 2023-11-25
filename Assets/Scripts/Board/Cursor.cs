@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Cursor : MonoBehaviour
 {
-    /*BoardSpaceLocal space;
+    BoardSpace space;
     GameObject hover;
     GameObject indicator;
     GameObject moveArrow;
@@ -12,7 +12,7 @@ public class Cursor : MonoBehaviour
 
     private void Start()
     {
-        space = transform.parent.GetComponent<BoardSpaceLocal>();
+        space = transform.parent.GetComponent<BoardSpace>();
         hover = transform.GetChild(0).gameObject;
         indicator = transform.GetChild(1).gameObject;
         buildScaffold = transform.GetChild(2).gameObject;
@@ -53,7 +53,7 @@ public class Cursor : MonoBehaviour
 
     private void SetCursorMode()
     {
-        switch (BoardManagerLocal.Instance.selectionMode)
+        switch (Board.Instance.selectionMode)
         {
             case SelectionMode.Move:
                 buildScaffold.SetActive(false);
@@ -64,5 +64,5 @@ public class Cursor : MonoBehaviour
                 moveArrow.SetActive(false);
                 break;
         }
-    }*/
+    }
 }

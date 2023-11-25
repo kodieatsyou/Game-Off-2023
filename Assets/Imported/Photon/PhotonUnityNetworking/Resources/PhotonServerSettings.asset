@@ -60,6 +60,8 @@ MonoBehaviour:
   - Test
   - RPCBoardManagerInitializeNonMasterClientBoards
   - RPCBoardManagerInitializeClientBoards
+  - BoardManagerFlipSpaceIsBuilt
+  - BoardManagerSetSpaceIsBuilt
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

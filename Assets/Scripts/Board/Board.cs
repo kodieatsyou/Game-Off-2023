@@ -4,6 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum SelectionMode
+{
+    Build,
+    Move,
+    Player,
+    None
+}
+
 public class Board : MonoBehaviour
 {
     public static Board Instance;
@@ -12,7 +20,6 @@ public class Board : MonoBehaviour
     public int heightSize;
     public int yOfCurrentHeighestBuiltBlock = 0;
     public SelectionMode selectionMode;
-    public BoardManager manager;
 
     void Awake()
     {
@@ -31,9 +38,9 @@ public class Board : MonoBehaviour
         
     }
 
-    public void InitializeBoard(BoardManager manager, bool[,,] initialBoard, int baseSize, int heightSize)
+    public void InitializeBoard(bool[,,] initialBoard, int baseSize, int heightSize)
     {
-        this.manager = manager;
+        selectionMode = SelectionMode.Build;
         boardArray = new BoardSpace[baseSize, heightSize, baseSize];
         this.baseSize = baseSize;
         this.heightSize = heightSize;

@@ -3,19 +3,16 @@ using UnityEngine;
 
 public class AStarPathfinding
 {
-    private BoardSpaceNetwork[,,] boardSpaceGrid;
-    private BoardSpaceNetwork start;
-    private BoardSpaceNetwork end;
+    private BoardSpace start;
+    private BoardSpace end;
     private Vector3 gridSize;
     private Node[,,] nodeGrid;
 
-    public AStarPathfinding(BoardSpaceNetwork[,,] boardSpaceGrid, BoardSpaceNetwork start, BoardSpaceNetwork end)
+    public AStarPathfinding(BoardSpace start, BoardSpace end)
     {
         this.start = start;
         this.end = end;
-        this.gridSize = new Vector3(boardSpaceGrid.GetLength(0), boardSpaceGrid.GetLength(1), boardSpaceGrid.GetLength(0));
-        this.boardSpaceGrid = boardSpaceGrid;
-        nodeGrid = new Node[(int)gridSize.x, (int)gridSize.y, (int)gridSize.z];
+        nodeGrid = new Node[Board.Instance.baseSize, Board.Instance.heightSize, Board.Instance.baseSize];
 
         for (int x = 0; x < gridSize.x; x++)
         {
@@ -24,7 +21,7 @@ public class AStarPathfinding
                 for (int z = 0; z < gridSize.z; z++)
                 {
                     bool isWalkable = false;
-                    if(boardSpaceGrid[x, y, z].isBuilt && !boardSpaceGrid[x, y + 1, z].isBuilt)
+                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt())
                     {
                         isWalkable = true;
                     }
@@ -37,8 +34,8 @@ public class AStarPathfinding
     public List<Vector3> FindPath()
     {
         Debug.Log(nodeGrid.GetLength(1));
-        Node startNode = nodeGrid[(int)start.posInBoard.x, (int)start.posInBoard.y, (int)start.posInBoard.z];
-        Node targetNode = nodeGrid[(int)end.posInBoard.x, (int)end.posInBoard.y, (int)end.posInBoard.z];
+        Node startNode = nodeGrid[(int)start.GetPosInBoard().x, (int)start.GetPosInBoard().y, (int)start.GetPosInBoard().z];
+        Node targetNode = nodeGrid[(int)end.GetPosInBoard().x, (int)end.GetPosInBoard().y, (int)end.GetPosInBoard().z];
 
         List<Node> openSet = new List<Node>();
         HashSet<Node> closedSet = new HashSet<Node>();
@@ -89,7 +86,7 @@ public class AStarPathfinding
 
         while (currentNode != startNode)
         {
-            path.Add(boardSpaceGrid[currentNode.gridX, currentNode.gridY, currentNode.gridZ].GetWorldPositionOfTopOfSpace());
+            path.Add(Board.Instance.boardArray[currentNode.gridX, currentNode.gridY, currentNode.gridZ].GetWorldPositionOfTopOfSpace());
             currentNode = currentNode.parent;
         }
 
