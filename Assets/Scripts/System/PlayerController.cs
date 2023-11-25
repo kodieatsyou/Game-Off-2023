@@ -21,8 +21,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     private int moveSpeed = 5;
     private int rotationSpeed = 10;
-    private bool continueAnimations = false;
-    private Animator animator;
+    
 
     #region UnityFrameFunctions
     void Awake()
@@ -48,7 +47,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
         IsActiveTurn = false;
         UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
         Debug.Log("Awake Player with name: " + PlayerName);
-        animator = GetComponent<Animator>();
     }
     void Update()
     {
@@ -104,29 +102,13 @@ public class PlayerController: MonoBehaviourPunCallbacks
         oldSpace.PlacePlayerOnSpace(null);
         StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(oldSpace, spaceToMoveTo).FindPath().ToArray()));
     }
-
-    void PlayTimedAnimation(string animationName)
-    {
-        continueAnimations = false;
-        animator.SetTrigger(animationName);
-        animator.SetBool("Continue", false);
-    }
-
-    public void OnTimedAnimationFinished()
-    {
-        animator.SetBool("Continue", true);
-        continueAnimations = true;
-    }
     IEnumerator MoveThroughWaypoints(Vector3[] waypoints)
     {
         int currentWaypointIndex = 0;
 
         while (currentWaypointIndex < waypoints.Length)
         {
-            Debug.Log("Going to space: " + waypoints[currentWaypointIndex]);
-
-            animator.SetBool("Moving", true);
-
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", true);
             // Calculate the distance to the next waypoint
             float distance = Vector3.Distance(transform.position, waypoints[currentWaypointIndex]);
 
@@ -139,10 +121,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 transform.rotation = horizontalLookRotation;
 
                 // Play climbing animation
-                animator.SetBool("Moving", false);
-                PlayTimedAnimation("Climb_Up");
-                yield return new WaitUntil(() => continueAnimations);
-                transform.position = waypoints[currentWaypointIndex];
+                GetComponent<PlayerAnimationController>().PlayRootMotionAnimation("Climb_Up");
+
+                // Wait for animation to complete
+                yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+
+                //transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
                 yield return null;
             }
@@ -153,9 +137,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
-                animator.SetBool("Moving", false);
-                //PlayTimedAnimation("Climbing_Down");
-                //yield return new WaitUntil(() => currentTimedAnimation == null);
+                // Play climbing animation
+                GetComponent<PlayerAnimationController>().PlayRootMotionAnimation("Climb_Down");
+
+                // Wait for animation to complete
+                yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+
                 transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
                 yield return null;
@@ -179,7 +166,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             }
         }
 
-        animator.SetBool("Moving", false);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
         currentSpace.PlacePlayerOnSpace(this.gameObject);
     }
     #endregion
