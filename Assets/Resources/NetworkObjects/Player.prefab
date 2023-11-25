@@ -307,7 +307,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: d273179f0c94abc4a87a21ba4c6038a2, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -383,13 +383,13 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Moving
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Climbing_Up
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: Climbing_Down
   m_SynchronizeLayers:
   - SynchronizeType: 2
@@ -410,8 +410,7 @@ MonoBehaviour:
   rotationSpeed: 10
   PCPhotonView: {fileID: 0}
   animator: {fileID: 0}
-  currentPositionDisplacementAnimationName: 
-  currentPositionDisplacementAnimationPosWhenDone: {x: 0, y: 0, z: 0}
+  currentTimedAnimation: 
 --- !u!1 &3103720536035194838
 GameObject:
   m_ObjectHideFlags: 0

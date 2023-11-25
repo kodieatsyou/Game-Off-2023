@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Cursor : MonoBehaviour
 {
-    BoardSpaceLocal space;
+    /*BoardSpaceLocal space;
     GameObject hover;
     GameObject indicator;
     GameObject moveArrow;
@@ -64,5 +64,5 @@ public class Cursor : MonoBehaviour
                 moveArrow.SetActive(false);
                 break;
         }
-    }
+    }*/
 }

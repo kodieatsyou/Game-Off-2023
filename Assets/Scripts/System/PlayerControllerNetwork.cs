@@ -14,8 +14,7 @@ public class PlayerControllerNetwork : MonoBehaviourPunCallbacks, IPunInstantiat
     public PhotonView PCPhotonView;
     public Animator animator;
 
-    public string currentPositionDisplacementAnimationName = null;
-    public Vector3 currentPositionDisplacementAnimationPosWhenDone = new Vector3(0, 0, 0);
+    public string currentTimedAnimation = null;
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
@@ -24,23 +23,16 @@ public class PlayerControllerNetwork : MonoBehaviourPunCallbacks, IPunInstantiat
         return;
     }
 
-    void StartPositionDisplacementAnimation(string nameOfAnimation, Vector3 posWhenDone)
+    public void PlayTimedAnimation(string animationName)
     {
-        animator.SetBool(nameOfAnimation, true);
-        currentPositionDisplacementAnimationName = nameOfAnimation;
-        currentPositionDisplacementAnimationPosWhenDone = posWhenDone;
+        currentTimedAnimation = animationName;
+        animator.SetBool(currentTimedAnimation, true);
     }
 
-    void SetPositionForPositionDisplacementAnimation()
+    public void OnTimedAnimationFinished()
     {
-        transform.position = currentPositionDisplacementAnimationPosWhenDone;
-    }
-
-    public void FinishPositionDisplacementAnimation()
-    {
-        Debug.Log("Finsihed timed animation!");
-        animator.SetBool(currentPositionDisplacementAnimationName, false);
-        currentPositionDisplacementAnimationName = null;
+        animator.SetBool(currentTimedAnimation, false);
+        currentTimedAnimation = null;
     }
 
     [PunRPC]
@@ -120,9 +112,9 @@ public class PlayerControllerNetwork : MonoBehaviourPunCallbacks, IPunInstantiat
 
                 // Play climbing animation
                 animator.SetBool("Moving", false);
-                StartPositionDisplacementAnimation("Climbing_Up", waypoints[currentWaypointIndex]);
-                yield return new WaitUntil(() => currentPositionDisplacementAnimationName == null);
-
+                PlayTimedAnimation("Climbing_Up");
+                yield return new WaitUntil(() => currentTimedAnimation == null);
+                transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
                 yield return null;
             } 
@@ -133,11 +125,10 @@ public class PlayerControllerNetwork : MonoBehaviourPunCallbacks, IPunInstantiat
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
-                // Play climbing animation
                 animator.SetBool("Moving", false);
-                StartPositionDisplacementAnimation("Climbing_Down", waypoints[currentWaypointIndex]);
-                yield return new WaitUntil(() => currentPositionDisplacementAnimationName == null);
-
+                PlayTimedAnimation("Climbing_Down");
+                yield return new WaitUntil(() => currentTimedAnimation == null);
+                transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
                 yield return null;
             }

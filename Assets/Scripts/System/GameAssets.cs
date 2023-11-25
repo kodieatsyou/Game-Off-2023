@@ -20,6 +20,7 @@ public class GameAssets : MonoBehaviour
 
     [Header("Board")]
     public GameObject board_space_object_;
+    public GameObject board_;
     [Header("Cursors")]
     public GameObject board_cursor_;
     [Header("Grass")]

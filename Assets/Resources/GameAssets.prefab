@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   board_space_object_: {fileID: 6650280991801686592, guid: 6cdb1a142ea4dd04c8555727e564b75f, type: 3}
+  board_: {fileID: 8056477766742870483, guid: 10c921b3d688b56459bfdab33733cfe5, type: 3}
   board_cursor_: {fileID: 3774863005068883490, guid: ab3ee5cc25d3d464fbafb1f54a48987c, type: 3}
   grass_blocks_:
     _serializedList:

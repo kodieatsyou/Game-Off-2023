@@ -8,10 +8,9 @@ public class MakeNetworkObjects : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if(PhotonNetwork.IsMasterClient)
         {
-            // Instantiate the object only on the master client
-            PhotonNetwork.InstantiateRoomObject("NetworkObjects/BoardManager", Vector3.zero, Quaternion.identity);
+            PhotonNetwork.Instantiate("Board Manager", Vector3.zero, Quaternion.identity);
         }
     }
 }

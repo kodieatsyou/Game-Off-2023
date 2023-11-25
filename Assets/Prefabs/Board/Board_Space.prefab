@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2176545935313610478}
   - component: {fileID: 7581321309412992204}
+  - component: {fileID: 3988899410871963769}
   m_Layer: 0
   m_Name: Board_Space
   m_TagString: Untagged
@@ -40,12 +41,24 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6650280991801686592}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87e6661f125e052448c554adc6bf017f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isBuilt: 0
+--- !u!114 &3988899410871963769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6650280991801686592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bb44415a06ae814aaa821a5e4236621, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6250387105795689880
 PrefabInstance:
   m_ObjectHideFlags: 0
