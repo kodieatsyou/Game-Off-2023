@@ -1,9 +1,11 @@
 using Photon.Pun;
+using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoardManager : MonoBehaviour
+public class BoardManager : MonoBehaviourPunCallbacks
 {
     public static BoardManager Instance;
 
@@ -57,6 +59,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
             BMPhotonView.RPC("RPCBoardManagerInitializeClientBoards", RpcTarget.AllBuffered, FlattenBoardArray(board), baseSize, heightSize);
+            SpawnPlayers();
+
         }
     }
 
@@ -133,6 +137,66 @@ public class BoardManager : MonoBehaviour
             count++;
         }
         return randomCoords;
+    }
+
+    void SpawnPlayers()
+    {
+        bool[,] spawns = new bool[baseSize, baseSize];
+        for (int x = 0; x < baseSize; x++) // preload randomCoords with false
+        {
+            for (int z = 0; z < baseSize; z++)
+            {
+                if (board[x, 0, z] && !board[x, 1, z])
+                {
+                    spawns[x, z] = true;
+                } else
+                {
+                    spawns[x, z] = false;
+                }
+            }
+        }
+
+        StartCoroutine(FindSpawn(spawns));
+    }
+
+    IEnumerator FindSpawn(bool[,] viableSpawningLocations)
+    {
+        Vector2[] spawns = new Vector2[PhotonNetwork.CurrentRoom.PlayerCount];
+
+        for(int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
+        {
+            Vector3 pos = new Vector3(0, 0, 0);
+            Vector2 currentPos = new Vector2(0, 0);
+            System.Random random = new System.Random();
+            while (!viableSpawningLocations[(int)currentPos.x, (int)currentPos.y])
+            {
+                currentPos = new Vector2(random.Next(0, baseSize - 1), random.Next(0, baseSize - 1));
+                yield return null;
+            }
+            spawns[i] = currentPos;
+        }
+        ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable
+        {
+            { "spawns", spawns }
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+    }
+
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+    {
+        if(propertiesThatChanged.ContainsKey("spawns"))
+        {
+            //Get spawns from room props
+            Vector2[] allSpawns = (Vector2[])PhotonNetwork.CurrentRoom.CustomProperties["spawns"];
+            //Get this players spawn location
+            Vector2 spawnLocation = allSpawns[PhotonNetwork.LocalPlayer.ActorNumber - 1];
+
+            //Spawn the player
+            Vector3 pos = Board.Instance.boardArray[(int)spawnLocation.x, 0, (int)spawnLocation.y].GetWorldPositionOfTopOfSpace();
+            GameObject player = PhotonNetwork.Instantiate("NetworkObjects/Player", pos, Quaternion.identity);
+            player.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
+            player.GetComponent<PhotonView>().RPC("RPCPlayerManagerPlayerMovedToSpace", RpcTarget.All, new Vector3(spawnLocation.x, 0, spawnLocation.y));
+        }
     }
 
     [PunRPC]

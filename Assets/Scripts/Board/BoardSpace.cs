@@ -1,3 +1,5 @@
+using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -13,7 +15,7 @@ public class BoardSpace : MonoBehaviour
     private GameObject blockMesh;
     private GameObject detailMesh;
     private GameObject playerOnSpace;
-    [SerializeField] private BoardSpace blockBelow;
+    private BoardSpace blockBelow;
     private bool isSelectable;
     private bool isSelected;
     private bool isBeingHovered;
@@ -117,7 +119,9 @@ public class BoardSpace : MonoBehaviour
             if (clicked && !Input.GetMouseButton(0))
             {
                 //isSelected = !isSelected;
-                BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", Photon.Pun.RpcTarget.All, posInBoard, true);
+                //BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", Photon.Pun.RpcTarget.All, posInBoard, true);
+                PlayerController.Instance.MoveTo(this);
+                //PlayerControllerNew.Instance.PCPhotonView.RPC("RPCPlayerControllerMoveToSpace", RpcTarget.All, this);
             }
         }
 
@@ -204,10 +208,20 @@ public class BoardSpace : MonoBehaviour
         switch (Board.Instance.selectionMode)
         {
             case SelectionMode.Build:
-                if (!isBuilt && (blockBelow.GetIsBuilt() || blockBelow.GetIsSelected()))
+                if (blockBelow != null)
                 {
-                    bCollider.enabled = true;
-                    isSelectable = true;
+                    if (!isBuilt && blockBelow.GetIsBuilt() || blockBelow.GetIsSelected())
+                    {
+                        if(blockBelow.GetPlayerOnSpace() == null)
+                        {
+                            bCollider.enabled = true;
+                            isSelectable = true;
+                        } else
+                        {
+                            bCollider.enabled = false;
+                            isSelectable = false;
+                        }
+                    }
                 }
                 else
                 {
@@ -216,7 +230,7 @@ public class BoardSpace : MonoBehaviour
                 }
                 break;
             case SelectionMode.Move:
-                if (posInBoard.y == 0)
+                if (PlayerController.Instance != null && posInBoard.y == PlayerController.Instance.currentSpace.GetPosInBoard().y && GetPlayerOnSpace() == null)
                 {
                     bCollider.enabled = true;
                     isSelectable = true;
@@ -265,10 +279,12 @@ public class BoardSpace : MonoBehaviour
 
     public GameObject GetPlayerOnSpace() { return playerOnSpace; }
 
-    public void PlacePlayerOnSpace(GameObject player)
-    {
-        this.playerOnSpace = player;
+    public void PlacePlayerOnSpace(GameObject player) 
+    { 
+        playerOnSpace = player;
     }
+
+    public void ClearPlayerOnSpace() { playerOnSpace = null; }
 
     private void OnMouseEnter()
     {

@@ -12,8 +12,8 @@ public class AStarPathfinding
     {
         this.start = start;
         this.end = end;
+        gridSize = new Vector3(Board.Instance.baseSize, Board.Instance.heightSize, Board.Instance.baseSize);
         nodeGrid = new Node[Board.Instance.baseSize, Board.Instance.heightSize, Board.Instance.baseSize];
-
         for (int x = 0; x < gridSize.x; x++)
         {
             for (int y = 0; y < gridSize.y; y++)
@@ -21,7 +21,7 @@ public class AStarPathfinding
                 for (int z = 0; z < gridSize.z; z++)
                 {
                     bool isWalkable = false;
-                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt())
+                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt() && Board.Instance.boardArray[x, y, z].GetPlayerOnSpace() == null)
                     {
                         isWalkable = true;
                     }
@@ -33,7 +33,6 @@ public class AStarPathfinding
 
     public List<Vector3> FindPath()
     {
-        Debug.Log(nodeGrid.GetLength(1));
         Node startNode = nodeGrid[(int)start.GetPosInBoard().x, (int)start.GetPosInBoard().y, (int)start.GetPosInBoard().z];
         Node targetNode = nodeGrid[(int)end.GetPosInBoard().x, (int)end.GetPosInBoard().y, (int)end.GetPosInBoard().z];
 
