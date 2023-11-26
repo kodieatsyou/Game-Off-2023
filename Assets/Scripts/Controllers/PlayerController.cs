@@ -117,12 +117,16 @@ public class PlayerController: MonoBehaviourPunCallbacks
         {
             case 1:
                 UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
+                UIController.Instance.ToggleWindButton(true);
+                UIController.Instance.ToggleWindDirectionButtons(true);
                 break;
             case 2:
                 UIController.Instance.PlayAnnouncement("Grapple", AnnouncementType.DropBounce);
+                UIController.Instance.ToggleGrappleButton(true);
                 break;
             case 3:
                 UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
+                UIController.Instance.ToggleCardsButton(true);
                 break;
         }
     }

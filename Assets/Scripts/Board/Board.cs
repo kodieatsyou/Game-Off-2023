@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,8 +56,18 @@ public class Board : MonoBehaviour
                 }
             }
         }
-
+        MakeWindButtons();
         CameraController.Instance.InitializeCamera();
+    }
+
+    void MakeWindButtons()
+    {
+        foreach (WindDir dir in Enum.GetValues(typeof(WindDir)))
+        {
+            GameObject b = Instantiate(GameAssets.i.wind_button_);
+            b.GetComponent<WindButton>().Initialize(dir);
+            UIController.Instance.RegisterWindButton(b);
+        }
     }
 
     public Vector3 GetBoardMiddlePosAtYLevel(int yLevel)

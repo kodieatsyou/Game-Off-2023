@@ -51,6 +51,8 @@ public class UIController : MonoBehaviour
     [SerializeField] Button buildButton;
     [SerializeField] Button moveButton;
     [SerializeField] Button cardsButton;
+    [SerializeField] Button windButton;
+    [SerializeField] Button grappleButton;
     [Header("Action Panel")]
     [SerializeField] Button ActionPanelConfirm;
     [SerializeField] Button ActionPanelClear;
@@ -65,10 +67,14 @@ public class UIController : MonoBehaviour
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
     List<GameObject> infoPanelPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
+    List<GameObject> windDirectionButtons = new List<GameObject>();
     float originalAnnouncementTextSize = 36;
     private bool newAnnouncementQueued = false;
     private Queue<IEnumerator> announcementQueue = new Queue<IEnumerator>();
     private bool isPlayingAnnouncement = false;
+
+
+
     Player player;
     #endregion
 
@@ -137,6 +143,9 @@ public class UIController : MonoBehaviour
         ToggleChat();
         ToggleHotbar(false);
         ToggleRollButton(false);
+        ToggleCardsButton(false);
+        ToggleWindButton(false);
+        ToggleGrappleButton(false);
         ToggleBuildButton(false);
         ToggleMoveButton(false);
         SetTurnTime(0);
@@ -523,12 +532,58 @@ public class UIController : MonoBehaviour
         {
             secondsString = "" + seconds;
         }
-        hotBar.transform.GetChild(4).GetComponent<TMP_Text>().text = minutesString + ":" + secondsString;
+        hotBar.transform.GetChild(6).GetComponent<TMP_Text>().text = minutesString + ":" + secondsString;
     }
 
     public void ToggleRollButton(bool toggle)
     {
         rollButton.interactable = toggle;
+    }
+
+    public void ToggleCardsButton(bool toggle)
+    {
+        if (toggle)
+        {
+            ToggleWindButton(false);
+            ToggleGrappleButton(false);
+            ToggleRollButton(false);
+        }
+        cardsButton.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleWindButton(bool toggle)
+    {
+        if(toggle)
+        {
+            ToggleCardsButton(false);
+            ToggleGrappleButton(false);
+            ToggleRollButton(false);
+        }
+        windButton.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleGrappleButton(bool toggle)
+    {
+        if (toggle)
+        {
+            ToggleCardsButton(false);
+            ToggleWindButton(false);
+            ToggleRollButton(false);
+        }
+        grappleButton.gameObject.SetActive(toggle);
+    }
+
+    public void RegisterWindButton(GameObject button)
+    {
+        windDirectionButtons.Add(button);
+    }
+
+    public void ToggleWindDirectionButtons(bool toggle)
+    {
+        foreach(GameObject button in windDirectionButtons)
+        {
+            button.SetActive(toggle);
+        }
     }
 
     public void ToggleBuildButton(bool toggle)
@@ -555,7 +610,7 @@ public class UIController : MonoBehaviour
     {
         actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
         ToggleActionPanel(true);
-        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(30, 50, 0);
+        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(5, 50, 0);
         Board.Instance.selectionMode = SelectionMode.Build;
     }
 
@@ -563,7 +618,7 @@ public class UIController : MonoBehaviour
     {
         actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
         ToggleActionPanel(true);
-        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-20, 50, 0);
+        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-45, 50, 0);
         Board.Instance.selectionMode = SelectionMode.Move;
     }
 
@@ -582,6 +637,17 @@ public class UIController : MonoBehaviour
     public void OnActionPanelClear()
     {
         Board.Instance.ClearAction();
+    }
+
+    public void OnWindButtonClick()
+    {
+        if (windDirectionButtons[0].activeSelf)
+        {
+            ToggleWindDirectionButtons(false);
+        } else
+        {
+            ToggleWindDirectionButtons(true);
+        }
     }
 
     public void SetBlocksLeftToBuild(int blocksToBuild)
