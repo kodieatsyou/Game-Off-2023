@@ -7,7 +7,6 @@ using System;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.EventSystems;
-using UnityEditor.VersionControl;
 
 public enum AnnouncementType
 {
@@ -162,6 +161,24 @@ public class UIController : MonoBehaviour
         foreach(Player p in PhotonNetwork.PlayerList)
         {
             Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(p);
+        }
+    }
+
+    public void ClearTurnPanel()
+    {
+        foreach (Transform child in infoPanelPlayerList.transform)
+        {
+            // Destroy each child
+            Destroy(child.gameObject);
+        }
+    }
+
+    public void SortTurnPanelBasedOnTurnOrder(List<PlayerTurnOrder> sortedOrder)
+    {
+        ClearTurnPanel();
+        foreach (PlayerTurnOrder pto in sortedOrder)
+        {
+            Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(pto.player);
         }
     }
 

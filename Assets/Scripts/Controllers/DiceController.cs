@@ -151,7 +151,7 @@ public class DiceController : MonoBehaviour
             .OrderBy(rotation => Vector3.Distance(rotation, NormalizeAndRoundEulerAngles(rotationEulerAngles)))
             .First();
 
-        Debug.Log("Original rotation: " + rotationEulerAngles + " Rounded rotation: " + closestRotation);
+        //Debug.Log("Original rotation: " + rotationEulerAngles + " Rounded rotation: " + closestRotation);
 
         return GetRollValueBasedOnDieType(closestRotation, type);
     }

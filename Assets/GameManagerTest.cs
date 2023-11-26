@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,13 +13,26 @@ public enum GameState
     GameEnded
 }
 
+[Serializable]
+public class PlayerTurnOrder
+{
+    public int order {  get; set; }
+    public Player player {  get; set; }
+
+    public PlayerTurnOrder(int order, Player player)
+    {
+        this.order = order;
+        this.player = player;
+    }
+}
+
 public class GameManagerTest : MonoBehaviour
 {
     public static GameManagerTest Instance;
 
     public GameState State = GameState.GameInitializing;
     public PhotonView GMPhotonView;
-    private List<KeyValuePair<int, Player>> players;
+    private List<PlayerTurnOrder> turnOrder;
 
     private void Awake()
     {
@@ -31,7 +45,7 @@ public class GameManagerTest : MonoBehaviour
             PhotonNetwork.Destroy(gameObject);
         }
         
-        players = new List<KeyValuePair<int, Player>>();
+        turnOrder = new List<PlayerTurnOrder>();
         GMPhotonView = GetComponent<PhotonView>();
     }
 
@@ -62,11 +76,13 @@ public class GameManagerTest : MonoBehaviour
     void RPCGameManagerPlayerRolledForTurn(int roll, PhotonMessageInfo info)
     {
         Debug.Log(info.Sender.NickName + " ROLLED A: " + roll + " for their turn order!");
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < turnOrder.Count; i++)
         {
-            if (players[i].Value == info.Sender)
+            if (turnOrder[i].player == info.Sender)
             {
-                players[i] = new KeyValuePair<int, Player>(roll, info.Sender);
+                turnOrder[i].order = roll;
+                turnOrder.Sort((pair1, pair2) => pair2.order.CompareTo(pair1.order));
+                UIController.Instance.SortTurnPanelBasedOnTurnOrder(turnOrder);
                 break;
             }
         }
@@ -89,8 +105,8 @@ public class GameManagerTest : MonoBehaviour
     public void RPCGameManagerPlayerInitialized(PhotonMessageInfo info)
     {
         Debug.Log("Player: " + info.Sender.NickName + " Has Initialized!");
-        players.Add(new KeyValuePair<int, Player>(-1, info.Sender));
-        if (players.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+        turnOrder.Add(new PlayerTurnOrder(-1, info.Sender));
+        if (turnOrder.Count == PhotonNetwork.CurrentRoom.PlayerCount)
         {
             StartGame();
         }
