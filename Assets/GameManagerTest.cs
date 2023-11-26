@@ -75,12 +75,13 @@ public class GameManagerTest : MonoBehaviour
     public void StartGame()
     {
         State = GameState.GameStarted;
-        GMPhotonView.RPC("RPCGameManagerStartPlayerTurn", RpcTarget.All);
+        //GMPhotonView.RPC("RPCGameManagerStartPlayerTurn", RpcTarget.All);
+        StartTurn();
     }
 
     public void StartTurn()
     {
-        UIController.Instance.StopCurrentAnnouncements();
+        UIController.Instance.HighlightTurn(currentTurnIndex);
         if (turnOrder[currentTurnIndex].player == PhotonNetwork.LocalPlayer)
         {
             PlayerController.Instance.StartTurn();
@@ -109,15 +110,10 @@ public class GameManagerTest : MonoBehaviour
 
         if(!turnOrder.Exists(pair => pair.order == -1))
         {
-            //Everyone rolled
-            Debug.Log("All Rolled!");
+            UIController.Instance.StopCurrentAnnouncements();
             StartGame();
             DealCards();
-        } else
-        {
-            UIController.Instance.PlayAnnouncement(new string[] { "Waiting for other players.", "Waiting for other players..", "Waiting for other players..." }, AnnouncementType.StaticFrame);
         }
-
     }
 
     [PunRPC]

@@ -26,11 +26,11 @@ public class BoardManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.Destroy(gameObject);
         }
+        BMPhotonView = GetComponent<PhotonView>();
     }
 
     private void Start()
     {
-        BMPhotonView = GetComponent<PhotonView>();
         board = new bool[baseSize, heightSize, baseSize];
         //Allow master client to make initial board
         if (PhotonNetwork.IsMasterClient)
@@ -59,9 +59,8 @@ public class BoardManager : MonoBehaviourPunCallbacks
                 }
             }
             BMPhotonView.RPC("RPCBoardManagerInitializeClientBoards", RpcTarget.AllBuffered, FlattenBoardArray(board), baseSize, heightSize);
-            SpawnPlayers();
-
         }
+        StartCoroutine(SpawnPlayer());
     }
 
     bool[] FlattenBoardArray(bool[,,] inflatedArray)
@@ -139,64 +138,33 @@ public class BoardManager : MonoBehaviourPunCallbacks
         return randomCoords;
     }
 
-    void SpawnPlayers()
+    IEnumerator SpawnPlayer()
     {
-        bool[,] spawns = new bool[baseSize, baseSize];
-        for (int x = 0; x < baseSize; x++) // preload randomCoords with false
+        yield return new WaitUntil(() => Board.Instance.boardArray != null);
+
+        System.Random random = new System.Random();
+        BoardSpace currentPos = Board.Instance.boardArray[0, 0, 0];
+        bool foundSpawn = false;
+        while (!foundSpawn)
         {
-            for (int z = 0; z < baseSize; z++)
+            currentPos = Board.Instance.boardArray[random.Next(0, baseSize - 1), 0, random.Next(0, baseSize - 1)];
+
+            if(currentPos.GetPlayerOnSpace() == null && !Board.Instance.boardArray[(int)currentPos.GetPosInBoard().x, 1, (int)currentPos.GetPosInBoard().z].GetIsBuilt())
             {
-                if (board[x, 0, z] && !board[x, 1, z])
-                {
-                    spawns[x, z] = true;
-                } else
-                {
-                    spawns[x, z] = false;
-                }
+                foundSpawn = true;
             }
+            yield return null;
         }
 
-        StartCoroutine(FindSpawn(spawns));
+        Vector3 pos = currentPos.GetWorldPositionOfTopOfSpace();
+        GameObject player = PhotonNetwork.Instantiate("NetworkObjects/Player", pos, Quaternion.identity);
+        //BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, player, currentPos);
     }
 
-    IEnumerator FindSpawn(bool[,] viableSpawningLocations)
+    [PunRPC]
+    void RPCBoardManagerPlacePlayerOnSpace(GameObject player, BoardSpace spaceToPutOn)
     {
-        Vector2[] spawns = new Vector2[PhotonNetwork.CurrentRoom.PlayerCount];
-
-        for(int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; i++)
-        {
-            Vector3 pos = new Vector3(0, 0, 0);
-            Vector2 currentPos = new Vector2(0, 0);
-            System.Random random = new System.Random();
-            while (!viableSpawningLocations[(int)currentPos.x, (int)currentPos.y])
-            {
-                currentPos = new Vector2(random.Next(0, baseSize - 1), random.Next(0, baseSize - 1));
-                yield return null;
-            }
-            spawns[i] = currentPos;
-        }
-        ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable
-        {
-            { "spawns", spawns }
-        };
-        PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-    }
-
-    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
-    {
-        if(propertiesThatChanged.ContainsKey("spawns"))
-        {
-            //Get spawns from room props
-            Vector2[] allSpawns = (Vector2[])PhotonNetwork.CurrentRoom.CustomProperties["spawns"];
-            //Get this players spawn location
-            Vector2 spawnLocation = allSpawns[PhotonNetwork.LocalPlayer.ActorNumber - 1];
-
-            //Spawn the player
-            Vector3 pos = Board.Instance.boardArray[(int)spawnLocation.x, 0, (int)spawnLocation.y].GetWorldPositionOfTopOfSpace();
-            GameObject player = PhotonNetwork.Instantiate("NetworkObjects/Player", pos, Quaternion.identity);
-            player.GetComponent<PhotonView>().TransferOwnership(PhotonNetwork.LocalPlayer);
-            player.GetComponent<PhotonView>().RPC("RPCPlayerManagerPlayerMovedToSpace", RpcTarget.All, new Vector3(spawnLocation.x, 0, spawnLocation.y));
-        }
+        Board.Instance.boardArray[(int)spaceToPutOn.GetPosInBoard().x, (int)spaceToPutOn.GetPosInBoard().y, (int)spaceToPutOn.GetPosInBoard().z].PlacePlayerOnSpace(player);
     }
 
     [PunRPC]

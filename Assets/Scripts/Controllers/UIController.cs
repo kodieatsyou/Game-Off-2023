@@ -181,6 +181,13 @@ public class UIController : MonoBehaviour
         }
     }
 
+    public void HighlightTurn(int turnIndex)
+    {
+        infoPanelPlayerList.GetComponentInChildren<PlayerInfoCardItem>().currentTurnGlow.SetActive(false);
+        Debug.Log("WHAT THE ACTUAL FUCK THIS IS THE CHILD: " + infoPanelPlayerList.transform.GetChild(turnIndex).name);
+        infoPanelPlayerList.transform.GetChild(turnIndex).GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(true);
+    }
+
     #endregion
 
     #region Chat
