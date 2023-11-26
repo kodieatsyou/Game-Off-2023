@@ -38,9 +38,7 @@ public class UIController : MonoBehaviour
     [SerializeField] float cardsAnimationDuration = 0.05f;
     [Header("Announcement")]
     [SerializeField] TMP_Text announcementText;
-    [SerializeField] float announcementSpeed = 5f;
-    [SerializeField] float announcementPauseTime = 3f;
-    [SerializeField] int announcementPos = 900;
+    [SerializeField] float announcementPauseTime = 1f;
     [Header("Game Over Screen")]
     [SerializeField] GameObject gameOverPlayerListObject;
     [Header("Chat")]
@@ -141,6 +139,7 @@ public class UIController : MonoBehaviour
         ToggleGameOverScreen(false);
         ToggleQuitScreen();
         PopulateTurnPanel();
+        cardsScreen.SetActive(false);
     }
 
     #region Main Functions
@@ -356,7 +355,7 @@ public class UIController : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator ScrollTextLR(string message, float targetPositionX = 900, float speed = 500)
+    IEnumerator ScrollTextLR(string message, float targetPositionX = 900, float speed = 800)
     {
         // Set text to left side
         announcementText.rectTransform.anchoredPosition = new Vector2(-targetPositionX, 0);
@@ -529,10 +528,13 @@ public class UIController : MonoBehaviour
     #endregion
 
     #region Cards
-    public void AddCard(GameObject card)
+    public void AddCard()
     {
-        GameObject cardObj = Instantiate(card, Vector3.zero, Quaternion.identity);
+        Array values = Enum.GetValues(typeof(CardType));
+        CardType randomCardType = (CardType)values.GetValue(UnityEngine.Random.Range(0, values.Length));
+        GameObject cardObj = Instantiate(GameAssets.i.card_, Vector3.zero, Quaternion.identity);
         cardObj.transform.SetParent(cardsScreen.transform, false);
+        cardObj.GetComponent<Card>().SetCardType(randomCardType);
         cards.Add(cardObj);
     }
 

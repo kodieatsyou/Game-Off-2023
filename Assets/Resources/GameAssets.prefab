@@ -134,6 +134,44 @@ MonoBehaviour:
   - {fileID: 2845986319323596710, guid: 834c20e5642bdd0499203f44141d07bc, type: 3}
   - {fileID: 9140929216165335027, guid: b1d993a8fb6e8c548945466e9d06cec6, type: 3}
   - {fileID: 7032300123889191275, guid: 4555e72be0f10fb4c82be345712de8e6, type: 3}
+  card_: {fileID: 5643217516290647438, guid: 52bf3b3eaa515e740ab46a2469a213b1, type: 3}
+  card_descriptions_:
+    _serializedList:
+    - Key: 0
+      Value: Cast a magical barrier that blocks all unwanted attention.
+    - Key: 1
+      Value: Lift youself in the air... Just high enough to get a block under your
+        feet.
+    - Key: 2
+      Value: Become a ninja for a turn. Who needs grappling hooks?
+    - Key: 3
+      Value: Summon your inner brawler and knock your opponents to the floor!
+    - Key: 4
+      Value: Thats one more block for me and one less for the enemy.
+    - Key: 5
+      Value: Hows the weather over there?
+    - Key: 6
+      Value: Make those around you so mad they can hardly move.
+    - Key: 7
+      Value: Target someone and freeze them in time!
+  card_art_:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: 4ad71c501671b584cb666668acea5bc2, type: 3}
+    - Key: 1
+      Value: {fileID: 21300000, guid: 04d7583918edf594a93e6f3e70c6b557, type: 3}
+    - Key: 2
+      Value: {fileID: 21300000, guid: e2457c697e7ad1046a2e2355e40d6813, type: 3}
+    - Key: 3
+      Value: {fileID: 21300000, guid: bd0ac5a53fbd1db47848397533a71b97, type: 3}
+    - Key: 4
+      Value: {fileID: 21300000, guid: e17a4fee180acdb4f81455ce9e1da147, type: 3}
+    - Key: 5
+      Value: {fileID: 21300000, guid: a5a48318b6030f1469d0157945dcbde4, type: 3}
+    - Key: 6
+      Value: {fileID: 21300000, guid: 040720a33f628c44b92992f8a6c7351b, type: 3}
+    - Key: 7
+      Value: {fileID: 21300000, guid: 15a4ea981cf235b42815eb93a083fa38, type: 3}
   player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
   character_skins_:
   - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}

@@ -31,11 +31,14 @@ public class GameAssets : MonoBehaviour
     public SerializedDictionary<int, GameObject> stone_blocks_;
     [Header("Detail")]
     public GameObject[] block_details_;
+    [Header("Cards")]
+    public GameObject card_;
+    public SerializedDictionary<CardType, string> card_descriptions_;
+    public SerializedDictionary<CardType, Sprite> card_art_;
 
-    [Header("Loadable Assets")]
-    [Header("Essentials")]
+
+    [Header("Player")]
     public GameObject player_object_;
-    [Header("Character")]
     public Texture[] character_skins_;
     [SerializedDictionary("Player Name", "Skin")]
     public Texture[] character_special_skins_;

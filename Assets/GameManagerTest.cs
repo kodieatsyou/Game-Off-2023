@@ -8,6 +8,7 @@ using UnityEngine;
 public enum GameState
 {
     GameInitializing,
+    GameRollingForTurns,
     GameStarted,
     GameWaiting,
     GameEnded
@@ -33,6 +34,7 @@ public class GameManagerTest : MonoBehaviour
     public GameState State = GameState.GameInitializing;
     public PhotonView GMPhotonView;
     private List<PlayerTurnOrder> turnOrder;
+    private int currentTurnIndex = 0;
 
     private void Awake()
     {
@@ -55,21 +57,39 @@ public class GameManagerTest : MonoBehaviour
         
     }
 
-    public void StartGame()
+    public void DealCards()
     {
-        State = GameState.GameStarted;
+        for(int i = 0; i < 6; i++)
+        {
+            UIController.Instance.AddCard();
+        }
+    }
+
+    public void RollForTurns()
+    {
+        State = GameState.GameRollingForTurns;
         UIController.Instance.PlayAnnouncement("Roll to decide turn order!", AnnouncementType.ScrollLR);
         PlayerController.Instance.RollForTurn();
     }
 
-    public void PlayerInitialized(Player player)
+    public void StartGame()
     {
-        /*Debug.Log("Player: " + player.NickName + " Has Initialized!");
-        players.Add(-1, player);
-        if(players.Count == PhotonNetwork.CurrentRoom.PlayerCount)
+        State = GameState.GameStarted;
+        GMPhotonView.RPC("RPCGameManagerStartPlayerTurn", RpcTarget.All);
+    }
+
+    public void StartTurn()
+    {
+        UIController.Instance.StopCurrentAnnouncements();
+        if (turnOrder[currentTurnIndex].player == PhotonNetwork.LocalPlayer)
         {
-            StartGame();
-        }*/
+            PlayerController.Instance.StartTurn();
+            UIController.Instance.PlayAnnouncement("Your turn!", AnnouncementType.ScrollLR);
+        }
+        else
+        {
+            UIController.Instance.PlayAnnouncement(turnOrder[currentTurnIndex].player.NickName + "'s turn!", AnnouncementType.ScrollLR);
+        }
     }
 
     [PunRPC]
@@ -86,19 +106,24 @@ public class GameManagerTest : MonoBehaviour
                 break;
             }
         }
+
+        if(!turnOrder.Exists(pair => pair.order == -1))
+        {
+            //Everyone rolled
+            Debug.Log("All Rolled!");
+            StartGame();
+            DealCards();
+        } else
+        {
+            UIController.Instance.PlayAnnouncement(new string[] { "Waiting for other players.", "Waiting for other players..", "Waiting for other players..." }, AnnouncementType.StaticFrame);
+        }
+
     }
 
     [PunRPC]
-    void RPCGameManagerStartPlayerTurn(int playerID)
+    void RPCGameManagerStartPlayerTurn()
     {
-        if (playerID == PhotonNetwork.LocalPlayer.ActorNumber)
-        {
-            PlayerController.Instance.StartTurn();
-        }
-        else
-        {
-            return;
-        }
+        StartTurn();
     }
 
     [PunRPC]
@@ -108,7 +133,7 @@ public class GameManagerTest : MonoBehaviour
         turnOrder.Add(new PlayerTurnOrder(-1, info.Sender));
         if (turnOrder.Count == PhotonNetwork.CurrentRoom.PlayerCount)
         {
-            StartGame();
+            RollForTurns();
         }
     }
 
