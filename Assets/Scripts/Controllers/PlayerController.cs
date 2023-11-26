@@ -13,8 +13,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private string PlayerName;
     private float NetworkTurnLength;
     private float CurrTurnLength;
-    private int ActionsRemaining;
-    private int blocksLeftToPlace;
+    public int ActionsRemaining;
+    public int blocksLeftToPlace;
     private bool IsActiveTurn;
     private bool IsRollingDie;
 
@@ -23,7 +23,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     //Moving
     public int moveSpeed = 5;
     public int rotationSpeed = 10;
-    private bool moving = false;
+    public bool moving = false;
     
 
     #region UnityFrameFunctions
@@ -56,9 +56,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
         if (IsActiveTurn)
         {
             CurrTurnLength -= Time.deltaTime;
+            UIController.Instance.SetTurnTime(CurrTurnLength);
+            UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
             if (CurrTurnLength < 0f || ActionsRemaining < 0)
             {
-                UIController.Instance.SetTurnTime(CurrTurnLength); // SetTurnTime(CurrTurnLength) Bug, currently SetTurnTime does not take in an argument
                 EndTurn();
             }
         }
@@ -66,7 +67,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     #endregion
 
     #region PlayerNetwork
-    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+    /*public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
         if (propertiesThatChanged.ContainsKey("CurrentPlayerTurn"))
         {
@@ -77,14 +78,19 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 StartTurn();
             }
         }
-    }
+    }*/
     #endregion
 
     #region PlayerActions
-    public void StartTurn()
+    public void StartTurn(float turnTime)
     {
+        CurrTurnLength = turnTime;
+        ActionsRemaining = 3;
+        blocksLeftToPlace = 2;
+
         IsActiveTurn = true;
         UIController.Instance.StartTurnSetUI(CurrTurnLength);
+        UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
     }
 
     private void EndTurn()
@@ -97,6 +103,28 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public void RollForTurn()
     {
         DiceController.Instance.ReadyRoller(DieType.Number, SendTurnRollToGameManager);
+    }
+
+    public void RollForActionDie()
+    {
+        DiceController.Instance.ReadyRoller(DieType.Action, DoActionDieResult);
+    }
+
+    void DoActionDieResult(int roll)
+    {
+        Debug.Log("Rolled a: " + roll);
+        switch(roll)
+        {
+            case 1:
+                UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
+                break;
+            case 2:
+                UIController.Instance.PlayAnnouncement("Grapple", AnnouncementType.DropBounce);
+                break;
+            case 3:
+                UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
+                break;
+        }
     }
 
     void SendTurnRollToGameManager(int roll)
@@ -177,7 +205,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
 
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
-        currentSpace.PlacePlayerOnSpace(this.gameObject);
+        //currentSpace.PlacePlayerOnSpace(this.gameObject);
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, currentSpace.GetPosInBoard());
         moving = false;
     }
     #endregion

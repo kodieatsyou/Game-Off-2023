@@ -20,6 +20,7 @@ public class Board : MonoBehaviour
     public int heightSize;
     public int yOfCurrentHeighestBuiltBlock = 0;
     public SelectionMode selectionMode;
+    public List<BoardSpace> selectedSpaces;
 
     void Awake()
     {
@@ -69,5 +70,122 @@ public class Board : MonoBehaviour
         {
             return new Vector3((baseSize / 2.0f) * 2.5f, yLevel * 2.5f, (baseSize / 2.0f) * 2.5f); // Get the location of the center of the middle block
         }
+    }
+
+    public void ConfirmAction()
+    {
+        switch(selectionMode)
+        {
+            case SelectionMode.None:
+                break;
+            case SelectionMode.Build:
+                UIController.Instance.ToggleBuildButton(false);
+                PlayerController.Instance.ActionsRemaining -= 1;
+                BuildSelected();
+                break;
+            case SelectionMode.Move:
+                UIController.Instance.ToggleMoveButton(false);
+                PlayerController.Instance.ActionsRemaining -= 1;
+                MoveToSelected();
+                break;
+        }
+    }
+
+    void MoveToSelected()
+    {
+        if(selectedSpaces.Count == 1)
+        {
+            PlayerController.Instance.MoveTo(selectedSpaces[0]);
+            selectedSpaces[0].SetIsSelected(false);
+        }
+        selectedSpaces.Clear();
+    }
+    void BuildSelected()
+    {
+        foreach (BoardSpace block in selectedSpaces)
+        {
+            block.SetIsSelected(false);
+            BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", RpcTarget.All, block.GetPosInBoard(), true);
+        }
+
+        selectedSpaces.Clear();
+    }
+
+    public void ClearAction()
+    {
+        ClearSelected();
+        if(selectionMode == SelectionMode.Build) 
+        {
+            PlayerController.Instance.blocksLeftToPlace = 2;
+        }
+    }
+
+    public void ClearSelected()
+    {
+        foreach (BoardSpace block in selectedSpaces)
+        {
+            block.SetIsSelected(false);
+        }
+        selectedSpaces.Clear();
+    }
+
+    public bool SelectBlock(BoardSpace blockSelected)
+    {
+        if(!PlayerController.Instance.moving)
+        {
+            switch (selectionMode)
+            {
+                case SelectionMode.Build:
+                    if (PlayerController.Instance.blocksLeftToPlace > 0)
+                    {
+                        PlayerController.Instance.blocksLeftToPlace -= 1;
+                        selectedSpaces.Add(blockSelected);
+                        UIController.Instance.ToggleActionPanelConfirm(true);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                case SelectionMode.Move:
+                    if (selectedSpaces.Count == 0)
+                    {
+                        selectedSpaces.Add(blockSelected);
+                        return true;
+                    }
+                    return false;
+            }
+        }
+        return false;
+    }
+
+    public bool UnSelectBlock(BoardSpace blockUnSelected)
+    {
+        if(selectedSpaces.Count > 0 && !PlayerController.Instance.moving)
+        {
+            switch (selectionMode)
+            {
+                case SelectionMode.Build:
+                    if (PlayerController.Instance.blocksLeftToPlace + 1 <= 2)
+                    {
+                        PlayerController.Instance.blocksLeftToPlace += 1;
+                        selectedSpaces.Remove(blockUnSelected);
+                        if (selectedSpaces.Count == 0)
+                        {
+                            UIController.Instance.ToggleActionPanelConfirm(false);
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                case SelectionMode.Move:
+                    selectedSpaces.Remove(blockUnSelected);
+                    return true;
+            }
+            return false;
+        }
+        return false;
     }
 }

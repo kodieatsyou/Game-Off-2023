@@ -51,13 +51,13 @@ public class PlayerNetworkController : MonoBehaviour, IPunInstantiateMagicCallba
         }
     }
 
-    [PunRPC]
-    public void RPCPlayerManagerPlayerMovedToSpace(Vector3 newSpace)
+    //[PunRPC]
+    /*public void RPCPlayerManagerPlayerMovedToSpace(Vector3 newSpace)
     {
         if (PCPhotonView.IsMine)
         {
             gameObject.GetComponent<PlayerController>().currentSpace = Board.Instance.boardArray[(int)newSpace.x, (int)newSpace.y, (int)newSpace.z];
         }
         Board.Instance.boardArray[(int)newSpace.x, (int)newSpace.y, (int)newSpace.z].PlacePlayerOnSpace(gameObject);
-    }
+    }*/
 }

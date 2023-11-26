@@ -27,7 +27,12 @@ public class Cursor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(space.GetIsSelectable())
+        indicator.SetActive(false);
+        hover.SetActive(false);
+        buildScaffold.SetActive(false);
+        moveArrow.SetActive(false);
+
+        if (space.GetIsSelectable())
         {
             indicator.SetActive(true);
             if (space.GetIsBeingHovered())

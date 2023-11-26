@@ -14,7 +14,7 @@ public class BoardSpace : MonoBehaviour
     [SerializeField] private int valueOfNeighbors;
     private GameObject blockMesh;
     private GameObject detailMesh;
-    private GameObject playerOnSpace;
+    private Player playerOnSpace;
     private BoardSpace blockBelow;
     private bool isSelectable;
     private bool isSelected;
@@ -118,10 +118,19 @@ public class BoardSpace : MonoBehaviour
             // Check if the right mouse button was just clicked (not held down indicating camera panning)
             if (clicked && !Input.GetMouseButton(0))
             {
-                //isSelected = !isSelected;
-                //BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", Photon.Pun.RpcTarget.All, posInBoard, true);
-                PlayerController.Instance.MoveTo(this);
-                //PlayerControllerNew.Instance.PCPhotonView.RPC("RPCPlayerControllerMoveToSpace", RpcTarget.All, this);
+                if(!isSelected)
+                {
+                    if(Board.Instance.SelectBlock(this))
+                    {
+                        isSelected = true;
+                    }
+                } else
+                {
+                    if(Board.Instance.UnSelectBlock(this))
+                    {
+                        isSelected = false;
+                    }
+                }
             }
         }
 
@@ -205,10 +214,12 @@ public class BoardSpace : MonoBehaviour
 
     public void UpdateSelectability()
     {
+        bCollider.enabled = false;
+        isSelectable = false;
         switch (Board.Instance.selectionMode)
         {
             case SelectionMode.Build:
-                if (blockBelow != null)
+                if (blockBelow != null && PlayerController.Instance.blocksLeftToPlace > 0)
                 {
                     if (!isBuilt && blockBelow.GetIsBuilt() || blockBelow.GetIsSelected())
                     {
@@ -216,29 +227,25 @@ public class BoardSpace : MonoBehaviour
                         {
                             bCollider.enabled = true;
                             isSelectable = true;
-                        } else
-                        {
-                            bCollider.enabled = false;
-                            isSelectable = false;
                         }
                     }
-                }
-                else
+                } else if(isSelected)
                 {
-                    bCollider.enabled = false;
-                    isSelectable = false;
+                    bCollider.enabled = true;
+                    isSelectable = true;
                 }
                 break;
             case SelectionMode.Move:
                 if (PlayerController.Instance != null && posInBoard.y == PlayerController.Instance.currentSpace.GetPosInBoard().y && GetPlayerOnSpace() == null)
                 {
-                    bCollider.enabled = true;
-                    isSelectable = true;
-                }
-                else
-                {
-                    bCollider.enabled = false;
-                    isSelectable = false;
+                    if (posInBoard.y + 1 < Board.Instance.heightSize)
+                    {
+                        if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt())
+                        {
+                            bCollider.enabled = true;
+                            isSelectable = true;
+                        }
+                    }
                 }
                 break;
         }
@@ -272,14 +279,15 @@ public class BoardSpace : MonoBehaviour
     public void SetIsBuilt(bool isBuilt) { this.isBuilt = isBuilt; } 
 
     public bool GetIsSelected() { return isSelected; }
+    public void SetIsSelected(bool isSelected) { this.isSelected = isSelected; }
 
     public bool GetIsBeingHovered() { return isBeingHovered; }
 
     public bool GetIsSelectable() { return isSelectable; }
 
-    public GameObject GetPlayerOnSpace() { return playerOnSpace; }
+    public Player GetPlayerOnSpace() { return playerOnSpace; }
 
-    public void PlacePlayerOnSpace(GameObject player) 
+    public void PlacePlayerOnSpace(Player player) 
     { 
         playerOnSpace = player;
     }

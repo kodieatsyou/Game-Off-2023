@@ -130,7 +130,6 @@ public class DiceController : MonoBehaviour
         if (currentRollDieCallback != null)
         {
             rolling = false;
-            UIController.Instance.PlayAnnouncement(result.ToString(), AnnouncementType.DropBounce);
             currentRollDieCallback(result);
         }
     }

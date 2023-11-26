@@ -51,14 +51,19 @@ public class UIController : MonoBehaviour
     [SerializeField] Button buildButton;
     [SerializeField] Button moveButton;
     [SerializeField] Button cardsButton;
+    [Header("Action Panel")]
+    [SerializeField] Button ActionPanelConfirm;
+    [SerializeField] Button ActionPanelClear;
     [Header("Camera Position")]
     [SerializeField] TMP_Text cameraHeightText;
     [Header("Other")]
     [SerializeField] GameObject playerCamera;
     [SerializeField] PlayerController playerController;
 
+
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
+    List<GameObject> infoPanelPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
     float originalAnnouncementTextSize = 36;
     private bool newAnnouncementQueued = false;
@@ -138,8 +143,8 @@ public class UIController : MonoBehaviour
         StopCurrentAnnouncements();
         ToggleGameOverScreen(false);
         ToggleQuitScreen();
-        PopulateTurnPanel();
         cardsScreen.SetActive(false);
+        PopulateTurnPanel();
     }
 
     #region Main Functions
@@ -157,19 +162,22 @@ public class UIController : MonoBehaviour
 
     public void PopulateTurnPanel()
     {
-        foreach(Player p in PhotonNetwork.PlayerList)
+        ClearTurnPanel();
+        foreach (Player p in PhotonNetwork.PlayerList)
         {
-            Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(p);
+            GameObject infoCard = Instantiate(playerInfoCard, infoPanelPlayerList.transform);
+            infoCard.GetComponent<PlayerInfoCardItem>().SetInfo(p);
+            infoPanelPlayerListObjects.Add(infoCard);
         }
     }
 
     public void ClearTurnPanel()
     {
-        foreach (Transform child in infoPanelPlayerList.transform)
+        foreach (GameObject infoCard in infoPanelPlayerListObjects)
         {
-            // Destroy each child
-            Destroy(child.gameObject);
+            Destroy(infoCard);
         }
+        infoPanelPlayerListObjects.Clear();
     }
 
     public void SortTurnPanelBasedOnTurnOrder(List<PlayerTurnOrder> sortedOrder)
@@ -177,15 +185,25 @@ public class UIController : MonoBehaviour
         ClearTurnPanel();
         foreach (PlayerTurnOrder pto in sortedOrder)
         {
-            Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(pto.player);
+            GameObject infoCard = Instantiate(playerInfoCard, infoPanelPlayerList.transform);
+            infoCard.GetComponent<PlayerInfoCardItem>().SetInfo(pto.player);
+            infoPanelPlayerListObjects.Add(infoCard);
         }
     }
 
     public void HighlightTurn(int turnIndex)
     {
-        infoPanelPlayerList.GetComponentInChildren<PlayerInfoCardItem>().currentTurnGlow.SetActive(false);
-        Debug.Log("WHAT THE ACTUAL FUCK THIS IS THE CHILD: " + infoPanelPlayerList.transform.GetChild(turnIndex).name);
-        infoPanelPlayerList.transform.GetChild(turnIndex).GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(true);
+        for(int i = 0; i < infoPanelPlayerListObjects.Count; i ++)
+        {
+            if(i == turnIndex)
+            {
+                infoPanelPlayerListObjects[i].GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(true);
+            } else
+            {
+                infoPanelPlayerListObjects[i].GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(false);
+            }
+            
+        }
     }
 
     #endregion
@@ -481,12 +499,11 @@ public class UIController : MonoBehaviour
     public void ToggleHotbar(bool toggle)
     {
         hotBar.SetActive(toggle);
-        actionInfoPanel.SetActive(toggle);
+        actionInfoPanel.SetActive(false);
     }
 
     public void SetTurnTime(float seconds)
     {
-
         int minutes = TimeSpan.FromSeconds(seconds).Minutes;
         seconds = TimeSpan.FromSeconds(seconds).Seconds;
 
@@ -519,9 +536,57 @@ public class UIController : MonoBehaviour
         buildButton.interactable = toggle;
     }
 
+    public void ToggleActionPanel(bool toggle)
+    {
+        actionInfoPanel.SetActive(toggle);
+    }
+
     public void ToggleMoveButton(bool toggle)
     {
         moveButton.interactable = toggle;
+    }
+
+    public void ToggleActionPanelConfirm(bool toggle)
+    {
+        ActionPanelConfirm.interactable = toggle;
+    }
+
+    public void OnBuildButtonClick()
+    {
+        actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
+        ToggleActionPanel(true);
+        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(30, 50, 0);
+        Board.Instance.selectionMode = SelectionMode.Build;
+    }
+
+    public void OnMoveButtonClick()
+    {
+        actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
+        ToggleActionPanel(true);
+        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-20, 50, 0);
+        Board.Instance.selectionMode = SelectionMode.Move;
+    }
+
+    public void OnRollButtonClick()
+    {
+        PlayerController.Instance.RollForActionDie();
+        ToggleRollButton(false);
+    }
+
+    public void OnActionPanelConfirm()
+    {
+        Board.Instance.ConfirmAction();
+        ToggleActionPanel(false);
+    }
+
+    public void OnActionPanelClear()
+    {
+        Board.Instance.ClearAction();
+    }
+
+    public void SetBlocksLeftToBuild(int blocksToBuild)
+    {
+        actionInfoPanel.GetComponentInChildren<TMP_Text>().text = "x" + blocksToBuild;
     }
     
 

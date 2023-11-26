@@ -158,13 +158,17 @@ public class BoardManager : MonoBehaviourPunCallbacks
 
         Vector3 pos = currentPos.GetWorldPositionOfTopOfSpace();
         GameObject player = PhotonNetwork.Instantiate("NetworkObjects/Player", pos, Quaternion.identity);
-        //BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, player, currentPos);
+        BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, currentPos.GetPosInBoard());
     }
 
     [PunRPC]
-    void RPCBoardManagerPlacePlayerOnSpace(GameObject player, BoardSpace spaceToPutOn)
+    void RPCBoardManagerPlacePlayerOnSpace(Player player, Vector3 posOfSpaceToPutOn)
     {
-        Board.Instance.boardArray[(int)spaceToPutOn.GetPosInBoard().x, (int)spaceToPutOn.GetPosInBoard().y, (int)spaceToPutOn.GetPosInBoard().z].PlacePlayerOnSpace(player);
+        if(player == PhotonNetwork.LocalPlayer)
+        {
+            PlayerController.Instance.currentSpace = Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z];
+        }
+        Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerOnSpace(player);
     }
 
     [PunRPC]

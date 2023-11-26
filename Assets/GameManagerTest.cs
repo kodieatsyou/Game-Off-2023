@@ -75,7 +75,6 @@ public class GameManagerTest : MonoBehaviour
     public void StartGame()
     {
         State = GameState.GameStarted;
-        //GMPhotonView.RPC("RPCGameManagerStartPlayerTurn", RpcTarget.All);
         StartTurn();
     }
 
@@ -84,7 +83,7 @@ public class GameManagerTest : MonoBehaviour
         UIController.Instance.HighlightTurn(currentTurnIndex);
         if (turnOrder[currentTurnIndex].player == PhotonNetwork.LocalPlayer)
         {
-            PlayerController.Instance.StartTurn();
+            PlayerController.Instance.StartTurn(60f);
             UIController.Instance.PlayAnnouncement("Your turn!", AnnouncementType.ScrollLR);
         }
         else
