@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,30 +7,26 @@ public class PlayerAnimationController : MonoBehaviour
 {
     private Animator animator;
     private bool continueAnimations = false;
-    private string curAnimationName = null;
+    PhotonView PCPhotonView;
+    string currentRootMotionAnimationName = null;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
+        PCPhotonView = GetComponent<PhotonView>();
     }
-    public void PlayRootMotionAnimation(string animationName)
+    public void PlayTriggeredAnimation(string animationName)
     {
-        GetComponent<RootMotionNetworkSync>().syncRootMotion = true;
         continueAnimations = false;
-        animator.SetBool("Continue", false);
+        //PCPhotonView.RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.Others, animationName);
         animator.SetBool(animationName, true);
-        curAnimationName = animationName;
+        currentRootMotionAnimationName = animationName;
     }
 
     public void OnRootMotionAnimationFinished()
     {
-        Debug.Log("Transform: " + transform.position + " delta: " + animator.deltaPosition);
-        transform.position = transform.position + animator.deltaPosition;
-        transform.rotation = animator.deltaRotation;
-        GetComponent<RootMotionNetworkSync>().syncRootMotion = false;
-        animator.SetBool(curAnimationName, false);
-        curAnimationName = null;
-        animator.SetBool("Continue", true);
+        animator.SetBool(currentRootMotionAnimationName, false);
+        currentRootMotionAnimationName = null;
         continueAnimations = true;
     }
 
@@ -42,4 +39,11 @@ public class PlayerAnimationController : MonoBehaviour
     {
         return continueAnimations;
     }
+
+    [PunRPC]
+    void RPCPlayerAnimationControllerPlayTriggeredAnimation(string animationName)
+    {
+        animator.SetTrigger(animationName);
+    }
+
 }

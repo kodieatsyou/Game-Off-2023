@@ -19,8 +19,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private UIController UI;
     public BoardSpace currentSpace;
 
-    private int moveSpeed = 5;
-    private int rotationSpeed = 10;
+    public int moveSpeed = 5;
+    public int rotationSpeed = 10;
     
 
     #region UnityFrameFunctions
@@ -121,12 +121,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 transform.rotation = horizontalLookRotation;
 
                 // Play climbing animation
-                GetComponent<PlayerAnimationController>().PlayRootMotionAnimation("Climb_Up");
+                GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Climb_Up");
 
                 // Wait for animation to complete
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
-                //transform.position = waypoints[currentWaypointIndex];
+                transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
                 yield return null;
             }
@@ -138,7 +138,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 transform.rotation = horizontalLookRotation;
 
                 // Play climbing animation
-                GetComponent<PlayerAnimationController>().PlayRootMotionAnimation("Climb_Down");
+                GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Climb_Down");
 
                 // Wait for animation to complete
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
