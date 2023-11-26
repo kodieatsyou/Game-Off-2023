@@ -14,6 +14,7 @@ public class PlayerNetworkController : MonoBehaviour, IPunInstantiateMagicCallba
         PCPhotonView.RPC("RPCPlayerNetworkControllerInitialize", RpcTarget.AllBuffered);
         if(PCPhotonView.IsMine)
         {
+            gameObject.GetComponentInChildren<SpriteRenderer>().enabled = true;
             gameObject.AddComponent<PlayerController>();
         }
         return;

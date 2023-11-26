@@ -17,6 +17,8 @@ public enum AnnouncementType
 
 public class UIController : MonoBehaviour
 {
+    public static UIController Instance;
+
     [Header("Regions")]
     [SerializeField] GameObject hotBar;
     [SerializeField] GameObject info;
@@ -63,6 +65,18 @@ public class UIController : MonoBehaviour
     float originalAnnouncementTextSize;
     Player player;
     #endregion
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -126,13 +140,16 @@ public class UIController : MonoBehaviour
         PopulateTurnPanel();
     }
 
-    public void StartTurn()
+    #region Main Functions
+    public void StartTurnSetUI(float turnTime)
     {
         ToggleHotbar(true);
         ToggleRollButton(true);
         ToggleBuildButton(true);
         ToggleMoveButton(true);
+        SetTurnTime(turnTime);
     }
+    #endregion
 
     #region Info Panel
 

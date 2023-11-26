@@ -3,26 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Billboard : MonoBehaviour
 {
-    GameObject camera = null;
+    GameObject playerCamera = null;
 
     private void Start()
     {
-        camera = GameObject.FindGameObjectWithTag("Camera");
+        playerCamera = GameObject.FindGameObjectWithTag("Camera");
     }
     void Update()
     {
 
-        if (camera != null)
+        if (playerCamera != null)
         {
-            // Calculate the direction from the sprite to the camera
-            Vector3 toCamera = camera.transform.position - transform.position;
-
-            // Ensure the sprite is always facing the camera
+            Vector3 toCamera = playerCamera.transform.position - transform.position;
             transform.LookAt(transform.position + toCamera, Vector3.up);
-        }
-        else
-        {
-            Debug.LogError("Main camera not found!");
         }
     }
 }

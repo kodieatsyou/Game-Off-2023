@@ -14,13 +14,16 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private float NetworkTurnLength;
     private float CurrTurnLength;
     private int ActionsRemaining;
+    private int blocksLeftToPlace;
     private bool IsActiveTurn;
     private GameManager GM = GameManager.Instance;
     private UIController UI;
     public BoardSpace currentSpace;
 
+    //Moving
     public int moveSpeed = 5;
     public int rotationSpeed = 10;
+    private bool moving = false;
     
 
     #region UnityFrameFunctions
@@ -55,7 +58,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             CurrTurnLength -= Time.deltaTime;
             if (CurrTurnLength < 0f || ActionsRemaining < 0)
             {
-                UI.SetTurnTime(CurrTurnLength); // SetTurnTime(CurrTurnLength) Bug, currently SetTurnTime does not take in an argument
+                UIController.Instance.SetTurnTime(CurrTurnLength); // SetTurnTime(CurrTurnLength) Bug, currently SetTurnTime does not take in an argument
                 EndTurn();
             }
         }
@@ -81,7 +84,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private void StartTurn()
     {
         IsActiveTurn = true;
-        // TODO: Add UI elements to indicate turn has started, enable UI
+        UIController.Instance.StartTurnSetUI(CurrTurnLength);
     }
 
     private void EndTurn()
@@ -97,10 +100,14 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     public void MoveTo(BoardSpace spaceToMoveTo)
     {
-        BoardSpace oldSpace = currentSpace;
-        currentSpace = spaceToMoveTo;
-        oldSpace.PlacePlayerOnSpace(null);
-        StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(oldSpace, spaceToMoveTo).FindPath().ToArray()));
+        if(!moving)
+        {
+            BoardSpace oldSpace = currentSpace;
+            currentSpace = spaceToMoveTo;
+            oldSpace.PlacePlayerOnSpace(null);
+            moving = true;
+            StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(oldSpace, spaceToMoveTo).FindPath().ToArray()));
+        }
     }
     IEnumerator MoveThroughWaypoints(Vector3[] waypoints)
     {
@@ -109,65 +116,58 @@ public class PlayerController: MonoBehaviourPunCallbacks
         while (currentWaypointIndex < waypoints.Length)
         {
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", true);
-            // Calculate the distance to the next waypoint
             float distance = Vector3.Distance(transform.position, waypoints[currentWaypointIndex]);
 
-            // Check if the next waypoint is one y level up
             if (waypoints[currentWaypointIndex].y > transform.position.y)
             {
-                // Rotate horizontally towards the waypoint before climbing
                 Vector3 horizontalDirection = (new Vector3(waypoints[currentWaypointIndex].x, transform.position.y, waypoints[currentWaypointIndex].z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
-                // Play climbing animation
                 GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Climb_Up");
 
-                // Wait for animation to complete
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
                 transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
+
                 yield return null;
             }
             else if (waypoints[currentWaypointIndex].y < transform.position.y)
             {
-                // Rotate horizontally towards the waypoint before climbing
                 Vector3 horizontalDirection = (new Vector3(waypoints[currentWaypointIndex].x, transform.position.y, waypoints[currentWaypointIndex].z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
-                // Play climbing animation
                 GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Climb_Down");
 
-                // Wait for animation to complete
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
                 transform.position = waypoints[currentWaypointIndex];
                 currentWaypointIndex++;
+
                 yield return null;
             }
             else
             {
-                // Move towards the waypoint
                 transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWaypointIndex], moveSpeed * Time.deltaTime);
 
-                // Rotate towards the waypoint
                 Vector3 direction = (waypoints[currentWaypointIndex] - transform.position).normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(direction);
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, rotationSpeed * Time.deltaTime);
 
-                // If the GameObject is close enough to the waypoint, move to the next waypoint
                 if (distance < 0.1f)
                 {
                     currentWaypointIndex++;
                 }
-                yield return null; // Yield control until the next frame
+
+                yield return null;
             }
         }
 
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
         currentSpace.PlacePlayerOnSpace(this.gameObject);
+        moving = false;
     }
     #endregion
 
