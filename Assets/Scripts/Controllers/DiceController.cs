@@ -18,55 +18,68 @@ public delegate void RollDieCallback(int result);
 
 public class DiceController : MonoBehaviour
 {
-    [SerializeField] float rollForce = 5f;
-    [SerializeField] Transform dieSpawnPosition;
-    [SerializeField] GameObject diePanel;
+    public static DiceController Instance;
+
+
+    private Transform dieSpawnPosition;
 
     public bool readyToRoll = false;
     private bool rolling = false;
+    private float rollForce = 300f;
 
-    private RollDieCallback rollDieCallback;
+    private RollDieCallback currentRollDieCallback;
+    private DieType currentRollType;
 
     public GameObject diceActionPrefab;
 
-    /*
-     * This is how rolling needs to be handled. pass function to handle roll result
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            PhotonNetwork.Destroy(gameObject);
+        }
+    }
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(0) && readyToRoll)
         {
-            RollDie(DieType.Action, HandleRollResult);
+            RollDie();
         }
     }
-    */
+
 
     private void Start()
     {
-        //diePanel.GetComponent<RawImage>().enabled = false;
+        dieSpawnPosition = GameObject.FindGameObjectWithTag("DiePit").transform;
         readyToRoll = false;
         rolling = false;
     }
 
-    public void ReadyRoller()
+    public void ReadyRoller(DieType type, RollDieCallback callback)
     {
         Debug.Log("Ready to roll!");
         if (!rolling)
         {
-            this.GetComponent<UIController>().PlayAnnouncement("Click to Roll Dice!", AnnouncementType.StaticBreathing);
+            UIController.Instance.PlayAnnouncement("Click to Roll Dice!", AnnouncementType.StaticBreathing);
+            currentRollDieCallback = callback;
+            currentRollType = type;
             readyToRoll = true;
         }
     }
-    public void RollDie(DieType type, RollDieCallback callback)
+    public void RollDie()
     {
         if(readyToRoll)
         {
             Debug.Log("Rolling!");
             rolling = true;
             readyToRoll = false;
-            rollDieCallback = callback;
-            this.GetComponent<UIController>().StopAnnouncement();
-            this.GetComponent<UIController>().ToggleRollButton(false);
-            StartCoroutine(StartRolling(type));
+            UIController.Instance.StopCurrentAnnouncements();
+            StartCoroutine(StartRolling(currentRollType));
         }
     }
 
@@ -82,11 +95,11 @@ public class DiceController : MonoBehaviour
 
         if (type == DieType.Action)
         {
-            dice = PhotonNetwork.Instantiate("Essential/Dice/ActionDie", spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
+            dice = PhotonNetwork.Instantiate("NetworkObjects/Dice/ActionDie", spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
             //dice = Instantiate(diceActionPrefab, spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
         } else if(type == DieType.Number)
         {
-            dice = PhotonNetwork.Instantiate("Essential/Dice/NumberDie", spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
+            dice = PhotonNetwork.Instantiate("NetworkObjects/Dice/NumberDie", spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
             //dice = Instantiate(diceActionPrefab, spawnPos, Quaternion.Euler(new Vector3(180, 0, 0)));
         } else
         {
@@ -114,10 +127,11 @@ public class DiceController : MonoBehaviour
         int result = GetResult(currentRotation, type);
         PhotonNetwork.Destroy(dice);
 
-        if (rollDieCallback != null)
+        if (currentRollDieCallback != null)
         {
             rolling = false;
-            rollDieCallback(result);
+            UIController.Instance.PlayAnnouncement(result.ToString(), AnnouncementType.DropBounce);
+            currentRollDieCallback(result);
         }
     }
 

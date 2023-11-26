@@ -40,7 +40,7 @@ public class Board : MonoBehaviour
 
     public void InitializeBoard(bool[,,] initialBoard, int baseSize, int heightSize)
     {
-        selectionMode = SelectionMode.Move;
+        selectionMode = SelectionMode.None;
         boardArray = new BoardSpace[baseSize, heightSize, baseSize];
         this.baseSize = baseSize;
         this.heightSize = heightSize;

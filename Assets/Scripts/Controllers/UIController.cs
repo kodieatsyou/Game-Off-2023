@@ -7,12 +7,14 @@ using System;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.EventSystems;
+using UnityEditor.VersionControl;
 
 public enum AnnouncementType
 {
     ScrollLR,
     DropBounce,
-    StaticBreathing
+    StaticBreathing,
+    StaticFrame
 }
 
 public class UIController : MonoBehaviour
@@ -61,8 +63,10 @@ public class UIController : MonoBehaviour
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
-    Coroutine currentAnnouncement;
-    float originalAnnouncementTextSize;
+    float originalAnnouncementTextSize = 36;
+    private bool newAnnouncementQueued = false;
+    private Queue<IEnumerator> announcementQueue = new Queue<IEnumerator>();
+    private bool isPlayingAnnouncement = false;
     Player player;
     #endregion
 
@@ -134,7 +138,7 @@ public class UIController : MonoBehaviour
         ToggleBuildButton(false);
         ToggleMoveButton(false);
         SetTurnTime(0);
-        StopAnnouncement();
+        StopCurrentAnnouncements();
         ToggleGameOverScreen(false);
         ToggleQuitScreen();
         PopulateTurnPanel();
@@ -220,45 +224,126 @@ public class UIController : MonoBehaviour
     #region Announcement
     public void PlayAnnouncement(string message, AnnouncementType type)
     {
-        if (currentAnnouncement != null)
-        {
-            StopCoroutine(currentAnnouncement);
-        }
-
+        IEnumerator announcementCoroutine = null;
         announcementBar.SetActive(true);
 
-        announcementText.text = message;
-
-        switch(type)
+        switch (type)
         {
             case AnnouncementType.ScrollLR:
-                currentAnnouncement = StartCoroutine(ScrollTextLR());
+                announcementCoroutine = ScrollTextLR(message);
                 break;
             case AnnouncementType.DropBounce:
-                currentAnnouncement = StartCoroutine(FallAndBounceText(1.0f));
+                announcementCoroutine = FallAndBounceText(message, 2.0f); // Set your desired timeShownAfterBounce value
                 break;
             case AnnouncementType.StaticBreathing:
-                currentAnnouncement = StartCoroutine(BreatheText());
+                announcementCoroutine = BreatheText(message);
                 break;
+            case AnnouncementType.StaticFrame:
+                announcementCoroutine = StaticFrame(new string[] { message });
+                break;
+            default:
+                Debug.LogError("Invalid AnnouncementType");
+                return;
+        }
+
+        announcementQueue.Enqueue(announcementCoroutine);
+
+        if (!isPlayingAnnouncement)
+        {
+            StartCoroutine(PlayQueuedAnnouncements());
         }
     }
 
-    public void StopAnnouncement()
+    public void PlayAnnouncement(string[] message, AnnouncementType type)
     {
-        if (currentAnnouncement != null)
+        IEnumerator announcementCoroutine = null;
+        announcementBar.SetActive(true);
+
+        switch (type)
         {
-            StopCoroutine(currentAnnouncement);
-            currentAnnouncement = null;
+            case AnnouncementType.ScrollLR:
+                announcementCoroutine = ScrollTextLR(message[0]);
+                break;
+            case AnnouncementType.DropBounce:
+                announcementCoroutine = FallAndBounceText(message[0], 2.0f); // Set your desired timeShownAfterBounce value
+                break;
+            case AnnouncementType.StaticBreathing:
+                announcementCoroutine = BreatheText(message[0]);
+                break;
+            case AnnouncementType.StaticFrame:
+                announcementCoroutine = StaticFrame(message);
+                break;
+            default:
+                Debug.LogError("Invalid AnnouncementType");
+                return;
         }
-        announcementText.GetComponent<TextMeshProUGUI>().fontSize = originalAnnouncementTextSize;
-        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+
+        announcementQueue.Enqueue(announcementCoroutine);
+
+        if (!isPlayingAnnouncement)
+        {
+            StartCoroutine(PlayQueuedAnnouncements());
+        }
+    }
+
+    private IEnumerator PlayQueuedAnnouncements()
+    {
+        isPlayingAnnouncement = true;
+
+        while (announcementQueue.Count > 0)
+        {
+            newAnnouncementQueued = false;
+            IEnumerator currentAnnouncement = announcementQueue.Dequeue();
+            yield return StartCoroutine(currentAnnouncement);
+        }
+
+        isPlayingAnnouncement = false;
+
+        // Hide announcement bar when all announcements finish playing
         announcementBar.SetActive(false);
     }
 
-    IEnumerator ScrollTextLR(float targetPositionX = 900, float speed = 500)
+    public void StopCurrentAnnouncements()
+    {
+        StopAllCoroutines();
+        newAnnouncementQueued = false;
+        isPlayingAnnouncement = false;
+        announcementQueue.Clear();
+
+        // Hide announcement bar when stopping announcements
+        announcementBar.SetActive(false);
+    }
+
+    IEnumerator StaticFrame(string[] frames, float speed = 0.5f)
+    {
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+        int counter = 0;
+        announcementText.text = frames[counter];
+        bool run = true;
+        while (run)
+        {
+            if (newAnnouncementQueued)
+            {
+                run = false;
+            }
+            announcementText.text = frames[counter];
+            if(counter + 1 > frames.Length - 1)
+            {
+                counter = 0;
+            } else
+            {
+                counter++;
+            }
+            yield return new WaitForSeconds(speed);
+        }
+        yield return null;
+    }
+
+    IEnumerator ScrollTextLR(string message, float targetPositionX = 900, float speed = 500)
     {
         // Set text to left side
         announcementText.rectTransform.anchoredPosition = new Vector2(-targetPositionX, 0);
+        announcementText.text = message;
 
         // Go to the middle
         while (Mathf.Abs(announcementText.rectTransform.anchoredPosition.x) > 0.1f)
@@ -293,11 +378,12 @@ public class UIController : MonoBehaviour
 
         // Ensure that the final position is exactly at the target position
         announcementText.rectTransform.anchoredPosition = new Vector2(targetPositionX, 0);
-        StopAnnouncement();
+        yield return null;
     }
 
-    IEnumerator FallAndBounceText(float timeShownAfterBounce, float targetPositionY = 3000, float speed = 6000, float bounciness = 0.05f)
+    IEnumerator FallAndBounceText(string message, float timeShownAfterBounce, float targetPositionY = 3000, float speed = 6000, float bounciness = 0.05f)
     {
+        announcementText.text = message;
         announcementText.rectTransform.anchoredPosition = new Vector2(0, targetPositionY);
 
         //Fall to middle
@@ -327,20 +413,28 @@ public class UIController : MonoBehaviour
 
         announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
         yield return new WaitForSeconds(timeShownAfterBounce);
-        StopAnnouncement();
+        yield return null;
     }
 
-    IEnumerator BreatheText()
+    IEnumerator BreatheText(string message)
     {
-        originalAnnouncementTextSize = announcementText.GetComponent<TextMeshProUGUI>().fontSize;
-        while (true)
+        announcementText.text = message;
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+        bool run = true;
+        while (run)
         {
+            if (newAnnouncementQueued)
+            {
+                run = false;
+            }
+
             // Grow the text
             yield return ScaleTextAnimation(originalAnnouncementTextSize, originalAnnouncementTextSize * 1.2f, 0.5f);
 
             // Shrink the text
             yield return ScaleTextAnimation(originalAnnouncementTextSize * 1.2f, originalAnnouncementTextSize, 0.5f);
         }
+        yield return null;
     }
 
     IEnumerator ScaleTextAnimation(float startScale, float endScale, float duration)

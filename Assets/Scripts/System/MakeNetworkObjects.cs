@@ -10,6 +10,7 @@ public class MakeNetworkObjects : MonoBehaviour
     {
         if(PhotonNetwork.IsMasterClient)
         {
+            PhotonNetwork.Instantiate("NetworkObjects/Game Manager", Vector3.zero, Quaternion.identity);
             PhotonNetwork.Instantiate("NetworkObjects/Board Manager", Vector3.zero, Quaternion.identity);
         }
     }

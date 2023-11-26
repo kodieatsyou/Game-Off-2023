@@ -16,8 +16,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     private int ActionsRemaining;
     private int blocksLeftToPlace;
     private bool IsActiveTurn;
-    private GameManager GM = GameManager.Instance;
-    private UIController UI;
+    private bool IsRollingDie;
+
     public BoardSpace currentSpace;
 
     //Moving
@@ -48,8 +48,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
         CurrTurnLength = NetworkTurnLength;
         ActionsRemaining = 3; // move, roll, build
         IsActiveTurn = false;
-        UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
-        Debug.Log("Awake Player with name: " + PlayerName);
+
+        GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerInitialized", RpcTarget.All);
     }
     void Update()
     {
@@ -81,7 +81,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     #endregion
 
     #region PlayerActions
-    private void StartTurn()
+    public void StartTurn()
     {
         IsActiveTurn = true;
         UIController.Instance.StartTurnSetUI(CurrTurnLength);
@@ -92,8 +92,19 @@ public class PlayerController: MonoBehaviourPunCallbacks
         IsActiveTurn = false;
         CurrTurnLength = NetworkTurnLength; // reset turn length at the end of the turn
         // TODO: Add UI elements to indicate turn has ended, disable UI
-        GM.GMPhotonView.RPC("RPCGameManagerEndTurn", RpcTarget.All); // Inform game manager turn has ended.
     }
+
+    public void RollForTurn()
+    {
+        DiceController.Instance.ReadyRoller(DieType.Number, SendTurnRollToGameManager);
+    }
+
+    void SendTurnRollToGameManager(int roll)
+    {
+        GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerRolledForTurn", RpcTarget.All, roll);
+        UIController.Instance.PlayAnnouncement(new string[] { "Waiting for other players.", "Waiting for other players..", "Waiting for other players..." }, AnnouncementType.StaticFrame);
+    }
+
     #endregion
 
     #region Pathfinding
