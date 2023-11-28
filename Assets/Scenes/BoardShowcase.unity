@@ -1156,7 +1156,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 319575868}
-  - component: {fileID: 319575869}
   - component: {fileID: 319575870}
   m_Layer: 0
   m_Name: BoardStart
@@ -1180,18 +1179,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &319575869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 319575866}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33f7343fcdd84184fb19aac0c96c18a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &319575870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3958,7 +3945,6 @@ MonoBehaviour:
   gameOverScreenHost: {fileID: 1635393534}
   gameOverScreenNonHost: {fileID: 362070473}
   chatPanel: {fileID: 1453351383}
-  actionInfoPanel: {fileID: 0}
   playerName: {fileID: 995191968}
   cardsSpacing: 110
   cardsAnimationDuration: 0.05
@@ -3971,10 +3957,10 @@ MonoBehaviour:
   chatContent: {fileID: 329216624}
   chatTypeBox: {fileID: 396505777}
   unreadChatIco: {fileID: 99195789}
-  rollButton: {fileID: 701279851}
-  buildButton: {fileID: 1247838055}
-  moveButton: {fileID: 473524652}
-  cardsButton: {fileID: 817272067}
+  rollButton: {fileID: 701279853}
+  buildButton: {fileID: 1247838057}
+  moveButton: {fileID: 473524654}
+  cardsButton: {fileID: 817272069}
   cameraHeightText: {fileID: 160683604}
   playerCamera: {fileID: 1115346356}
 --- !u!114 &699902468
