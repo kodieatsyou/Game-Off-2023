@@ -9,11 +9,9 @@ using UnityEngine;
 ///  Handles selecting and mouse hovering
 /// </summary>
 
-public class BoardSpace : MonoBehaviour
+public class BoardSpaceLocal: MonoBehaviour
 {
     [SerializeField] private bool isBuilt;
-    private bool wasBuiltLastFrame;
-    private bool needsUpdate;
     private Vector3 posInBoard;
     private Vector3 posInWorld;
     private float worldSpaceScalingFactor;
@@ -21,14 +19,14 @@ public class BoardSpace : MonoBehaviour
     private GameObject blockMesh;
     private GameObject detailMesh;
     private GameObject playerOnSpace;
-    private BoardSpace blockBelow;
+    private BoardSpaceLocal blockBelow;
     private bool isSelectable;
     private bool isSelected;
     private bool isBeingHovered;
     private bool clicked;
     private BoxCollider bCollider;
 
-    public BoardSpace InitializeSpace(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
+    public BoardSpaceLocal InitializeSpace(Vector3 posInBoard, float worldSpaceScalingFactor, bool isBuilt)
     {
         //Set in-board and in-world positions
         this.posInBoard = posInBoard;
@@ -40,11 +38,9 @@ public class BoardSpace : MonoBehaviour
         playerOnSpace = null;
         transform.name = ToString();
         this.isBuilt = isBuilt;
-        wasBuiltLastFrame = isBuilt;
         valueOfNeighbors = 1;
         isSelectable = false;
         isSelected = false;
-        needsUpdate = true;
         isBeingHovered = false;
         clicked = false;
 
@@ -77,15 +73,12 @@ public class BoardSpace : MonoBehaviour
 
     private void Update()
     {
-        //Check if isBuilt was changed from last frame
-        if(isBuilt != wasBuiltLastFrame){ needsUpdate = true; }
-
         //Check if there is a block below and we havent saved it yet
         if(blockBelow == null)
         {
-            if ((int)posInBoard.y - 1 >= 0 && BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
+            if ((int)posInBoard.y - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z] != null)
             {
-                blockBelow = BoardManager.BoardSpace_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
+                blockBelow = BoardManagerLocal.BoardSpaceLocal_Arr[(int)posInBoard.x, (int)posInBoard.y - 1, (int)posInBoard.z];
             }
         }
 
@@ -93,7 +86,6 @@ public class BoardSpace : MonoBehaviour
         if(CalculateValueOfNeighbors() != valueOfNeighbors)
         {
             valueOfNeighbors = CalculateValueOfNeighbors();
-            needsUpdate = true;
         }
         
         //Check if block below this one exists and is built if not set this block to not built
@@ -102,26 +94,19 @@ public class BoardSpace : MonoBehaviour
             if(isBuilt)
             {
                 isBuilt = false;
-                needsUpdate = true;
             }
         }
-        
-        //If we need to update then we update the block mesh
-        if(needsUpdate)
+
+        if (isBuilt && (int)posInBoard.y > BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock)
         {
-            if(isBuilt && (int)posInBoard.y > BoardManager.Instance.yOfCurrentHeighestBuiltBlock)
-            {
-                BoardManager.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
-            }
-            UpdateBlockMesh();
-            needsUpdate = false;
+            BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock = (int)posInBoard.y;
         }
+
+        UpdateBlockMesh();
 
         UpdateSelectability();
 
         HandleClick();
-
-        wasBuiltLastFrame = isBuilt;
     }
 
     private void HandleClick()
@@ -136,7 +121,8 @@ public class BoardSpace : MonoBehaviour
             // Check if the right mouse button was just clicked (not held down indicating camera panning)
             if (clicked && !Input.GetMouseButton(0))
             {
-                isSelected = !isSelected;
+                //isSelected = !isSelected;
+                SetIsBuiltPushUpdate(false);
             }
         }
 
@@ -150,24 +136,37 @@ public class BoardSpace : MonoBehaviour
     {
         if (isBuilt && valueOfNeighbors != 0)
         {
+            // Store a reference to the blockMesh before destroying it
+            GameObject previousBlockMesh = blockMesh?.gameObject;
+
+            // Destroy the previous blockMesh
+            Destroy(previousBlockMesh);
+
+            // Check if the original object is not null before instantiating
             if (valueOfNeighbors % 11 == 0)
             {
-                Destroy(blockMesh?.gameObject);
-                blockMesh = Instantiate(GameAssets.i.stone_blocks_[valueOfNeighbors / 11], transform);
-                detailMesh?.SetActive(false);
+                if(GameAssets.i.stone_blocks_[valueOfNeighbors / 11] != null)
+                {
+                    blockMesh = Instantiate(GameAssets.i.stone_blocks_[valueOfNeighbors / 11], transform);
+                    detailMesh?.SetActive(false);
+                }
+               
             }
-            else
+            else 
             {
-                Destroy(blockMesh?.gameObject);
-                blockMesh = Instantiate(GameAssets.i.grass_blocks_[valueOfNeighbors], transform);
-                detailMesh?.SetActive(true);
+                if (GameAssets.i.grass_blocks_[valueOfNeighbors] != null)
+                {
+                    blockMesh = Instantiate(GameAssets.i.grass_blocks_[valueOfNeighbors], transform);
+                    detailMesh?.SetActive(true);
+                }
             }
-        } else
+        }
+        else
         {
+            // Destroy the blockMesh if it exists
             Destroy(blockMesh?.gameObject);
             detailMesh?.SetActive(false);
         }
-        
     }
 
     private int CalculateValueOfNeighbors()
@@ -177,29 +176,29 @@ public class BoardSpace : MonoBehaviour
         int y = (int)posInBoard.y;
         int z = (int)posInBoard.z;
 
-        if (z + 1 < BoardManager.Instance.BaseSize && BoardManager.BoardSpace_Arr[x, y, z + 1] != null)
+        if (z + 1 < BoardManagerLocal.Instance.BaseSize && BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z + 1] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
+            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z + 1].GetIsBuilt()) neighborValue *= 2; // Front Block
         } 
 
-        if (z - 1 >= 0 && BoardManager.BoardSpace_Arr[x, y, z - 1] != null)
+        if (z - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z - 1] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
+            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y, z - 1].GetIsBuilt()) neighborValue *= 3; // Behind Block
         }
 
-        if (x + 1 < BoardManager.Instance.BaseSize && BoardManager.BoardSpace_Arr[x + 1, y, z] != null)
+        if (x + 1 < BoardManagerLocal.Instance.BaseSize && BoardManagerLocal.BoardSpaceLocal_Arr[x + 1, y, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
+            if(BoardManagerLocal.BoardSpaceLocal_Arr[x + 1, y, z].GetIsBuilt()) neighborValue *= 5; // Left Block
         } 
 
-        if (x - 1 >= 0 && BoardManager.BoardSpace_Arr[x - 1, y, z] != null)
+        if (x - 1 >= 0 && BoardManagerLocal.BoardSpaceLocal_Arr[x - 1, y, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
+            if(BoardManagerLocal.BoardSpaceLocal_Arr[x - 1, y, z].GetIsBuilt()) neighborValue *= 7; // Right Block
         }
 
-        if (y + 1 < BoardManager.Instance.HeightSize && BoardManager.BoardSpace_Arr[x, y + 1, z] != null)
+        if (y + 1 < BoardManagerLocal.Instance.HeightSize && BoardManagerLocal.BoardSpaceLocal_Arr[x, y + 1, z] != null)
         {
-            if(BoardManager.BoardSpace_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
+            if(BoardManagerLocal.BoardSpaceLocal_Arr[x, y + 1, z].GetIsBuilt()) neighborValue *= 11; // Above Block
         }
 
         return neighborValue;
@@ -207,7 +206,7 @@ public class BoardSpace : MonoBehaviour
 
     public void UpdateSelectability()
     {
-        switch (BoardManager.Instance.selectionMode)
+        switch (BoardManagerLocal.Instance.selectionMode)
         {
             case SelectionMode.Build:
                 if (!isBuilt && (blockBelow.GetIsBuilt() || blockBelow.GetIsSelected()))
@@ -215,6 +214,18 @@ public class BoardSpace : MonoBehaviour
                     bCollider.enabled = true;
                     isSelectable = true;
                 } else
+                {
+                    bCollider.enabled = false;
+                    isSelectable = false;
+                }
+                break;
+            case SelectionMode.Move:
+                if(posInBoard.y == 0)
+                {
+                    bCollider.enabled = true;
+                    isSelectable = true;
+                }
+                else
                 {
                     bCollider.enabled = false;
                     isSelectable = false;
@@ -261,6 +272,25 @@ public class BoardSpace : MonoBehaviour
         this.playerOnSpace = player;
     }
 
+    public void SetIsBuiltNoUpdate(bool isBuilt)
+    {
+        if (isBuilt != this.isBuilt)
+        {
+            this.isBuilt = isBuilt;
+        }
+    }
+
+    public void SetIsBuiltPushUpdate(bool isBuilt) { 
+        if(isBuilt != this.isBuilt)
+        {
+            this.isBuilt = isBuilt;
+            if (BoardManagerLocal.Instance.initialized)
+            {
+                BoardManagerLocal.Instance.PushSyncFromLocalBoard(this);
+            }
+        }
+    }
+
     private void OnMouseEnter()
     {
         if(isSelectable)
@@ -273,5 +303,4 @@ public class BoardSpace : MonoBehaviour
     {
         isBeingHovered = false;
     }
-
 }

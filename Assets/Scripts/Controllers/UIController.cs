@@ -20,7 +20,7 @@ public class UIController : MonoBehaviour
     [Header("Regions")]
     [SerializeField] GameObject hotBar;
     [SerializeField] GameObject info;
-    [SerializeField] GameObject menuScreen;
+    [SerializeField] GameObject quitScreen;
     [SerializeField] GameObject cardsScreen;
     [SerializeField] GameObject announcementBar;
     [SerializeField] GameObject gameOverScreenHost;
@@ -28,7 +28,8 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject chatPanel;
     //[SerializeField] GameObject actionInfoPanel;
     [Header("Info")]
-    [SerializeField] TMP_Text playerName;
+    [SerializeField] GameObject infoPanelPlayerList;
+    [SerializeField] GameObject playerInfoCard;
     [Header("Card")]
     [SerializeField] float cardsSpacing = 100f;
     [SerializeField] float cardsAnimationDuration = 0.05f;
@@ -53,6 +54,7 @@ public class UIController : MonoBehaviour
     [SerializeField] TMP_Text cameraHeightText;
     [Header("Other")]
     [SerializeField] GameObject playerCamera;
+    [SerializeField] PlayerController playerController;
 
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
@@ -65,14 +67,7 @@ public class UIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //hotBar.SetActive(false);
         player = PhotonNetwork.LocalPlayer;
-        if (player == PhotonNetwork.LocalPlayer)
-        {
-            // Just testing setting names
-            playerName.text = player.NickName;
-        }
-
         InitializeUI();
     }
 
@@ -127,7 +122,8 @@ public class UIController : MonoBehaviour
         SetTurnTime(0);
         StopAnnouncement();
         ToggleGameOverScreen(false);
-        ToggleMenuScreen(false);
+        ToggleQuitScreen();
+        PopulateTurnPanel();
     }
 
     public void StartTurn()
@@ -137,6 +133,18 @@ public class UIController : MonoBehaviour
         ToggleBuildButton(true);
         ToggleMoveButton(true);
     }
+
+    #region Info Panel
+
+    public void PopulateTurnPanel()
+    {
+        foreach(Player p in PhotonNetwork.PlayerList)
+        {
+            Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(p);
+        }
+    }
+
+    #endregion
 
     #region Chat
     public void ToggleChat()
@@ -381,12 +389,14 @@ public class UIController : MonoBehaviour
     {
         moveButton.interactable = toggle;
     }
+    
+
     #endregion
 
-    #region Menu
-    public void ToggleMenuScreen(bool toggle)
+    #region Quit
+    public void ToggleQuitScreen()
     {
-        menuScreen.SetActive(toggle);
+        quitScreen.SetActive(!quitScreen.activeSelf);
     }
     #endregion
 

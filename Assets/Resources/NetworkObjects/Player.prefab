@@ -269,9 +269,8 @@ GameObject:
   - component: {fileID: 6229240161908657685}
   - component: {fileID: -1438261242718217789}
   - component: {fileID: -3938719423913425302}
-  - component: {fileID: 1985424651351516471}
   m_Layer: 0
-  m_Name: Yeti
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -385,18 +384,6 @@ MonoBehaviour:
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
---- !u!114 &1985424651351516471
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3016171009201000026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e37e39a3dd90c472684c11ae74ef8ac2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3103720536035194838
 GameObject:
   m_ObjectHideFlags: 0
