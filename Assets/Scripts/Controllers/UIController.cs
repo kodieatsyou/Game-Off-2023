@@ -26,7 +26,7 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject gameOverScreenHost;
     [SerializeField] GameObject gameOverScreenNonHost;
     [SerializeField] GameObject chatPanel;
-    [SerializeField] GameObject actionInfoPanel;
+    //[SerializeField] GameObject actionInfoPanel;
     [Header("Info")]
     [SerializeField] GameObject infoPanelPlayerList;
     [SerializeField] GameObject playerInfoCard;
@@ -347,7 +347,7 @@ public class UIController : MonoBehaviour
     public void ToggleHotbar(bool toggle)
     {
         hotBar.SetActive(toggle);
-        actionInfoPanel.SetActive(toggle);
+        //actionInfoPanel.SetActive(toggle);
     }
 
     public void SetTurnTime(float seconds)
