@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviourPunCallbacks
@@ -186,5 +187,13 @@ public class BoardManager : MonoBehaviourPunCallbacks
     {
         board[(int)pos.x, (int)pos.y, (int)pos.z] = newValue;
         Board.Instance.boardArray[(int)pos.x, (int)pos.y, (int)pos.z].SetIsBuilt(newValue);
+    }
+
+    [PunRPC]
+    public void RPCBoardManagerDoWind(WindDir dir)
+    {
+        Debug.Log("MAKING WIND PARTICLES");
+        Instantiate(GameAssets.i.wind_particle_.GetComponent<WindParticle>().InitializeWindParticles(3f, dir));
+        PlayerController.Instance.GetPushedByWind(dir);
     }
 }

@@ -199,4 +199,43 @@ public class Board : MonoBehaviour
         }
         return false;
     }
+
+    public BoardSpace GetWindPushBlock(BoardSpace curSpace, WindDir dir) {
+        Vector3 curBoardPos = curSpace.GetPosInBoard();
+        switch (dir)
+        {
+            case WindDir.North:
+                if(curBoardPos.x == 0) {
+                    return curSpace;
+                } 
+                curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x - 1, curBoardPos.y, curBoardPos.z));
+                return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
+            case WindDir.East:
+                if(curBoardPos.z == baseSize - 1) {
+                    return curSpace;
+                } 
+                curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x, curBoardPos.y, curBoardPos.z + 1));
+                return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
+            case WindDir.South:
+                if(curBoardPos.x == baseSize - 1) {
+                    return curSpace;
+                } 
+                curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x + 1, curBoardPos.y, curBoardPos.z));
+                return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
+            case WindDir.West:
+                if(curBoardPos.z == 0) {
+                    return curSpace;
+                } 
+                curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x, curBoardPos.y, curBoardPos.z - 1));
+                return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
+        }
+        return null;
+    }
+
+    Vector3 FindNextValidYGoingDown(Vector3 positionToCheckFrom) {
+        while(!Board.Instance.boardArray[(int)positionToCheckFrom.x, (int)positionToCheckFrom.y, (int)positionToCheckFrom.z].GetIsBuilt() || positionToCheckFrom.y != 0) {
+            positionToCheckFrom = new Vector3(positionToCheckFrom.x, positionToCheckFrom.y - 1, positionToCheckFrom.z);
+        }
+        return positionToCheckFrom;
+    }
 }

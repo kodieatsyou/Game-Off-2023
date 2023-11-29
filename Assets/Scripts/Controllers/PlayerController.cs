@@ -215,4 +215,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     }
     #endregion
 
+    public void GetPushedByWind(WindDir dir) {
+        BoardSpace newSpace = Board.Instance.GetWindPushBlock(currentSpace, dir);
+        Debug.Log("I got pushed to a new space: " + newSpace.ToString());
+    }
 }

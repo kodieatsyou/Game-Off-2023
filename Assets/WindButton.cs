@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum WindDir
@@ -13,11 +15,15 @@ public enum WindDir
 public class WindButton : MonoBehaviour
 {
     public WindDir dir;
+    public Color unhoveredColor;
+    public Color hoveredColor;
+
+    private bool isHovered;
     public void Initialize(WindDir dir)
     {
         this.dir = dir;
         SetPositionAndRotation();
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
     }
 
     void SetPositionAndRotation()
@@ -46,10 +52,23 @@ public class WindButton : MonoBehaviour
                 break;
         }
     }
-
-    // Update is called once per frame
     void Update()
     {
-        
+        if(isHovered) {
+            if(Input.GetMouseButtonDown(0)) {
+                BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerDoWind", RpcTarget.All, dir);
+                UIController.Instance.ToggleWindDirectionButtons(false);
+            }
+        }
+    }
+
+    private void OnMouseEnter() {
+        isHovered = true;
+        GetComponentInChildren<SpriteRenderer>().color = hoveredColor;
+    }
+
+    private void OnMouseExit() {
+        isHovered = false;
+        GetComponentInChildren<SpriteRenderer>().color = unhoveredColor;
     }
 }
