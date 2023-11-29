@@ -236,14 +236,17 @@ public class BoardSpace : MonoBehaviour
                 }
                 break;
             case SelectionMode.Move:
-                if (PlayerController.Instance != null && posInBoard.y == PlayerController.Instance.currentSpace.GetPosInBoard().y && GetPlayerOnSpace() == null)
+             //&& posInBoard.y == PlayerController.Instance.currentSpace.GetPosInBoard().y
+                if (PlayerController.Instance != null && GetPlayerOnSpace() == null && GetIsBuilt())
                 {
                     if (posInBoard.y + 1 < Board.Instance.heightSize)
                     {
                         if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt())
                         {
-                            bCollider.enabled = true;
-                            isSelectable = true;
+                            if(blockBelow != null && blockBelow.GetIsBuilt()) {
+                                bCollider.enabled = true;
+                                isSelectable = true;
+                            }
                         }
                     }
                 }

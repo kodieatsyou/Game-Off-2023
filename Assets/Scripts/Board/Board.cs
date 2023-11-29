@@ -110,6 +110,7 @@ public class Board : MonoBehaviour
             selectedSpaces[0].SetIsSelected(false);
         }
         selectedSpaces.Clear();
+        selectionMode = SelectionMode.None;
     }
     void BuildSelected()
     {
@@ -118,8 +119,8 @@ public class Board : MonoBehaviour
             block.SetIsSelected(false);
             BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", RpcTarget.All, block.GetPosInBoard(), true);
         }
-
         selectedSpaces.Clear();
+        selectionMode = SelectionMode.None;
     }
 
     public void ClearAction()
@@ -205,25 +206,25 @@ public class Board : MonoBehaviour
         switch (dir)
         {
             case WindDir.North:
-                if(curBoardPos.x == 0) {
+                if(curBoardPos.x == 0 || boardArray[(int)curBoardPos.x - 1, (int)curBoardPos.y + 1, (int)curBoardPos.z].GetIsBuilt()) {
                     return curSpace;
                 } 
                 curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x - 1, curBoardPos.y, curBoardPos.z));
                 return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
             case WindDir.East:
-                if(curBoardPos.z == baseSize - 1) {
+                if(curBoardPos.z == baseSize - 1 || boardArray[(int)curBoardPos.x, (int)curBoardPos.y + 1, (int)curBoardPos.z + 1].GetIsBuilt()) {
                     return curSpace;
                 } 
                 curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x, curBoardPos.y, curBoardPos.z + 1));
                 return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
             case WindDir.South:
-                if(curBoardPos.x == baseSize - 1) {
+                if(curBoardPos.x == baseSize - 1 || boardArray[(int)curBoardPos.x + 1, (int)curBoardPos.y + 1, (int)curBoardPos.z].GetIsBuilt()) {
                     return curSpace;
                 } 
                 curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x + 1, curBoardPos.y, curBoardPos.z));
                 return boardArray[(int)curBoardPos.x, (int)curBoardPos.y, (int)curBoardPos.z];
             case WindDir.West:
-                if(curBoardPos.z == 0) {
+                if(curBoardPos.z == 0 || boardArray[(int)curBoardPos.x, (int)curBoardPos.y + 1, (int)curBoardPos.z - 1].GetIsBuilt()) {
                     return curSpace;
                 } 
                 curBoardPos = FindNextValidYGoingDown(new Vector3(curBoardPos.x, curBoardPos.y, curBoardPos.z - 1));

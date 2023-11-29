@@ -8,7 +8,7 @@ public class PlayerAnimationController : MonoBehaviour
     private Animator animator;
     private bool continueAnimations = false;
     PhotonView PCPhotonView;
-    string currentRootMotionAnimationName = null;
+    string currentTriggeredAnimationName = null;
 
     private void Start()
     {
@@ -20,13 +20,13 @@ public class PlayerAnimationController : MonoBehaviour
         continueAnimations = false;
         //PCPhotonView.RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.Others, animationName);
         animator.SetBool(animationName, true);
-        currentRootMotionAnimationName = animationName;
+        currentTriggeredAnimationName = animationName;
     }
 
-    public void OnRootMotionAnimationFinished()
+    public void OnTriggeredAnimationFinished()
     {
-        animator.SetBool(currentRootMotionAnimationName, false);
-        currentRootMotionAnimationName = null;
+        animator.SetBool(currentTriggeredAnimationName, false);
+        currentTriggeredAnimationName = null;
         continueAnimations = true;
     }
 

@@ -22,6 +22,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     //Moving
     public int moveSpeed = 5;
+
+    public int fallSpeed = 12;
     public int rotationSpeed = 10;
     public bool moving = false;
     
@@ -216,7 +218,49 @@ public class PlayerController: MonoBehaviourPunCallbacks
     #endregion
 
     public void GetPushedByWind(WindDir dir) {
-        BoardSpace newSpace = Board.Instance.GetWindPushBlock(currentSpace, dir);
-        Debug.Log("I got pushed to a new space: " + newSpace.ToString());
+        switch(dir){
+            case WindDir.North:
+                transform.rotation = Quaternion.Euler(0, 90, 0);
+                break;
+            case WindDir.East:
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                break;
+            case WindDir.South:
+                transform.rotation = Quaternion.Euler(0, -90, 0);
+                break;
+            case WindDir.West:
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                break;
+        }
+        StartCoroutine(GetPushed(Board.Instance.GetWindPushBlock(currentSpace, dir)));
+    }
+
+    IEnumerator GetPushed(BoardSpace spaceToLandOn) 
+    {
+        bool falling = false;
+        if(spaceToLandOn.GetPosInBoard().y < currentSpace.GetPosInBoard().y - 1) {
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Wind_Fall", true);
+            falling = true;
+        }
+        if(spaceToLandOn == currentSpace) {
+            GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Wind_Push_Into_Block");
+            yield break;
+        }
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Wind_Push");
+        yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+        if(falling) {
+            float distance = Vector3.Distance(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace());
+            while (distance > 0.1f)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace(), fallSpeed * Time.deltaTime);
+                distance = Vector3.Distance(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace());
+                yield return null;
+            }
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Wind_Fall", false);
+            falling = false;
+            Debug.Log("DONE!");
+        }
+        transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, spaceToLandOn.GetPosInBoard());
     }
 }

@@ -23,7 +23,7 @@ public class WindButton : MonoBehaviour
     {
         this.dir = dir;
         SetPositionAndRotation();
-        //gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     void SetPositionAndRotation()
