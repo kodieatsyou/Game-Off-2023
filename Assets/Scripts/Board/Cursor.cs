@@ -64,6 +64,10 @@ public class Cursor : MonoBehaviour
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
                 break;
+            case SelectionMode.Grapple:
+                buildScaffold.SetActive(false);
+                moveArrow.SetActive(true);
+                break;
             case SelectionMode.Build:
                 buildScaffold.SetActive(true);
                 moveArrow.SetActive(false);

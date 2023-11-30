@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 
 public class PlayerController: MonoBehaviourPunCallbacks
 {
@@ -60,9 +61,16 @@ public class PlayerController: MonoBehaviourPunCallbacks
             CurrTurnLength -= Time.deltaTime;
             UIController.Instance.SetTurnTime(CurrTurnLength);
             UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
-            if (CurrTurnLength < 0f || ActionsRemaining < 0)
+            if (ActionsRemaining <= 0)
             {
-                EndTurn();
+                UIController.Instance.PlayAnnouncement("Out of Actions!", AnnouncementType.DropBounce);
+                GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
+                IsActiveTurn = false;
+            }
+            if(CurrTurnLength <= 0f) {
+                UIController.Instance.PlayAnnouncement("Out of Time!", AnnouncementType.DropBounce);
+                GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
+                IsActiveTurn = false;
             }
         }
     }
@@ -120,7 +128,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
             case 1:
                 UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
                 UIController.Instance.ToggleWindButton(true);
-                UIController.Instance.ToggleWindDirectionButtons(true);
                 break;
             case 2:
                 UIController.Instance.PlayAnnouncement("Grapple", AnnouncementType.DropBounce);
@@ -147,14 +154,11 @@ public class PlayerController: MonoBehaviourPunCallbacks
     {
         if(!moving)
         {
-            BoardSpace oldSpace = currentSpace;
-            currentSpace = spaceToMoveTo;
-            oldSpace.PlacePlayerOnSpace(null);
             moving = true;
-            StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(oldSpace, spaceToMoveTo).FindPath().ToArray()));
+            StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath().ToArray(), spaceToMoveTo));
         }
     }
-    IEnumerator MoveThroughWaypoints(Vector3[] waypoints)
+    IEnumerator MoveThroughWaypoints(Vector3[] waypoints, BoardSpace endSpace)
     {
         int currentWaypointIndex = 0;
 
@@ -209,14 +213,34 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 yield return null;
             }
         }
-
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
-        //currentSpace.PlacePlayerOnSpace(this.gameObject);
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, currentSpace.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, endSpace.GetPosInBoard(), currentSpace.GetPosInBoard());
         moving = false;
     }
     #endregion
 
+    public void GrappleToBlock(BoardSpace grappleTo) {
+        if(Mathf.Abs(grappleTo.GetPosInBoard().y - currentSpace.GetPosInBoard().y) == 2) {
+            Debug.Log("GRAPPLIJG");
+            StartCoroutine(Grapple(grappleTo));
+        } else {
+            Debug.Log("Moving");
+            MoveTo(grappleTo);
+        }
+    }
+
+    public IEnumerator Grapple(BoardSpace target) {
+        Vector3 horizontalDirection = (new Vector3(target.GetPosInWorld().x, transform.position.y, target.GetPosInWorld().z) - transform.position).normalized;
+        Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
+        transform.rotation = horizontalLookRotation;
+
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Grapple");
+
+        yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+
+        transform.position = target.GetWorldPositionOfTopOfSpace();
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, target.GetPosInBoard(), currentSpace.GetPosInBoard());
+    }
     public void GetPushedByWind(WindDir dir) {
         switch(dir){
             case WindDir.North:
@@ -237,6 +261,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     IEnumerator GetPushed(BoardSpace spaceToLandOn) 
     {
+        currentSpace.PlacePlayerOnSpace(null);
         bool falling = false;
         if(spaceToLandOn.GetPosInBoard().y < currentSpace.GetPosInBoard().y - 1) {
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Wind_Fall", true);
@@ -261,6 +286,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
             Debug.Log("DONE!");
         }
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, spaceToLandOn.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
 }

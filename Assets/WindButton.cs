@@ -58,6 +58,8 @@ public class WindButton : MonoBehaviour
             if(Input.GetMouseButtonDown(0)) {
                 BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerDoWind", RpcTarget.All, dir);
                 UIController.Instance.ToggleWindDirectionButtons(false);
+                UIController.Instance.ToggleWindButton(false);
+                PlayerController.Instance.ActionsRemaining -= 1;
             }
         }
     }

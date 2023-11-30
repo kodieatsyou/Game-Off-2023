@@ -241,14 +241,34 @@ public class BoardSpace : MonoBehaviour
                 {
                     if (posInBoard.y + 1 < Board.Instance.heightSize)
                     {
-                        if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt())
+                        if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt() && Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetPlayerOnSpace() == null)
                         {
-                            if(blockBelow != null && blockBelow.GetIsBuilt()) {
+                            if(GetPosInBoard().y == 0 || (blockBelow != null && blockBelow.GetIsBuilt())) {
                                 bCollider.enabled = true;
                                 isSelectable = true;
                             }
                         }
                     }
+                }
+                break;
+            case SelectionMode.Grapple:
+                if(PlayerController.Instance != null && GetPlayerOnSpace() == null && GetIsBuilt()) {
+                    BoardSpace playerSpace = PlayerController.Instance.currentSpace;
+                    if(((Mathf.Abs(playerSpace.GetPosInBoard().x - GetPosInBoard().x) == 1 && Mathf.Abs(playerSpace.GetPosInBoard().z - Mathf.Abs(GetPosInBoard().z)) == 0) ||
+                    (Mathf.Abs(playerSpace.GetPosInBoard().z - Mathf.Abs(GetPosInBoard().z)) == 1 && Mathf.Abs(playerSpace.GetPosInBoard().x - GetPosInBoard().x) == 0)) &&
+                    (Mathf.Abs(GetPosInBoard().y - playerSpace.GetPosInBoard().y) == 1 || Mathf.Abs(GetPosInBoard().y - playerSpace.GetPosInBoard().y) == 2)) 
+                    {
+                        if (posInBoard.y + 1 < Board.Instance.heightSize) 
+                        {
+                            if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt() && Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetPlayerOnSpace() == null)
+                            {
+                                if(GetPosInBoard().y == 0 || (blockBelow != null && blockBelow.GetIsBuilt())) {
+                                    bCollider.enabled = true;
+                                    isSelectable = true;
+                                }
+                            }
+                        }
+                    } 
                 }
                 break;
         }

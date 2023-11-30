@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
+
+    public Transform rightHand;
     private Animator animator;
     private bool continueAnimations = false;
     PhotonView PCPhotonView;
@@ -38,6 +40,13 @@ public class PlayerAnimationController : MonoBehaviour
     public bool CheckIfContinue()
     {
         return continueAnimations;
+    }
+
+    public void SpawnGrappleGun() {
+        GameObject gun = Instantiate(GameAssets.i.prop_grapple_gun_);
+        gun.transform.position = rightHand.position;
+        gun.transform.rotation = Quaternion.Euler(gun.transform.rotation.eulerAngles + transform.rotation.eulerAngles);
+        gun.transform.parent = rightHand;
     }
 
     [PunRPC]

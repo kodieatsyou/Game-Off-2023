@@ -47,4 +47,7 @@ public class GameAssets : MonoBehaviour
     public Material super_special_material_;
     public GameObject[] character_head_accessories_;
     public GameObject[] character_face_accessories_;
+
+    [Header("Animation Props")]
+    public GameObject prop_grapple_gun_;
 }

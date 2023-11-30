@@ -6986,7 +6986,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 699902467}
         m_TargetAssemblyTypeName: UIController, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: OnGrappleButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

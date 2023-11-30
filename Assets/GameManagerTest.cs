@@ -132,4 +132,15 @@ public class GameManagerTest : MonoBehaviour
         }
     }
 
+    [PunRPC]
+    public void RPCGameManagerPlayerEndedTurn(PhotonMessageInfo info)
+    {
+        if(currentTurnIndex + 1 >= turnOrder.Count) {
+            currentTurnIndex = 0;
+        } else {
+            currentTurnIndex += 1;
+        }
+        StartTurn();
+    }
+
 }

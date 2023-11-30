@@ -608,18 +608,47 @@ public class UIController : MonoBehaviour
 
     public void OnBuildButtonClick()
     {
-        actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
-        ToggleActionPanel(true);
-        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(5, 50, 0);
-        Board.Instance.selectionMode = SelectionMode.Build;
+        if(Board.Instance.selectionMode == SelectionMode.Build) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
+            ToggleActionPanel(true);
+            if(Board.Instance.selectedSpaces.Count == 0) {
+                ToggleActionPanelConfirm(false);
+            }
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(5, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Build;
+        }
     }
 
     public void OnMoveButtonClick()
     {
-        actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
-        ToggleActionPanel(true);
-        actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-45, 50, 0);
-        Board.Instance.selectionMode = SelectionMode.Move;
+        if(Board.Instance.selectionMode == SelectionMode.Move) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
+            ToggleActionPanel(true);
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-45, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Move;
+        }
+    }
+
+    public void OnGrappleButtonClick()
+    {
+        if(Board.Instance.selectionMode == SelectionMode.Grapple) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
+            ToggleActionPanel(true);
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-95, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Grapple;
+        }
     }
 
     public void OnRollButtonClick()

@@ -10,6 +10,7 @@ public enum SelectionMode
     Build,
     Move,
     Player,
+    Grapple,
     None
 }
 
@@ -99,6 +100,11 @@ public class Board : MonoBehaviour
                 PlayerController.Instance.ActionsRemaining -= 1;
                 MoveToSelected();
                 break;
+            case SelectionMode.Grapple:
+                UIController.Instance.ToggleGrappleButton(false);
+                PlayerController.Instance.ActionsRemaining -= 1;
+                GrappleToSelected();
+                break;
         }
     }
 
@@ -107,6 +113,17 @@ public class Board : MonoBehaviour
         if(selectedSpaces.Count == 1)
         {
             PlayerController.Instance.MoveTo(selectedSpaces[0]);
+            selectedSpaces[0].SetIsSelected(false);
+        }
+        selectedSpaces.Clear();
+        selectionMode = SelectionMode.None;
+    }
+
+    void GrappleToSelected()
+    {
+        if(selectedSpaces.Count == 1)
+        {
+            PlayerController.Instance.GrappleToBlock(selectedSpaces[0]);
             selectedSpaces[0].SetIsSelected(false);
         }
         selectedSpaces.Clear();
@@ -166,6 +183,13 @@ public class Board : MonoBehaviour
                         return true;
                     }
                     return false;
+                case SelectionMode.Grapple:
+                    if (selectedSpaces.Count == 0)
+                    {
+                        selectedSpaces.Add(blockSelected);
+                        return true;
+                    }
+                    return false;
             }
         }
         return false;
@@ -194,6 +218,11 @@ public class Board : MonoBehaviour
                     }
                 case SelectionMode.Move:
                     selectedSpaces.Remove(blockUnSelected);
+                    UIController.Instance.ToggleActionPanelConfirm(false);
+                    return true;
+                case SelectionMode.Grapple:
+                    selectedSpaces.Remove(blockUnSelected);
+                    UIController.Instance.ToggleActionPanelConfirm(false);
                     return true;
             }
             return false;
@@ -234,7 +263,7 @@ public class Board : MonoBehaviour
     }
 
     Vector3 FindNextValidYGoingDown(Vector3 positionToCheckFrom) {
-        while(!Board.Instance.boardArray[(int)positionToCheckFrom.x, (int)positionToCheckFrom.y, (int)positionToCheckFrom.z].GetIsBuilt() || positionToCheckFrom.y != 0) {
+        while(!Board.Instance.boardArray[(int)positionToCheckFrom.x, (int)positionToCheckFrom.y, (int)positionToCheckFrom.z].GetIsBuilt() && positionToCheckFrom.y != 0) {
             positionToCheckFrom = new Vector3(positionToCheckFrom.x, positionToCheckFrom.y - 1, positionToCheckFrom.z);
         }
         return positionToCheckFrom;

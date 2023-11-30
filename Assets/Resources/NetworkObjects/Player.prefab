@@ -240,7 +240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowLayerWeightsInspector: 0
-  ShowParameterInspector: 0
+  ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 4
     SynchronizeType: 2
@@ -251,6 +251,18 @@ MonoBehaviour:
   - Type: 9
     SynchronizeType: 2
     Name: Climb_Down
+  - Type: 4
+    SynchronizeType: 0
+    Name: Wind_Push
+  - Type: 4
+    SynchronizeType: 0
+    Name: Wind_Fall
+  - Type: 4
+    SynchronizeType: 0
+    Name: Wind_Push_Into_Block
+  - Type: 4
+    SynchronizeType: 0
+    Name: Grapple
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0
@@ -279,6 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a1eeb2cdf2a7bb479cae21443d2c157, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rightHand: {fileID: 6489977746316984642}
 --- !u!114 &6489977744699991979
 MonoBehaviour:
   m_ObjectHideFlags: 0
