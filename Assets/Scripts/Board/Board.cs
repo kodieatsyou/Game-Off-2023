@@ -11,6 +11,7 @@ public enum SelectionMode
     Move,
     Player,
     Grapple,
+    Ninja,
     None
 }
 

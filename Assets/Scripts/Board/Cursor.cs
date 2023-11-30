@@ -5,7 +5,10 @@ using UnityEngine;
 public class Cursor : MonoBehaviour
 {
     BoardSpace space;
-    GameObject hover;
+    GameObject blockHover;
+    GameObject playerHover;
+
+    GameObject currentHover;
     GameObject indicator;
     GameObject moveArrow;
     GameObject buildScaffold;
@@ -13,12 +16,16 @@ public class Cursor : MonoBehaviour
     private void Start()
     {
         space = transform.parent.GetComponent<BoardSpace>();
-        hover = transform.GetChild(0).gameObject;
-        indicator = transform.GetChild(1).gameObject;
-        buildScaffold = transform.GetChild(2).gameObject;
-        moveArrow = transform.GetChild(3).gameObject;
+        blockHover = transform.GetChild(0).gameObject;
+        playerHover = transform.GetChild(1).gameObject;
+        indicator = transform.GetChild(2).gameObject;
+        buildScaffold = transform.GetChild(3).gameObject;
+        moveArrow = transform.GetChild(4).gameObject;
 
-        hover.SetActive(false);
+        currentHover = blockHover;
+
+        blockHover.SetActive(false);
+        playerHover.SetActive(false);
         indicator.SetActive(false);
         buildScaffold.SetActive(false);
         moveArrow.SetActive(false);
@@ -28,7 +35,7 @@ public class Cursor : MonoBehaviour
     void Update()
     {
         indicator.SetActive(false);
-        hover.SetActive(false);
+        currentHover.SetActive(false);
         buildScaffold.SetActive(false);
         moveArrow.SetActive(false);
 
@@ -37,17 +44,17 @@ public class Cursor : MonoBehaviour
             indicator.SetActive(true);
             if (space.GetIsBeingHovered())
             {
-                hover.SetActive(true);
+                currentHover.SetActive(true);
                 indicator.SetActive(false);
                 SetCursorMode();
             } else if(space.GetIsSelected())
             {
-                hover.SetActive(false);
+                currentHover.SetActive(false);
                 indicator.SetActive(false);
                 SetCursorMode();
             } else
             {
-                hover.SetActive(false);
+                currentHover.SetActive(false);
                 indicator.SetActive(true);
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(false);
@@ -63,14 +70,24 @@ public class Cursor : MonoBehaviour
             case SelectionMode.Move:
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
+                currentHover = blockHover;
                 break;
             case SelectionMode.Grapple:
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
+                currentHover = blockHover;
                 break;
             case SelectionMode.Build:
                 buildScaffold.SetActive(true);
                 moveArrow.SetActive(false);
+                break;
+            case SelectionMode.Ninja:
+                buildScaffold.SetActive(false);
+                moveArrow.SetActive(true);
+                currentHover = blockHover;
+                break;
+            case SelectionMode.None:
+                currentHover = blockHover;
                 break;
         }
     }

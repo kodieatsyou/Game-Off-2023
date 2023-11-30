@@ -50,4 +50,9 @@ public class GameAssets : MonoBehaviour
 
     [Header("Animation Props")]
     public GameObject prop_grapple_gun_;
+    public GameObject prop_hourglass_;
+
+
+    [Header("Card Particles")]
+    public GameObject card_switch_particle_;
 }

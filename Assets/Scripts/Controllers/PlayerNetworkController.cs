@@ -17,6 +17,14 @@ public class PlayerNetworkController : MonoBehaviour, IPunInstantiateMagicCallba
             gameObject.GetComponentInChildren<SpriteRenderer>().enabled = true;
             gameObject.AddComponent<DiceController>();
             gameObject.AddComponent<PlayerController>();
+            gameObject.tag = "OtherPlayer";
+        } else {
+            BoxCollider collider = gameObject.AddComponent<BoxCollider>();
+            collider.center = new Vector3(0, 1, 0);
+            collider.size = new Vector3(1.5f, 2.5f, 1);
+            collider.isTrigger = true;
+            gameObject.AddComponent<PlayerClickOnHandler>();
+            gameObject.tag = "OtherPlayer";
         }
         return;
     }

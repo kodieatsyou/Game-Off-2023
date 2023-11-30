@@ -165,6 +165,15 @@ public class UIController : MonoBehaviour
         ToggleMoveButton(true);
         SetTurnTime(turnTime);
     }
+
+    public void EndTurnSetUI()
+    {
+        ToggleHotbar(false);
+        ToggleRollButton(false);
+        ToggleBuildButton(false);
+        ToggleMoveButton(false);
+        SetTurnTime(0);
+    }
     #endregion
 
     #region Info Panel
@@ -613,6 +622,7 @@ public class UIController : MonoBehaviour
             ToggleActionPanel(false);
             Board.Instance.ClearSelected();
         } else {
+            PlayerController.Instance.StopAllCardAnimations();
             actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
             ToggleActionPanel(true);
             if(Board.Instance.selectedSpaces.Count == 0) {
@@ -630,6 +640,7 @@ public class UIController : MonoBehaviour
             ToggleActionPanel(false);
             Board.Instance.ClearSelected();
         } else {
+            PlayerController.Instance.StopAllCardAnimations();
             actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
             ToggleActionPanel(true);
             actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-45, 50, 0);
@@ -644,6 +655,7 @@ public class UIController : MonoBehaviour
             ToggleActionPanel(false);
             Board.Instance.ClearSelected();
         } else {
+            PlayerController.Instance.StopAllCardAnimations();
             actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
             ToggleActionPanel(true);
             actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-95, 50, 0);
@@ -675,6 +687,9 @@ public class UIController : MonoBehaviour
             ToggleWindDirectionButtons(false);
         } else
         {
+            PlayerController.Instance.StopAllCardAnimations();
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
             ToggleWindDirectionButtons(true);
         }
     }
@@ -705,10 +720,19 @@ public class UIController : MonoBehaviour
         cards.Add(cardObj);
     }
 
+    public void AddSpecificCard(CardType type) {
+        GameObject cardObj = Instantiate(GameAssets.i.card_, Vector3.zero, Quaternion.identity);
+        cardObj.transform.SetParent(cardsScreen.transform, false);
+        cardObj.GetComponent<Card>().SetCardType(type);
+        cards.Add(cardObj);
+    }
+
     public void ToggleCardsScreen()
     {
         if(!cardsScreen.activeSelf)
         {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
             StartCoroutine(SpreadCardsOut());
         } else
         {

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
+using Unity.VisualScripting;
 
 public class PlayerController: MonoBehaviourPunCallbacks
 {
@@ -18,6 +19,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public int blocksLeftToPlace;
     private bool IsActiveTurn;
     private bool IsRollingDie;
+
+    private bool frozen = false;
+
+    private bool hasBarrier = false;
 
     public BoardSpace currentSpace;
 
@@ -63,51 +68,41 @@ public class PlayerController: MonoBehaviourPunCallbacks
             UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
             if (ActionsRemaining <= 0)
             {
+                EndTurn();
                 UIController.Instance.PlayAnnouncement("Out of Actions!", AnnouncementType.DropBounce);
                 GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
-                IsActiveTurn = false;
-            }
-            if(CurrTurnLength <= 0f) {
+            } else if(CurrTurnLength <= 0f) {
+                EndTurn();
                 UIController.Instance.PlayAnnouncement("Out of Time!", AnnouncementType.DropBounce);
                 GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
-                IsActiveTurn = false;
             }
         }
     }
     #endregion
 
-    #region PlayerNetwork
-    /*public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
-    {
-        if (propertiesThatChanged.ContainsKey("CurrentPlayerTurn"))
-        {
-            Debug.Log("CurrentPlayerTurn change detected");
-            int networkPlayerValue = (int)PhotonNetwork.CurrentRoom.CustomProperties["CurrentPlayerTurn"];
-            if (networkPlayerValue == PlayerID)
-            {
-                StartTurn();
-            }
-        }
-    }*/
-    #endregion
-
     #region PlayerActions
     public void StartTurn(float turnTime)
     {
+        if(hasBarrier) {
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", false);
+            GetComponent<PlayerAnimationController>().DestroyParticle();
+            hasBarrier = false;
+        }
+
+        Debug.Log("Starting turn!");
+        IsActiveTurn = true;
         CurrTurnLength = turnTime;
         ActionsRemaining = 3;
         blocksLeftToPlace = 2;
-
-        IsActiveTurn = true;
         UIController.Instance.StartTurnSetUI(CurrTurnLength);
         UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
     }
 
     private void EndTurn()
     {
+        Debug.Log("Ending turn!");
         IsActiveTurn = false;
-        CurrTurnLength = NetworkTurnLength; // reset turn length at the end of the turn
-        // TODO: Add UI elements to indicate turn has ended, disable UI
+        UIController.Instance.EndTurnSetUI();
     }
 
     public void RollForTurn()
@@ -123,7 +118,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
     void DoActionDieResult(int roll)
     {
         Debug.Log("Rolled a: " + roll);
-        switch(roll)
+        UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
+        UIController.Instance.ToggleCardsButton(true);
+        /*switch(roll)
         {
             case 1:
                 UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
@@ -137,7 +134,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
                 UIController.Instance.ToggleCardsButton(true);
                 break;
-        }
+        }*/
     }
 
     void SendTurnRollToGameManager(int roll)
@@ -219,6 +216,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     }
     #endregion
 
+    #region Grapple
     public void GrappleToBlock(BoardSpace grappleTo) {
         if(Mathf.Abs(grappleTo.GetPosInBoard().y - currentSpace.GetPosInBoard().y) == 2) {
             Debug.Log("GRAPPLIJG");
@@ -241,22 +239,27 @@ public class PlayerController: MonoBehaviourPunCallbacks
         transform.position = target.GetWorldPositionOfTopOfSpace();
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, target.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
+    #endregion
+    
+    #region Wind
     public void GetPushedByWind(WindDir dir) {
-        switch(dir){
-            case WindDir.North:
-                transform.rotation = Quaternion.Euler(0, 90, 0);
-                break;
-            case WindDir.East:
-                transform.rotation = Quaternion.Euler(0, 180, 0);
-                break;
-            case WindDir.South:
-                transform.rotation = Quaternion.Euler(0, -90, 0);
-                break;
-            case WindDir.West:
-                transform.rotation = Quaternion.Euler(0, 0, 0);
-                break;
+        if(!hasBarrier) {
+            switch(dir){
+                case WindDir.North:
+                    transform.rotation = Quaternion.Euler(0, 90, 0);
+                    break;
+                case WindDir.East:
+                    transform.rotation = Quaternion.Euler(0, 180, 0);
+                    break;
+                case WindDir.South:
+                    transform.rotation = Quaternion.Euler(0, -90, 0);
+                    break;
+                case WindDir.West:
+                    transform.rotation = Quaternion.Euler(0, 0, 0);
+                    break;
+            }
+            StartCoroutine(GetPushed(Board.Instance.GetWindPushBlock(currentSpace, dir)));
         }
-        StartCoroutine(GetPushed(Board.Instance.GetWindPushBlock(currentSpace, dir)));
     }
 
     IEnumerator GetPushed(BoardSpace spaceToLandOn) 
@@ -288,4 +291,147 @@ public class PlayerController: MonoBehaviourPunCallbacks
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
+
+    #endregion
+
+    #region  Cards
+
+    public void UseCard(CardType type) {
+        StopAllCardAnimations();
+        Board.Instance.selectionMode = SelectionMode.None;
+        switch(type){
+            case CardType.Switch:
+                EnableOtherPlayerColliders();
+                GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Switch_Ready", true);
+                UIController.Instance.ToggleCardsScreen();
+                break;
+            case CardType.Punch:
+                EnableOtherPlayerColliders();
+                GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", true);
+                UIController.Instance.ToggleCardsScreen();
+                break;
+            case CardType.TimeStop:
+                GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", true);
+                UIController.Instance.ToggleCardsScreen();
+                break;
+            case CardType.Levitate:
+                StartCoroutine(DoLevitate());
+                UIController.Instance.ToggleCardsScreen();
+                break;
+            case CardType.Barrier:
+                GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", true);
+                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsButton(false);
+                hasBarrier = true;
+                ActionsRemaining = 0;
+                break;
+            case CardType.Taunt:
+                break;
+            case CardType.Ninja:
+                GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", true);
+                UIController.Instance.ToggleCardsScreen();
+                Board.Instance.selectionMode = SelectionMode.Ninja;
+            break;
+        }  
+    }
+
+    IEnumerator DoLevitate() {
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Levitate");
+        yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, new Vector3(currentSpace.GetPosInBoard().x, currentSpace.GetPosInBoard().y + 1, currentSpace.GetPosInBoard().z), currentSpace.GetPosInBoard());
+        transform.position = currentSpace.GetWorldPositionOfTopOfSpace();
+        UIController.Instance.ToggleCardsButton(false);
+        ActionsRemaining -= 1;
+    }
+
+    public void DoNinja(BoardSpace target) {
+        StartCoroutine(DoNinjaMovement(target, 10f));
+    }
+
+    IEnumerator DoNinjaMovement(BoardSpace target, float speed)
+    {
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja", true);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", false);
+        Vector3 startPosition = transform.position;
+        Vector3 targetPos = target.GetWorldPositionOfTopOfSpace();
+
+        Vector3 horizontalDirection = (new Vector3(targetPos.x, transform.position.y, targetPos.z) - transform.position).normalized;
+        Quaternion horizontalLookRotation = Quaternion.LookRotation(-horizontalDirection);
+        transform.rotation = horizontalLookRotation;
+
+        float totalDistance = Vector3.Distance(startPosition, targetPos);
+
+        float peakHeight = Mathf.Max(startPosition.y, targetPos.y) + 2f; // Adjust the peak height as needed
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < totalDistance / speed)
+        {
+            float t = elapsedTime / (totalDistance / speed);
+
+            // Horizontal movement
+            float x = Mathf.Lerp(startPosition.x, targetPos.x, t);
+            float z = Mathf.Lerp(startPosition.z, targetPos.z, t);
+
+            // Vertical movement using a parabolic motion
+            float y = Mathf.Lerp(startPosition.y, targetPos.y, t) + Mathf.Sin(t * Mathf.PI) * peakHeight;
+
+            Vector3 newPosition = new Vector3(x, y, z);
+            transform.position = newPosition;
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja", false);
+        // Ensure the object reaches the final position exactly
+        transform.position = targetPos;
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, target.GetPosInBoard(), currentSpace.GetPosInBoard());
+        UIController.Instance.ToggleCardsButton(false);
+        ActionsRemaining -= 1;
+    }
+
+    public static float CalculateParabolaY(Vector3 startPosition, Vector3 endPosition, float xValue)
+    {
+        // Normalize the x value between 0 and 1 based on the start and end positions
+        float t = Mathf.InverseLerp(startPosition.x, endPosition.x, xValue);
+
+        // Calculate the parabolic height
+        float parabolicHeight = 4f * t * (1 - t);
+
+        // Calculate the y value on the parabola
+        float y = Mathf.Lerp(startPosition.y, endPosition.y, t) + parabolicHeight;
+
+        return y;
+    }
+
+    public void StopAllCardAnimations() {
+        GetComponent<PlayerAnimationController>().DestroyParticle();
+        GetComponent<PlayerAnimationController>().DestroyProp();
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Switch_Ready", false);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", false);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", false);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", false);
+    }
+
+    void EnableOtherPlayerColliders() {
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        foreach(GameObject op in otherPlayers) {
+            if(op.GetComponent<PlayerClickOnHandler>() != null) {
+                op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
+                op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked += HandlePlayerClickedOn;
+            }
+        }
+    }
+    void HandlePlayerClickedOn(GameObject playerClicked) {
+        Debug.Log("You clicked on player: " + playerClicked.GetComponent<PlayerNetworkController>().PCPhotonView.Owner.NickName);
+    }
+
+    public void FreeInTime() {
+        if(!hasBarrier) {
+            frozen = true;
+        }
+
+    }
+
+    #endregion
 }

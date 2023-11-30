@@ -224,3 +224,5 @@ MonoBehaviour:
   - {fileID: 2194824439739574541, guid: 0733c91aaae06b545ad4a7069051a0ae, type: 3}
   - {fileID: 8938123118380925807, guid: 0a1dfd31a9ee5ec4b8f7e656872a5702, type: 3}
   prop_grapple_gun_: {fileID: 3375307950989656675, guid: 2257d987791c14b0faac2cfa6f83330d, type: 3}
+  prop_hourglass_: {fileID: 5678193131563498798, guid: 9d0a192ad6865f44e8ba9ca7008d1d4e, type: 3}
+  card_switch_particle_: {fileID: 894291940622221738, guid: 82262b82136748b408d55889782c9657, type: 3}

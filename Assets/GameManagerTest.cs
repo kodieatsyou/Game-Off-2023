@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum GameState
@@ -57,11 +58,18 @@ public class GameManagerTest : MonoBehaviour
         
     }
 
-    public void DealCards()
+    public void DealRandomCards()
     {
         for(int i = 0; i < 6; i++)
         {
             UIController.Instance.AddCard();
+        }
+    }
+
+    public void DealOneOfEachCards()
+    {
+        foreach (CardType type in Enum.GetValues(typeof(CardType))) {
+            UIController.Instance.AddSpecificCard(type);
         }
     }
 
@@ -111,7 +119,8 @@ public class GameManagerTest : MonoBehaviour
         {
             UIController.Instance.StopCurrentAnnouncements();
             StartGame();
-            DealCards();
+            //DealRandomCards();
+            DealOneOfEachCards();
         }
     }
 

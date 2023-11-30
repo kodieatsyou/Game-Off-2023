@@ -118,6 +118,9 @@ public class BoardSpace : MonoBehaviour
             // Check if the right mouse button was just clicked (not held down indicating camera panning)
             if (clicked && !Input.GetMouseButton(0))
             {
+                if(Board.Instance.selectionMode == SelectionMode.Ninja) {
+                    PlayerController.Instance.DoNinja(this);
+                }
                 if(!isSelected)
                 {
                     if(Board.Instance.SelectBlock(this))
@@ -269,6 +272,35 @@ public class BoardSpace : MonoBehaviour
                             }
                         }
                     } 
+                }
+                break;
+            case SelectionMode.Ninja:
+                if(PlayerController.Instance != null && GetPlayerOnSpace() == null && GetIsBuilt()) {
+                    BoardSpace playerSpace = PlayerController.Instance.currentSpace;
+                    if(Mathf.Abs(GetPosInBoard().y - playerSpace.GetPosInBoard().y) == 2) 
+                    {
+                        if (posInBoard.y + 1 < Board.Instance.heightSize) 
+                        {
+                            if (!Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetIsBuilt() && Board.Instance.boardArray[(int)posInBoard.x, (int)posInBoard.y + 1, (int)posInBoard.z].GetPlayerOnSpace() == null)
+                            {
+                                if(GetPosInBoard().y == 0 || (blockBelow != null && blockBelow.GetIsBuilt())) {
+                                    bCollider.enabled = true;
+                                    isSelectable = true;
+                                }
+                            }
+                        } else {
+                            if(GetPosInBoard().y == 0 || (blockBelow != null && blockBelow.GetIsBuilt())) {
+                                    bCollider.enabled = true;
+                                    isSelectable = true;
+                                }
+                        }
+                    } 
+                }
+                break;
+            case SelectionMode.Player:
+                if(GetPlayerOnSpace() != null) {
+                    bCollider.enabled = true;
+                    isSelectable = true;
                 }
                 break;
         }
