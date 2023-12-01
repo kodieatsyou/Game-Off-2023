@@ -266,6 +266,30 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 2
     Name: Power_Switch_Ready
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Punch_Ready
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Time_Stop_Ready
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Levitate
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Barrier
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Ninja_Ready
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Ninja
+  - Type: 4
+    SynchronizeType: 2
+    Name: Cry
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Taunt
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0

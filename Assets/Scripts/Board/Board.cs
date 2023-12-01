@@ -109,6 +109,26 @@ public class Board : MonoBehaviour
         }
     }
 
+    public List<BoardSpace> GetPlayerObjectsAroundSpace(BoardSpace space) {
+        List<BoardSpace> spacesWithPlayers = new List<BoardSpace>();
+        int checkX = (int)space.GetPosInBoard().x;
+        int checkZ = (int)space.GetPosInBoard().z;
+        for(int x = checkX - 1; x < checkX + 2; x++) {
+            for(int z = checkZ - 1; z < checkZ + 2; z++) {
+                if(x == (int)space.GetPosInBoard().x && z == (int)space.GetPosInBoard().z) {
+                    continue;
+                }
+                //Debug.Log("Checking space: " + x + " " + (int)space.GetPosInBoard().y + " " + z + " for players.");
+                if((x >= 0 && x < baseSize) && (z >= 0 && z < baseSize)) {
+                    if(boardArray[x, (int)space.GetPosInBoard().y, z].GetPlayerObjOnSpace() != null) {
+                        spacesWithPlayers.Add(boardArray[x, (int)space.GetPosInBoard().y, z]);
+                    }
+                }
+            }
+        }
+        return spacesWithPlayers;
+    }
+
     void MoveToSelected()
     {
         if(selectedSpaces.Count == 1)

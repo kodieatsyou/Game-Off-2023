@@ -7457,6 +7457,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6489977744509937811, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744509937811, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6489977744699991980, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -7506,7 +7514,35 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[8].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[9].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[10].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[11].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
       propertyPath: m_SynchronizeParameters.Array.data[12].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[13].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[14].SynchronizeType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6489977744699991985, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
+      propertyPath: m_SynchronizeParameters.Array.data[15].SynchronizeType
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6489977744699991989, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}

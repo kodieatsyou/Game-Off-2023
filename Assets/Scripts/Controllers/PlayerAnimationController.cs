@@ -89,7 +89,7 @@ public class PlayerAnimationController : MonoBehaviour
     [PunRPC]
     void RPCPlayerAnimationControllerPlayTriggeredAnimation(string animationName)
     {
-        animator.SetTrigger(animationName);
+        PlayTriggeredAnimation(animationName);
     }
 
 }

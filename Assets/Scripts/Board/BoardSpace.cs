@@ -15,6 +15,8 @@ public class BoardSpace : MonoBehaviour
     private GameObject blockMesh;
     private GameObject detailMesh;
     private Player playerOnSpace;
+
+    public GameObject playerObjOnSpace;
     private BoardSpace blockBelow;
     private bool isSelectable;
     private bool isSelected;
@@ -32,6 +34,7 @@ public class BoardSpace : MonoBehaviour
 
         //Set initial values for variables
         playerOnSpace = null;
+        playerObjOnSpace = null;
         transform.name = ToString();
         this.isBuilt = isBuilt;
         valueOfNeighbors = 1;
@@ -342,6 +345,11 @@ public class BoardSpace : MonoBehaviour
 
     public Player GetPlayerOnSpace() { return playerOnSpace; }
 
+    public GameObject GetPlayerObjOnSpace() { return playerObjOnSpace; }
+
+    public void PlacePlayerObjectOnSpace(GameObject playerObj) {
+        playerObjOnSpace = playerObj;
+    }
     public void PlacePlayerOnSpace(Player player) 
     { 
         playerOnSpace = player;

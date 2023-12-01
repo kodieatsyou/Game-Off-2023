@@ -155,18 +155,24 @@ public class PlayerController: MonoBehaviourPunCallbacks
             StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath().ToArray(), spaceToMoveTo));
         }
     }
-    IEnumerator MoveThroughWaypoints(Vector3[] waypoints, BoardSpace endSpace)
+    IEnumerator MoveThroughWaypoints(BoardSpace[] waypoints, BoardSpace endSpace)
     {
         int currentWaypointIndex = 0;
 
         while (currentWaypointIndex < waypoints.Length)
         {
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", true);
-            float distance = Vector3.Distance(transform.position, waypoints[currentWaypointIndex]);
+            Vector3 targetWorldPosition = waypoints[currentWaypointIndex].GetWorldPositionOfTopOfSpace();
+            Vector3 targetBoardPosition = waypoints[currentWaypointIndex].GetPosInBoard();
 
-            if (waypoints[currentWaypointIndex].y > transform.position.y)
+
+            Debug.Log("Going to: " + targetBoardPosition + " current: " + currentSpace.GetPosInBoard());
+
+            float distance = Vector3.Distance(transform.position, targetWorldPosition);
+
+            if (targetBoardPosition.y > currentSpace.GetPosInBoard().y)
             {
-                Vector3 horizontalDirection = (new Vector3(waypoints[currentWaypointIndex].x, transform.position.y, waypoints[currentWaypointIndex].z) - transform.position).normalized;
+                Vector3 horizontalDirection = (new Vector3(targetWorldPosition.x, transform.position.y, targetWorldPosition.z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
@@ -174,14 +180,14 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
-                transform.position = waypoints[currentWaypointIndex];
+                transform.position = targetWorldPosition;
                 currentWaypointIndex++;
-
+                BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, targetBoardPosition, currentSpace.GetPosInBoard());
                 yield return null;
             }
-            else if (waypoints[currentWaypointIndex].y < transform.position.y)
+            else if (targetBoardPosition.y < currentSpace.GetPosInBoard().y)
             {
-                Vector3 horizontalDirection = (new Vector3(waypoints[currentWaypointIndex].x, transform.position.y, waypoints[currentWaypointIndex].z) - transform.position).normalized;
+                Vector3 horizontalDirection = (new Vector3(targetWorldPosition.x, transform.position.y, targetWorldPosition.z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
 
@@ -189,29 +195,29 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
-                transform.position = waypoints[currentWaypointIndex];
+                transform.position = targetWorldPosition;
                 currentWaypointIndex++;
-
+                BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, targetBoardPosition, currentSpace.GetPosInBoard());
                 yield return null;
             }
             else
             {
-                transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWaypointIndex], moveSpeed * Time.deltaTime);
+                Vector3 horizontalDirection = (new Vector3(targetWorldPosition.x, transform.position.y, targetWorldPosition.z) - transform.position).normalized;
+                Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
+                transform.rotation = horizontalLookRotation;
 
-                Vector3 direction = (waypoints[currentWaypointIndex] - transform.position).normalized;
-                Quaternion lookRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, rotationSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetWorldPosition, moveSpeed * Time.deltaTime);
 
                 if (distance < 0.1f)
                 {
                     currentWaypointIndex++;
+                    BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, targetBoardPosition, currentSpace.GetPosInBoard());
                 }
 
                 yield return null;
             }
         }
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, endSpace.GetPosInBoard(), currentSpace.GetPosInBoard());
         moving = false;
     }
     #endregion
@@ -237,7 +243,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
         transform.position = target.GetWorldPositionOfTopOfSpace();
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, target.GetPosInBoard(), currentSpace.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, target.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
     #endregion
     
@@ -264,7 +270,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     IEnumerator GetPushed(BoardSpace spaceToLandOn) 
     {
-        currentSpace.PlacePlayerOnSpace(null);
         bool falling = false;
         if(spaceToLandOn.GetPosInBoard().y < currentSpace.GetPosInBoard().y - 1) {
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Wind_Fall", true);
@@ -289,7 +294,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             Debug.Log("DONE!");
         }
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
 
     #endregion
@@ -311,6 +316,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 UIController.Instance.ToggleCardsScreen();
                 break;
             case CardType.TimeStop:
+                EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", true);
                 UIController.Instance.ToggleCardsScreen();
                 break;
@@ -326,6 +332,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 ActionsRemaining = 0;
                 break;
             case CardType.Taunt:
+                GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Taunt");
+                UIController.Instance.ToggleCardsScreen();
+                DoTaunt();
                 break;
             case CardType.Ninja:
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", true);
@@ -335,10 +344,21 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }  
     }
 
+    public void DoTaunt() {
+        List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
+        if(spacesWithPlayers.Count != 0) {
+            foreach(BoardSpace space in spacesWithPlayers) {
+                space.GetPlayerObjOnSpace().gameObject.GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Cry");
+            }
+        }
+        UIController.Instance.ToggleCardsButton(false);
+        ActionsRemaining -= 1;
+    }
+
     IEnumerator DoLevitate() {
         GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Levitate");
         yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, new Vector3(currentSpace.GetPosInBoard().x, currentSpace.GetPosInBoard().y + 1, currentSpace.GetPosInBoard().z), currentSpace.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, new Vector3(currentSpace.GetPosInBoard().x, currentSpace.GetPosInBoard().y + 1, currentSpace.GetPosInBoard().z), currentSpace.GetPosInBoard());
         transform.position = currentSpace.GetWorldPositionOfTopOfSpace();
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
@@ -385,7 +405,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja", false);
         // Ensure the object reaches the final position exactly
         transform.position = targetPos;
-        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, target.GetPosInBoard(), currentSpace.GetPosInBoard());
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, target.GetPosInBoard(), currentSpace.GetPosInBoard());
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
     }

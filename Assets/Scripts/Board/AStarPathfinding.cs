@@ -31,7 +31,7 @@ public class AStarPathfinding
         }
     }
 
-    public List<Vector3> FindPath()
+    public List<BoardSpace> FindPath()
     {
         Node startNode = nodeGrid[(int)start.GetPosInBoard().x, (int)start.GetPosInBoard().y, (int)start.GetPosInBoard().z];
         Node targetNode = nodeGrid[(int)end.GetPosInBoard().x, (int)end.GetPosInBoard().y, (int)end.GetPosInBoard().z];
@@ -78,14 +78,14 @@ public class AStarPathfinding
         return null;
     }
 
-    private List<Vector3> RetracePath(Node startNode, Node endNode)
+    private List<BoardSpace> RetracePath(Node startNode, Node endNode)
     {
-        List<Vector3> path = new List<Vector3>();
+        List<BoardSpace> path = new List<BoardSpace>();
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            path.Add(Board.Instance.boardArray[currentNode.gridX, currentNode.gridY, currentNode.gridZ].GetWorldPositionOfTopOfSpace());
+            path.Add(Board.Instance.boardArray[currentNode.gridX, currentNode.gridY, currentNode.gridZ]);
             currentNode = currentNode.parent;
         }
 
