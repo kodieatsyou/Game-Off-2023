@@ -5,7 +5,7 @@ using UnityEngine;
 public class Cursor : MonoBehaviour
 {
     BoardSpace space;
-    GameObject blockHover;
+    public GameObject blockHover;
     GameObject playerHover;
 
     GameObject currentHover;

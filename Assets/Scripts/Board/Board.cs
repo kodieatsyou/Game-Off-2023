@@ -35,6 +35,7 @@ public class Board : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
     }
 
     void Start()
@@ -155,6 +156,7 @@ public class Board : MonoBehaviour
         foreach (BoardSpace block in selectedSpaces)
         {
             block.SetIsSelected(false);
+            PlayerController.Instance.GetComponent<AudioManager>().amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "build");
             BoardManager.Instance.BMPhotonView.RPC("BoardManagerSetSpaceIsBuilt", RpcTarget.All, block.GetPosInBoard(), true);
         }
         selectedSpaces.Clear();

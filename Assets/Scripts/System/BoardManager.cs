@@ -168,6 +168,8 @@ public class BoardManager : MonoBehaviourPunCallbacks
         Debug.Log("Plscing plsyrt on spacd: " + posOfSpaceToPutOn);
         if(player == PhotonNetwork.LocalPlayer)
         {
+            Debug.Log(PlayerController.Instance.currentSpace);
+            Debug.Log(Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z]);
             PlayerController.Instance.currentSpace = Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z];
         }
         Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerObjectOnSpace(PhotonView.Find(viewID).gameObject);

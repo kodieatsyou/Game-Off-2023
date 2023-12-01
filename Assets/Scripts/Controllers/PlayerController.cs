@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using Unity.VisualScripting;
+using ExitGames.Client.Photon.StructWrapping;
 
 public class PlayerController: MonoBehaviourPunCallbacks
 {
@@ -32,7 +33,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public int fallSpeed = 12;
     public int rotationSpeed = 10;
     public bool moving = false;
-    
+
+    private AudioManager audioManager;
 
     #region UnityFrameFunctions
     void Awake()
@@ -58,6 +60,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
         IsActiveTurn = false;
 
         GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerInitialized", RpcTarget.All);
+
+        audioManager = GetComponent<AudioManager>();
     }
     void Update()
     {
@@ -84,6 +88,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public void StartTurn(float turnTime)
     {
         if(hasBarrier) {
+            audioManager.amPhotonView.RPC("RPCAudioManagerStopPlayerLoopSound", RpcTarget.All);
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", false);
             GetComponent<PlayerAnimationController>().DestroyParticle();
             hasBarrier = false;
@@ -158,7 +163,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     IEnumerator MoveThroughWaypoints(BoardSpace[] waypoints, BoardSpace endSpace)
     {
         int currentWaypointIndex = 0;
-
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerLoopSound", RpcTarget.All, "movement");
         while (currentWaypointIndex < waypoints.Length)
         {
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", true);
@@ -172,6 +177,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
             if (targetBoardPosition.y > currentSpace.GetPosInBoard().y)
             {
+
+                audioManager.amPhotonView.RPC("RPCAudioManagerTogglePausePlayerLoopSound", RpcTarget.All);
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "jump");
                 Vector3 horizontalDirection = (new Vector3(targetWorldPosition.x, transform.position.y, targetWorldPosition.z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
@@ -183,10 +191,13 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 transform.position = targetWorldPosition;
                 currentWaypointIndex++;
                 BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, targetBoardPosition, currentSpace.GetPosInBoard());
+                audioManager.amPhotonView.RPC("RPCAudioManagerTogglePausePlayerLoopSound", RpcTarget.All);
                 yield return null;
             }
             else if (targetBoardPosition.y < currentSpace.GetPosInBoard().y)
             {
+                audioManager.amPhotonView.RPC("RPCAudioManagerTogglePausePlayerLoopSound", RpcTarget.All);
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "jump");
                 Vector3 horizontalDirection = (new Vector3(targetWorldPosition.x, transform.position.y, targetWorldPosition.z) - transform.position).normalized;
                 Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
                 transform.rotation = horizontalLookRotation;
@@ -195,9 +206,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
                 yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
 
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "land");
+                
                 transform.position = targetWorldPosition;
                 currentWaypointIndex++;
                 BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, targetBoardPosition, currentSpace.GetPosInBoard());
+                audioManager.amPhotonView.RPC("RPCAudioManagerTogglePausePlayerLoopSound", RpcTarget.All);
                 yield return null;
             }
             else
@@ -218,6 +232,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             }
         }
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", false);
+        audioManager.amPhotonView.RPC("RPCAudioManagerStopPlayerLoopSound", RpcTarget.All);
         moving = false;
     }
     #endregion
@@ -325,13 +340,16 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 UIController.Instance.ToggleCardsScreen();
                 break;
             case CardType.Barrier:
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "barrier");
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", true);
                 UIController.Instance.ToggleCardsScreen();
                 UIController.Instance.ToggleCardsButton(false);
                 hasBarrier = true;
                 ActionsRemaining = 0;
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerLoopSound", RpcTarget.All, "barrier");
                 break;
             case CardType.Taunt:
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-flex");
                 GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Taunt");
                 UIController.Instance.ToggleCardsScreen();
                 DoTaunt();
@@ -348,7 +366,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
-                space.GetPlayerObjOnSpace().gameObject.GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Cry");
+                space.GetPlayerObjOnSpace().gameObject.GetComponent<PhotonView>().RPC("testRPC", RpcTarget.All, space.GetPlayerOnSpace(), "Cry");
             }
         }
         UIController.Instance.ToggleCardsButton(false);
@@ -385,6 +403,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
         float elapsedTime = 0f;
 
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerLoopSound", RpcTarget.All, "ninja");
+
         while (elapsedTime < totalDistance / speed)
         {
             float t = elapsedTime / (totalDistance / speed);
@@ -407,6 +427,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
         transform.position = targetPos;
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, target.GetPosInBoard(), currentSpace.GetPosInBoard());
         UIController.Instance.ToggleCardsButton(false);
+
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "land");
+        audioManager.amPhotonView.RPC("RPCAudioManagerStopPlayerLoopSound", RpcTarget.All);
+
         ActionsRemaining -= 1;
     }
 

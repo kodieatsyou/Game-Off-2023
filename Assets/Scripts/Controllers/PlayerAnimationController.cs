@@ -1,11 +1,13 @@
 using Photon.Pun;
+using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
-
+    public bool test = false;
     public Transform rightHand;
     private Animator animator;
     private bool continueAnimations = false;
@@ -23,9 +25,10 @@ public class PlayerAnimationController : MonoBehaviour
     }
     public void PlayTriggeredAnimation(string animationName)
     {
+        Debug.Log("Playing triggered animation for player: " + " : " + animationName + PCPhotonView.Owner.NickName);
         continueAnimations = false;
         //PCPhotonView.RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.Others, animationName);
-        animator.SetBool(animationName, true);
+        GetComponent<Animator>().SetBool(animationName, true);
         currentTriggeredAnimationName = animationName;
     }
 
@@ -87,9 +90,15 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     [PunRPC]
-    void RPCPlayerAnimationControllerPlayTriggeredAnimation(string animationName)
+    void testRPC(Player player, string animationName)
     {
-        PlayTriggeredAnimation(animationName);
+        if(PCPhotonView.Owner == player)
+        {
+            continueAnimations = false;
+            GetComponent<Animator>().SetBool(animationName, true);
+            currentTriggeredAnimationName = animationName;
+            Debug.Log("RPC ON PLAYER: " + player.NickName + " WAS CALLED");
+        }
     }
 
 }

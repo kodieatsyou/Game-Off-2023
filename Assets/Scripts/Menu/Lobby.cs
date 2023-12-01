@@ -226,10 +226,10 @@ public class Lobby : MonoBehaviourPunCallbacks
         serverSettingRoomName.text = PhotonNetwork.CurrentRoom.Name;
 
         MenuManager.Instance.OpenMenu("room");
+        startGameButton.SetActive(PhotonNetwork.IsMasterClient);
 
         if (PhotonNetwork.IsMasterClient)
         {
-            startGameButton.SetActive(true);
             PhotonNetwork.CurrentRoom.SetCustomProperties(customRoomProps);
         }
     }

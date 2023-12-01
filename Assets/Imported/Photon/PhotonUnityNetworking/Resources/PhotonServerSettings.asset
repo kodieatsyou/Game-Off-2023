@@ -87,6 +87,16 @@ MonoBehaviour:
   - RPCGameManagerPlayerEndedTurn
   - DestroyAnimationItems
   - RPCBoardManagerPlacePlayerOnSpaceWithSpecificID
+  - RPCAudioManagerPlaySound
+  - RPCAudioManagerPlayPlayerSound
+  - RPCAudioManagerStopPlayerSound
+  - RPCAudioManagerStopPlayerLoopSound
+  - RPCAudioManagerPlayPlayerLoopSound
+  - RPCAudioManagerPlayPlayerOneShotSound
+  - RPCAudioManagerPausePlayerLoopSound
+  - RPCAudioManagerUnPausePlayerLoopSound
+  - RPCAudioManagerTogglePausePlayerLoopSound
+  - testRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
