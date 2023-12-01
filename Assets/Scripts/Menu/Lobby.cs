@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -22,9 +23,16 @@ public class Lobby : MonoBehaviourPunCallbacks
 
     #region Serialized
 
+    #region Room Settings
     [SerializeField] private TMP_InputField roomNameInput;
+    [SerializeField] private TMP_Dropdown winHeightInput;
+    [SerializeField] private TMP_Dropdown cardDealingInput;
+    [SerializeField] private TMP_Dropdown turnTimeInput;
+    #endregion
+
     [SerializeField] private TMP_InputField playerNameInput;
     [SerializeField] private TMP_Dropdown maxPlayerInput;
+
     [SerializeField] private TMP_Text errorHeader;
     [SerializeField] private TMP_Text errorBody;
     [SerializeField] private TMP_Text serverSettingRoomName;
@@ -34,6 +42,8 @@ public class Lobby : MonoBehaviourPunCallbacks
     [SerializeField] Transform roomListContent;
 	[SerializeField] GameObject roomListItemPrefab;
     [SerializeField] GameObject startGameButton;
+
+    public ExitGames.Client.Photon.Hashtable customRoomProps = new ExitGames.Client.Photon.Hashtable();
 
     #endregion 
     #endregion
@@ -52,6 +62,10 @@ public class Lobby : MonoBehaviourPunCallbacks
         PhotonNetwork.GameVersion = gameVersion;
         PhotonNetwork.ConnectUsingSettings();
         GeneratePlayerName();
+
+        customRoomProps.Add("WinHeight", 10);
+        customRoomProps.Add("TurnTime", 10);
+        customRoomProps.Add("CardDeal", "Random");
     }
 
     // Join random room
@@ -74,6 +88,21 @@ public class Lobby : MonoBehaviourPunCallbacks
         }
     }
 
+    public void HandleWinHeightInput()
+    {
+        customRoomProps["WinHeight"] = winHeightInput.options[winHeightInput.value].text;
+    }
+
+    public void HandleTurnTimeInput()
+    {
+        customRoomProps["TurnTime"] = turnTimeInput.options[turnTimeInput.value].text;
+    }
+
+    public void HandleCardDealingInput()
+    {
+        customRoomProps["CardDealing"] = cardDealingInput.options[cardDealingInput.value].text;
+    }
+
     // Generate a random room name if user wants to create room
     public void HandleCreateRoomButton()
     {
@@ -84,12 +113,12 @@ public class Lobby : MonoBehaviourPunCallbacks
     // Generates random generic room name
     public string GenerateRoomName()
     {
-        string roomName = "Room " + Random.Range(0, 10000).ToString("0000");
+        string roomName = "Room " + UnityEngine.Random.Range(0, 10000).ToString("0000");
         return roomName;
     }
 
     // Generates random player name
-        public void GeneratePlayerName()
+    public void GeneratePlayerName()
     {
         playerNameInput.text = NameGenerator.Instance.GenerateName();
         PhotonNetwork.NickName = playerNameInput.text;
@@ -98,13 +127,14 @@ public class Lobby : MonoBehaviourPunCallbacks
     // Creates room with specified settings
     public void CreateRoom()
     {
+        Debug.Log("MaxPlayer: " + maxPlayerInput.value);
         if(string.IsNullOrEmpty(roomNameInput.text))
         {
-            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.captionText.text), BroadcastPropsChangeToAll = true}, TypedLobby.Default);
+            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.options[maxPlayerInput.value].text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
         }
         else
         {
-            PhotonNetwork.CreateRoom(roomNameInput.text, new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.captionText.text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
+            PhotonNetwork.CreateRoom(roomNameInput.text, new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.options[maxPlayerInput.value].text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
         }
         MenuManager.Instance.OpenMenu("loading");
     }
@@ -196,7 +226,12 @@ public class Lobby : MonoBehaviourPunCallbacks
         serverSettingRoomName.text = PhotonNetwork.CurrentRoom.Name;
 
         MenuManager.Instance.OpenMenu("room");
-        startGameButton.SetActive(PhotonNetwork.IsMasterClient);
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            startGameButton.SetActive(true);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(customRoomProps);
+        }
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)

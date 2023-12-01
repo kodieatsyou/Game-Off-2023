@@ -1153,18 +1153,48 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
-  - m_Index: 452
+  - m_Index: 21
     m_Metrics:
-      m_Width: 33.203125
-      m_Height: 41.21875
-      m_HorizontalBearingX: 3.421875
-      m_HorizontalBearingY: 51.65625
-      m_HorizontalAdvance: 38.796875
+      m_Width: 35.90625
+      m_Height: 85.40625
+      m_HorizontalBearingX: -13.40625
+      m_HorizontalBearingY: 67.859375
+      m_HorizontalAdvance: 25.109375
+    m_GlyphRect:
+      m_X: 370
+      m_Y: 298
+      m_Width: 37
+      m_Height: 86
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
+  - m_Index: 72
+    m_Metrics:
+      m_Width: 18.09375
+      m_Height: 59.3125
+      m_HorizontalBearingX: 2.875
+      m_HorizontalBearingY: 42.65625
+      m_HorizontalAdvance: 25.46875
+    m_GlyphRect:
+      m_X: 374
+      m_Y: 93
+      m_Width: 19
+      m_Height: 60
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
+  - m_Index: 77
+    m_Metrics:
+      m_Width: 40.40625
+      m_Height: 35.5625
+      m_HorizontalBearingX: 4.140625
+      m_HorizontalBearingY: 44.015625
+      m_HorizontalAdvance: 48.875
     m_GlyphRect:
       m_X: 251
       m_Y: 681
-      m_Width: 34
-      m_Height: 42
+      m_Width: 41
+      m_Height: 37
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
@@ -1823,12 +1853,20 @@ MonoBehaviour:
     m_Y: 406
     m_Width: 57
     m_Height: 103
-  - m_X: 319
-    m_Y: 288
-    m_Width: 52
-    m_Height: 32
   - m_X: 360
-    m_Y: 320
+    m_Y: 288
+    m_Width: 56
+    m_Height: 105
+  - m_X: 364
+    m_Y: 83
+    m_Width: 38
+    m_Height: 79
+  - m_X: 241
+    m_Y: 671
+    m_Width: 60
+    m_Height: 56
+  - m_X: 375
+    m_Y: 162
     m_Width: 75
     m_Height: 85
   - m_X: 241
@@ -2049,14 +2087,6 @@ MonoBehaviour:
     m_Width: 6
     m_Height: 94
   - m_X: 319
-    m_Y: 320
-    m_Width: 41
-    m_Height: 1
-  - m_X: 360
-    m_Y: 405
-    m_Width: 663
-    m_Height: 1
-  - m_X: 371
     m_Y: 288
     m_Width: 652
     m_Height: 32
@@ -2300,7 +2330,7 @@ Material:
     - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
     - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
-    - _GlowColor: {r: 1, g: 0.5640445, b: 0, a: 0.5}
+    - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _ReflectFaceColor: {r: 0, g: 0, b: 0, a: 1}
