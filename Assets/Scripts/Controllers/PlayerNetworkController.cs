@@ -18,19 +18,13 @@ public class PlayerNetworkController : MonoBehaviour, IPunInstantiateMagicCallba
             gameObject.AddComponent<DiceController>();
             gameObject.AddComponent<PlayerController>();
 
-            //DELETE THIS
-            gameObject.AddComponent<PlayerClickOnHandler>();
-            BoxCollider collider = gameObject.AddComponent<BoxCollider>();
-            collider.center = new Vector3(0, 1, 0);
-            collider.size = new Vector3(1.5f, 2.5f, 1);
-            collider.isTrigger = true;
-
         } else {
+            GameObject highlight = Instantiate(GameAssets.i.player_highlight_, transform);
             BoxCollider collider = gameObject.AddComponent<BoxCollider>();
             collider.center = new Vector3(0, 1, 0);
             collider.size = new Vector3(1.5f, 2.5f, 1);
             collider.isTrigger = true;
-            gameObject.AddComponent<PlayerClickOnHandler>();
+            gameObject.AddComponent<PlayerClickOnHandler>().highlightBox = highlight;
             gameObject.tag = "OtherPlayer";
         }
         return;

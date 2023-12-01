@@ -99,6 +99,8 @@ MonoBehaviour:
   - RPCPlayerDoPunch
   - RPCPlayerPunched
   - RPCGameManagerPlayerWon
+  - RPCPlayerTaunted
+  - RPCPlayerFrozen
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -24,7 +24,11 @@ public class PlayerAnimationController : MonoBehaviour
     }
     public void PlayTriggeredAnimation(string animationName)
     {
-        Debug.Log("Playing triggered animation for player: " + " : " + animationName + PCPhotonView.Owner.NickName);
+        if(currentTriggeredAnimationName != null) {
+            animator.SetBool(currentTriggeredAnimationName, false);
+            currentTriggeredAnimationName = null;
+            continueAnimations = true;
+        }
         continueAnimations = false;
         animator.SetBool(animationName, true);
         currentTriggeredAnimationName = animationName;
