@@ -134,8 +134,9 @@ public class Board : MonoBehaviour
     {
         if(selectedSpaces.Count == 1)
         {
-            PlayerController.Instance.MoveTo(selectedSpaces[0]);
+            Debug.Log("Selcted space: " + selectedSpaces[0]);
             selectedSpaces[0].SetIsSelected(false);
+            PlayerController.Instance.MoveTo(selectedSpaces[0]);
         }
         selectedSpaces.Clear();
         selectionMode = SelectionMode.None;
@@ -202,6 +203,7 @@ public class Board : MonoBehaviour
                 case SelectionMode.Move:
                     if (selectedSpaces.Count == 0)
                     {
+                        Debug.Log("Selcting space: " + blockSelected.ToString());
                         selectedSpaces.Add(blockSelected);
                         return true;
                     }

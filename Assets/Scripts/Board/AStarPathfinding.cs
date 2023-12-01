@@ -10,6 +10,7 @@ public class AStarPathfinding
 
     public AStarPathfinding(BoardSpace start, BoardSpace end)
     {
+        Debug.Log("Setting board space end to: " + end.ToString());
         this.start = start;
         this.end = end;
         gridSize = new Vector3(Board.Instance.baseSize, Board.Instance.heightSize, Board.Instance.baseSize);
@@ -21,8 +22,9 @@ public class AStarPathfinding
                 for (int z = 0; z < gridSize.z; z++)
                 {
                     bool isWalkable = false;
-                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && y + 1 < Board.Instance.heightSize && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt() && Board.Instance.boardArray[x, y, z].GetPlayerOnSpace() == null)
+                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt())
                     {
+                        if(y + 1 >= Board.Instance.heightSize || (!Board.Instance.boardArray[x, y + 1, z].GetIsBuilt() && Board.Instance.boardArray[x, y, z].GetPlayerOnSpace() == null))
                         isWalkable = true;
                     }
                     nodeGrid[x, y, z] = new Node(isWalkable, x, y, z);
@@ -102,9 +104,6 @@ public class AStarPathfinding
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    if (x == 0 && y == 0 && z == 0)
-                        continue;
-
                     // Exclude diagonal movement horizontally
                     if (x != 0 && z != 0)
                         continue;
@@ -113,9 +112,15 @@ public class AStarPathfinding
                     int checkY = node.gridY + y;
                     int checkZ = node.gridZ + z;
 
+                    // Debug statement to check indices
+                    Debug.Log($"Checking indices: ({checkX}, {checkY}, {checkZ})");
+
                     // Check if the position is within the grid boundaries
                     if (checkX >= 0 && checkX < gridSize.x && checkY >= 0 && checkY < gridSize.y && checkZ >= 0 && checkZ < gridSize.z)
                     {
+                        // Debug statement to check walkability
+                        Debug.Log($"Walkable: {nodeGrid[checkX, checkY, checkZ].isWalkable}");
+
                         // Check if the node at the position is walkable
                         if (nodeGrid[checkX, checkY, checkZ].isWalkable)
                         {

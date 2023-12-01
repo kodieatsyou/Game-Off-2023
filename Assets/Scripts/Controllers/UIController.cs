@@ -288,9 +288,11 @@ public class UIController : MonoBehaviour
         if(player.IsMasterClient)
         {
             gameOverScreenHost.SetActive(toggle);
+            DoHeightCount();
         } else
         {
             gameOverScreenNonHost.SetActive(toggle);
+            DoHeightCount();
         }
     }
 
@@ -697,6 +699,7 @@ public class UIController : MonoBehaviour
 
     public void OnRollButtonClick()
     {
+        ToggleActionPanel(false);
         PlayerController.Instance.RollForActionDie();
         ToggleRollButton(false);
     }

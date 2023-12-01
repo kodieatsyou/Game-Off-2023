@@ -187,15 +187,16 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     public void MoveTo(BoardSpace spaceToMoveTo)
     {
+        Debug.Log("Moving to space: " + spaceToMoveTo);
         if(!moving)
         {
             moving = true;
-            BoardSpace[] path = new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath().ToArray();
+            List<BoardSpace> path = new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath();
             if(path == null) {
                 //No valid path need to do teleport.
                 return;
             } else {
-                StartCoroutine(MoveThroughWaypoints(path, spaceToMoveTo));
+                StartCoroutine(MoveThroughWaypoints(path.ToArray(), spaceToMoveTo));
             }
             
         }
@@ -209,9 +210,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Moving", true);
             Vector3 targetWorldPosition = waypoints[currentWaypointIndex].GetWorldPositionOfTopOfSpace();
             Vector3 targetBoardPosition = waypoints[currentWaypointIndex].GetPosInBoard();
-
-
-            Debug.Log("Going to: " + targetBoardPosition + " current: " + currentSpace.GetPosInBoard());
 
             float distance = Vector3.Distance(transform.position, targetWorldPosition);
 
