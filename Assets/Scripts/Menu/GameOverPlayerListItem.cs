@@ -23,11 +23,6 @@ public class GameOverPlayerListItem : MonoBehaviourPunCallbacks
 
     private int height;
     private bool winner;
-
-    private void Start()
-    {
-        StartCoroutine(DisplayHeight(height, winner));
-    }
     public void SetInfo(string testName, int heightClimbed, bool isWinner)
     {
         nameText.text = testName;
@@ -35,33 +30,17 @@ public class GameOverPlayerListItem : MonoBehaviourPunCallbacks
         height = heightClimbed;
     }
 
-    IEnumerator DisplayHeight(int targetHeight, bool isWinner)
-    {
-        int currentHeight = 0;
-        float currentScale = startScale;
-
-        while (currentHeight < targetHeight)
-        {
-            currentHeight++;
-            heightText.text = currentHeight.ToString();
-
-            heightText.transform.localScale = new Vector3(currentScale, currentScale, 1f);
-
-            /*if (incrementSound != null && audioSource != null)
-            {
-                audioSource.PlayOneShot(incrementSound);
-                audioSource.pitch += pitchIncrement;
-            }*/
-
-            currentScale = currentScale + scaleIncrementFactor;
-            currentScale = Mathf.Clamp(currentScale, startScale, maxScale);
-            yield return new WaitForSeconds(1f / speed);
-            speed += 0.5f;
+    public void SetHeightText(int height, float textScale) {
+        if(height <= this.height) {
+            if(height == this.height && winner) {
+                HighlightAsWinner();
+            }
+            heightText.text = height.ToString();
+            heightText.transform.localScale = new Vector3(textScale, textScale, 1f);
         }
+    }
 
-        if(isWinner)
-        {
-            winnerGlow.SetActive(true);
-        }
+    public void HighlightAsWinner() {
+        winnerGlow.SetActive(true);
     }
 }

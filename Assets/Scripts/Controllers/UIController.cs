@@ -258,6 +258,27 @@ public class UIController : MonoBehaviour
         gameOverPlayerListObjects.Add(playerListItem);
     }
 
+    public void DoGameOverCountHeight() {
+        StartCoroutine(DoHeightCount());
+    }
+
+    IEnumerator DoHeightCount() {
+        bool maxHeightReached = false;
+        int currentHeight = 0;
+        float currentTextScale = 0.2f;
+        float currentSpeed = 0.1f;
+        while (!maxHeightReached)
+        {
+            foreach(GameObject obj in gameOverPlayerListObjects) {
+                obj.GetComponent<GameOverPlayerListItem>().SetHeightText(currentHeight, currentTextScale);
+            }
+            currentHeight++;
+            currentTextScale++;
+            yield return new WaitForSeconds(1f / currentSpeed);
+            currentSpeed += 0.5f;
+        }
+    }
+
     public void ToggleGameOverScreen(bool toggle)
     {
         if(toggle == false)

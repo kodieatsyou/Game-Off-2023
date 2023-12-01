@@ -153,10 +153,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     void DoActionDieResult(int roll)
     {
-        Debug.Log("Rolled a: " + roll);
-        UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
-        UIController.Instance.ToggleCardsButton(true);
-        /*switch(roll)
+        switch(roll)
         {
             case 1:
                 UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
@@ -175,7 +172,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
                 UIController.Instance.ToggleCardsButton(true);
                 break;
-        }*/
+        }
     }
 
     void SendTurnRollToGameManager(int roll)
@@ -193,7 +190,14 @@ public class PlayerController: MonoBehaviourPunCallbacks
         if(!moving)
         {
             moving = true;
-            StartCoroutine(MoveThroughWaypoints(new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath().ToArray(), spaceToMoveTo));
+            BoardSpace[] path = new AStarPathfinding(currentSpace, spaceToMoveTo).FindPath().ToArray();
+            if(path == null) {
+                //No valid path need to do teleport.
+                return;
+            } else {
+                StartCoroutine(MoveThroughWaypoints(path, spaceToMoveTo));
+            }
+            
         }
     }
     IEnumerator MoveThroughWaypoints(BoardSpace[] waypoints, BoardSpace endSpace)

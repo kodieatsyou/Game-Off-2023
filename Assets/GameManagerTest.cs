@@ -171,10 +171,10 @@ public class GameManagerTest : MonoBehaviour
     {
         if (GMPhotonView.IsMine)
         {
-            //UIController.Instance.PlayAnnouncement("You won!", AnnouncementType.ScrollLR);
+            UIController.Instance.PlayAnnouncement("You won!", AnnouncementType.DropBounce);
         } else
         {
-            //UIController.Instance.PlayAnnouncement(player.NickName + " won!", AnnouncementType.ScrollLR);
+            UIController.Instance.PlayAnnouncement(player.NickName + " won!", AnnouncementType.DropBounce);
         }
         EndGame(player);
     }

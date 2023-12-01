@@ -71,20 +71,24 @@ public class Cursor : MonoBehaviour
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
                 currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, 3.75f, indicator.transform.position.z);
                 break;
             case SelectionMode.Grapple:
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
                 currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, 3.75f, indicator.transform.position.z);
                 break;
             case SelectionMode.Build:
                 buildScaffold.SetActive(true);
                 moveArrow.SetActive(false);
+                indicator.transform.position = new Vector3(indicator.transform.position.x, 1.25f, indicator.transform.position.z);
                 break;
             case SelectionMode.Ninja:
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
                 currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, 3.75f, indicator.transform.position.z);
                 break;
             case SelectionMode.None:
                 currentHover = blockHover;
