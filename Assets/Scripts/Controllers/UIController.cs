@@ -584,7 +584,7 @@ public class UIController : MonoBehaviour
             ToggleRollButton(false);
         }
         grappleButton.gameObject.SetActive(toggle);
-        if(!PlayerController.Instance.isTaunted) {
+        if(PlayerController.Instance != null && !PlayerController.Instance.isTaunted) {
             grappleButton.interactable = true;
         } else {
             grappleButton.interactable = false;

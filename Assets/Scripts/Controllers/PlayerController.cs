@@ -324,6 +324,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             case CardType.Punch:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", true);
+                DoPunch();
                 UIController.Instance.ToggleCardsScreen();
                 break;
             case CardType.TimeStop:
@@ -364,8 +365,22 @@ public class PlayerController: MonoBehaviourPunCallbacks
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
+                Debug.Log(space);
                 space.GetPlayerObjOnSpace().GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
+                space.GetPlayerObjOnSpace().GetComponent<PlayerClickOnHandler>().OnPlayerClicked += HandlePlayerPunched;
             }
+        }
+    }
+
+    public void HandlePlayerPunched(GameObject playerObj) {
+        Debug.Log("Player Punched!");
+        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerPunched", RpcTarget.All, playerObj.GetComponent<PhotonView>().Owner);
+    }
+
+    [PunRPC]
+    void RPCPlayerPunched(Player player) {
+        if(player == GetComponent<PhotonView>().Owner) {
+            gameObject.SetActive(false);
         }
     }
 

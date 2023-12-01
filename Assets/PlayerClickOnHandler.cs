@@ -13,8 +13,11 @@ public class PlayerClickOnHandler : MonoBehaviour
     bool isHovered = false;
     BoxCollider trigger;
 
+    CardType cardClickType;
+
     void Start() {
         trigger = GetComponent<BoxCollider>();
+        ToggleSelectability(false);
     }
 
     void Update() {
