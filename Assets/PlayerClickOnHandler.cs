@@ -9,8 +9,10 @@ public class PlayerClickOnHandler : MonoBehaviour
 
     public event PlayerClickedCallback OnPlayerClicked;
 
-    bool isSelectable = false;
-    bool isHovered = false;
+    public GameObject highlightBox;
+
+    public bool isSelectable = false;
+    public bool isHovered = false;
     BoxCollider trigger;
 
     CardType cardClickType;
@@ -23,12 +25,13 @@ public class PlayerClickOnHandler : MonoBehaviour
     void Update() {
         if(isHovered && isSelectable) {
             if(Input.GetMouseButtonDown(0)) {
+                Debug.Log("FUCK");
                 OnPlayerClicked?.Invoke(gameObject);
             }
         }
     }
     public void ToggleSelectability(bool isSelectable) {
-        this.isSelectable = false;
+        this.isSelectable = isSelectable;
         trigger.enabled = isSelectable;
     }
 

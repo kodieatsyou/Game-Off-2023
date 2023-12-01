@@ -24,6 +24,11 @@ public class PlayerAnimationController : MonoBehaviour
     }
     public void PlayTriggeredAnimation(string animationName)
     {
+        if(currentTriggeredAnimationName != null) {
+            animator.SetBool(currentTriggeredAnimationName, false);
+            currentTriggeredAnimationName = null;
+            continueAnimations = true;
+        }
         continueAnimations = false;
         animator.SetBool(animationName, true);
         currentTriggeredAnimationName = animationName;

@@ -95,6 +95,11 @@ public class PlayerController: MonoBehaviourPunCallbacks
             hasBarrier = false;
         }
 
+        if(frozen) {
+            UIController.Instance.PlayAnnouncement("You are frozen for this turn!", AnnouncementType.ScrollLR);
+            EndTurn();
+        }
+
         Debug.Log("Starting turn!");
         IsActiveTurn = true;
         CurrTurnLength = turnTime;
@@ -106,6 +111,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     private void EndTurn()
     {
+        if(frozen) {
+            frozen = false;
+        }
+        if(isTaunted) {
+            isTaunted = false;
+        }
         Debug.Log("Ending turn!");
         IsActiveTurn = false;
         UIController.Instance.EndTurnSetUI();
@@ -315,12 +326,14 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public void UseCard(CardType type) {
         StopAllCardAnimations();
         Board.Instance.selectionMode = SelectionMode.None;
-        switch(type){
-            case CardType.Switch:
+        /*
+        case CardType.Switch:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Switch_Ready", true);
                 UIController.Instance.ToggleCardsScreen();
                 break;
+                */
+        switch(type){
             case CardType.Punch:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", true);
@@ -334,6 +347,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 break;
             case CardType.Levitate:
                 StartCoroutine(DoLevitate());
+                UIController.Instance.ToggleCardsButton(false);
+                ActionsRemaining -= 1;
                 UIController.Instance.ToggleCardsScreen();
                 break;
             case CardType.Barrier:
@@ -372,51 +387,134 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
     }
 
+    public void DoTimeStop() {
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        foreach(GameObject op in otherPlayers) {
+            if(op.GetComponent<PlayerClickOnHandler>() != null) {
+                op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
+                op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked += HandlePlayerFrozen;
+            }
+        }
+    }
+
     public void HandlePlayerPunched(GameObject playerObj) {
+        Vector3 horizontalDirection = (new Vector3(playerObj.transform.position.x, transform.position.y, playerObj.transform.position.z) - transform.position).normalized;
+        Quaternion horizontalLookRotation = Quaternion.LookRotation(horizontalDirection);
+        transform.rotation = horizontalLookRotation;
+        
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        foreach(GameObject op in otherPlayers) {
+            if(op.GetComponent<PlayerClickOnHandler>() != null) {
+                op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(false);
+                op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked -= HandlePlayerPunched;
+            }
+        }
         Debug.Log("Player Punched!");
-        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerPunched", RpcTarget.All, playerObj.GetComponent<PhotonView>().Owner);
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Punch");
+        UIController.Instance.ToggleCardsButton(false);
+        ActionsRemaining -= 1;
+        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerPunched", RpcTarget.All, playerObj.GetComponent<PhotonView>().Owner, currentSpace.GetPosInBoard());
+        StopAllCardAnimations();
+    }
+
+    public void HandlePlayerFrozen(GameObject playerObj) {
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        foreach(GameObject op in otherPlayers) {
+            if(op.GetComponent<PlayerClickOnHandler>() != null) {
+                op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(false);
+                op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked -= HandlePlayerFrozen;
+            }
+        }
+        Debug.Log("Player Frozen!");
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Time_Stop");
+        UIController.Instance.ToggleCardsButton(false);
+        ActionsRemaining -= 1;
+        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerFrozen", RpcTarget.All);
+        //GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", false);
     }
 
     [PunRPC]
-    void RPCPlayerPunched(Player player) {
+    void RPCPlayerPunched(Player player, Vector3 puncherBlock) {
+        Debug.Log("PUNCHED");
         if(player == GetComponent<PhotonView>().Owner) {
-            gameObject.SetActive(false);
-        }
-    }
-
-    IEnumerator GetPunchedToBlock(BoardSpace targetBlock) {
-
-        float punchSpeed = 5f;
-
-        // Horizontal movement
-        Vector3 horizontalTarget = new Vector3(targetBlock.GetWorldPositionOfTopOfSpace().x, transform.position.y, targetBlock.GetWorldPositionOfTopOfSpace().z);
-        Vector3 verticalTarget = targetBlock.GetWorldPositionOfTopOfSpace();
-
-        // Move horizontally and then vertically
-        while (Vector3.Distance(transform.position, horizontalTarget) > 0.1f || Vector3.Distance(transform.position, verticalTarget) > 0.1f) {
-            if (Vector3.Distance(transform.position, horizontalTarget) > 0.1f) {
-                // Move horizontally
-                transform.position = Vector3.MoveTowards(transform.position, horizontalTarget, punchSpeed * Time.deltaTime);
-            } else if (Vector3.Distance(transform.position, verticalTarget) > 0.1f) {
-                // Move vertically
-                transform.position = Vector3.MoveTowards(transform.position, verticalTarget, punchSpeed * Time.deltaTime);
+            puncherBlock = Board.Instance.boardArray[(int)puncherBlock.x, (int)puncherBlock.y, (int)puncherBlock.z].GetPosInBoard();
+            BoardSpace punchedToBlock = null;
+            if(puncherBlock.x > currentSpace.GetPosInBoard().x) {
+                punchedToBlock = Board.Instance.GetWindPushBlock(currentSpace, WindDir.North);
+                transform.rotation = Quaternion.Euler(0, 90, 0);
+            } else if (puncherBlock.x < currentSpace.GetPosInBoard().x) {
+                punchedToBlock = Board.Instance.GetWindPushBlock(currentSpace, WindDir.South);
+                transform.rotation = Quaternion.Euler(0, -90, 0);
+            } else if (puncherBlock.z > currentSpace.GetPosInBoard().z) {
+                punchedToBlock = Board.Instance.GetWindPushBlock(currentSpace, WindDir.West);
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            } else {
+                punchedToBlock = Board.Instance.GetWindPushBlock(currentSpace, WindDir.East);
+                transform.rotation = Quaternion.Euler(0, 180, 0);
             }
-            yield return null;
+            Debug.Log("Punched to block: " + punchedToBlock.GetPosInBoard());
+            StartCoroutine(GetPunched(punchedToBlock));
         }
-        yield return null;
     }
 
-    
+    IEnumerator GetPunched(BoardSpace spaceToLandOn) 
+    {
+        bool falling = false;
+        if(spaceToLandOn.GetPosInBoard().y < currentSpace.GetPosInBoard().y - 1) {
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Get_Punched_Fall", true);
+            falling = true;
+        }
+        if(spaceToLandOn == currentSpace) {
+            GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Get_Punched_Into_Block");
+            yield break;
+        }
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Get_Punched");
+        yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
+        if(falling) {
+            float distance = Vector3.Distance(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace());
+            while (distance > 0.1f)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace(), fallSpeed * Time.deltaTime);
+                distance = Vector3.Distance(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace());
+                yield return null;
+            }
+            GetComponent<PlayerAnimationController>().SetAnimatorBool("Get_Punched_Fall", false);
+            falling = false;
+            Debug.Log("DONE!");
+        }
+        transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
+        BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
+    }
 
     public void DoTaunt() {
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
-                space.GetPlayerObjOnSpace().gameObject.GetComponent<PhotonView>().RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.All, space.GetPlayerOnSpace(), "Cry");
+                space.GetPlayerObjOnSpace().GetComponent<PhotonView>().RPC("RPCPlayerTaunted", RpcTarget.All, space.GetPlayerOnSpace());
+                //space.GetPlayerObjOnSpace().gameObject.GetComponent<PhotonView>().RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.All, space.GetPlayerOnSpace(), "Cry");
             }
         }
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
+    }
+
+    [PunRPC]
+    void RPCPlayerTaunted(Player player) {
+        Debug.Log("Taunted!");
+        if(player == GetComponent<PhotonView>().Owner) {
+            GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Cry");
+            isTaunted = true;
+            UIController.Instance.PlayAnnouncement("You were taunted!", AnnouncementType.DropBounce);
+        }
+    }
+
+    [PunRPC]
+    void RPCPlayerFrozen(Player player) {
+        Debug.Log("Frozen!");
+        if(player == GetComponent<PhotonView>().Owner) {
+            frozen = true;
+            UIController.Instance.PlayAnnouncement("You were frozen in time!", AnnouncementType.DropBounce);
+        }
     }
 
     IEnumerator DoLevitate() {
@@ -424,8 +522,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
         yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, new Vector3(currentSpace.GetPosInBoard().x, currentSpace.GetPosInBoard().y + 1, currentSpace.GetPosInBoard().z), currentSpace.GetPosInBoard());
         transform.position = currentSpace.GetWorldPositionOfTopOfSpace();
-        UIController.Instance.ToggleCardsButton(false);
-        ActionsRemaining -= 1;
     }
 
     public void DoNinja(BoardSpace target) {
@@ -495,6 +591,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", false);
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", false);
         GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", false);
+        GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", false);
     }
 
     void EnableOtherPlayerColliders() {
@@ -506,6 +603,17 @@ public class PlayerController: MonoBehaviourPunCallbacks
             }
         }
     }
+
+    void DisableOtherPlayerColliders() {
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        foreach(GameObject op in otherPlayers) {
+            if(op.GetComponent<PlayerClickOnHandler>() != null) {
+                op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(false);
+                op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked -= HandlePlayerClickedOn;
+            }
+        }
+    }
+
     void HandlePlayerClickedOn(GameObject playerClicked) {
         Debug.Log("You clicked on player: " + playerClicked.GetComponent<PlayerNetworkController>().PCPhotonView.Owner.NickName);
     }

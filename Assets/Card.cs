@@ -10,11 +10,16 @@ public enum CardType
     Levitate,
     Ninja,
     Punch,
-    Steal,
-    Switch,
     Taunt,
     TimeStop
 }
+
+/*
+
+Steal,
+    Switch,
+
+    */
 
 public class Card : MonoBehaviour
 {

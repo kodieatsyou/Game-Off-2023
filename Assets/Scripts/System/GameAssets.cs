@@ -48,6 +48,8 @@ public class GameAssets : MonoBehaviour
     public GameObject[] character_head_accessories_;
     public GameObject[] character_face_accessories_;
 
+    public GameObject player_highlight_;
+
     [Header("Animation Props")]
     public GameObject prop_grapple_gun_;
     public GameObject prop_hourglass_;

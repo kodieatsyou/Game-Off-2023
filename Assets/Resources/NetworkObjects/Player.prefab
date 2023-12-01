@@ -290,6 +290,21 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 2
     Name: Power_Taunt
+  - Type: 4
+    SynchronizeType: 2
+    Name: Get_Punched
+  - Type: 4
+    SynchronizeType: 2
+    Name: Get_Punched_Fall
+  - Type: 4
+    SynchronizeType: 2
+    Name: Get_Punched_Into_Block
+  - Type: 4
+    SynchronizeType: 2
+    Name: Power_Punch
+  - Type: 4
+    SynchronizeType: 0
+    Name: Power_Time_Stop
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0
