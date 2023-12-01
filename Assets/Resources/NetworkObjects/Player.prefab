@@ -586,6 +586,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: fba772ef406c34390b5664ba2535eed1, type: 3}
   - {fileID: 8300000, guid: d47eb2629e6a542d89a510ab651f45b8, type: 3}
   - {fileID: 8300000, guid: 2b5b1652331e646918fd82e259812975, type: 3}
+  - {fileID: 8300000, guid: bd125af5cd2b44ebdbe773ade432d0ab, type: 3}
+  - {fileID: 8300000, guid: db8d3f4e8fbaa4e348a3a2d9ab3c3900, type: 3}
   aSourcePlayerLoop: {fileID: 8479543755123605021}
   aSourcePlayerOneShot: {fileID: 4844940547974138632}
 --- !u!1 &6489977744755011906

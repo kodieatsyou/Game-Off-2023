@@ -431,7 +431,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
-                Debug.Log(space);
                 space.GetPlayerObjOnSpace().GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
                 space.GetPlayerObjOnSpace().GetComponent<PlayerClickOnHandler>().OnPlayerClicked += HandlePlayerPunched;
             }
@@ -440,7 +439,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     public void DoTimeStop() {
         GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
-        Debug.Log("OTHER PLAYERS: " + otherPlayers.Length);
         foreach(GameObject op in otherPlayers) {
             Debug.Log(op.name);
             if(op.GetComponent<PlayerClickOnHandler>() != null) {
@@ -464,6 +462,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
         Debug.Log("Player Punched!");
         GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Punch", "Power_Punch_Ready");
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "punch");
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
         UIController.Instance.RemoveCard(currentCardInUse);
@@ -479,8 +478,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked -= HandlePlayerFrozen;
             }
         }
-        Debug.Log("Player Frozen!");
         GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Time_Stop");
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "time-stop");
         StopAllCardAnimations();
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
@@ -492,7 +491,6 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     [PunRPC]
     void RPCPlayerPunched(Player player, Vector3 puncherBlock) {
-        Debug.Log("PUNCHED");
         if(player == GetComponent<PhotonView>().Owner) {
             puncherBlock = Board.Instance.boardArray[(int)puncherBlock.x, (int)puncherBlock.y, (int)puncherBlock.z].GetPosInBoard();
             BoardSpace punchedToBlock = null;
@@ -536,9 +534,11 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 yield return null;
             }
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Get_Punched_Fall", false);
+            audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-sad");
             falling = false;
             Debug.Log("DONE!");
         }
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "land");
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
         StopAllCardAnimations();
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
@@ -575,9 +575,11 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     IEnumerator DoLevitate() {
         GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Levitate");
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "levitate");
         yield return new WaitUntil(() => GetComponent<PlayerAnimationController>().CheckIfContinue());
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, new Vector3(currentSpace.GetPosInBoard().x, currentSpace.GetPosInBoard().y + 1, currentSpace.GetPosInBoard().z), currentSpace.GetPosInBoard());
         transform.position = currentSpace.GetWorldPositionOfTopOfSpace();
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "build");
     }
 
     public void DoNinja(BoardSpace target) {
