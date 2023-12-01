@@ -39,6 +39,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     private bool countDownPlayed = false;
 
+    private GameObject currentCardInUse = null;
+
     #region UnityFrameFunctions
     void Awake()
     {
@@ -113,6 +115,8 @@ public class PlayerController: MonoBehaviourPunCallbacks
         if(frozen) {
             UIController.Instance.PlayAnnouncement("You are frozen for this turn!", AnnouncementType.ScrollLR);
             EndTurn();
+            GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
+            return;
         }
 
         Debug.Log("Starting turn!");
@@ -350,7 +354,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     #region  Cards
 
-    public void UseCard(CardType type) {
+    public void UseCard(GameObject cardOBJ, CardType type) {
         StopAllCardAnimations();
         Board.Instance.selectionMode = SelectionMode.None;
         /*
@@ -362,41 +366,54 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 */
         switch(type){
             case CardType.Punch:
-                EnableOtherPlayerColliders();
+                StopAllCardAnimations();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", true);
-                DoPunch();
                 UIController.Instance.ToggleCardsScreen(false);
+                currentCardInUse = cardOBJ;
+                DoPunch();
                 break;
             case CardType.TimeStop:
-                EnableOtherPlayerColliders();
+                StopAllCardAnimations();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", true);
                 UIController.Instance.ToggleCardsScreen(false);
+                currentCardInUse = cardOBJ;
+                DoTimeStop();
                 break;
             case CardType.Levitate:
+                StopAllCardAnimations();
                 StartCoroutine(DoLevitate());
                 UIController.Instance.ToggleCardsButton(false);
                 ActionsRemaining -= 1;
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
+                UIController.Instance.RemoveCard(cardOBJ);
                 break;
             case CardType.Barrier:
+                StopAllCardAnimations();
                 audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "barrier");
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", true);
                 UIController.Instance.ToggleCardsScreen(false);
                 UIController.Instance.ToggleCardsButton(false);
                 hasBarrier = true;
                 ActionsRemaining = 0;
+                UIController.Instance.RemoveCard(cardOBJ);
                 audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerLoopSound", RpcTarget.All, "barrier");
                 break;
             case CardType.Taunt:
+                StopAllCardAnimations();
                 audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-flex");
                 GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Taunt");
                 UIController.Instance.ToggleCardsScreen(false);
+                UIController.Instance.ToggleCardsButton(false);
+                ActionsRemaining -= 1;
+                UIController.Instance.RemoveCard(cardOBJ);
                 DoTaunt();
                 break;
             case CardType.Ninja:
+                StopAllCardAnimations();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", true);
                 UIController.Instance.ToggleCardsScreen(false);
                 Board.Instance.selectionMode = SelectionMode.Ninja;
+                currentCardInUse = cardOBJ;
             break;
         }  
     }
@@ -419,7 +436,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     public void DoTimeStop() {
         GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("OtherPlayer");
+        Debug.Log("OTHER PLAYERS: " + otherPlayers.Length);
         foreach(GameObject op in otherPlayers) {
+            Debug.Log(op.name);
             if(op.GetComponent<PlayerClickOnHandler>() != null) {
                 op.GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
                 op.GetComponent<PlayerClickOnHandler>().OnPlayerClicked += HandlePlayerFrozen;
@@ -440,11 +459,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
             }
         }
         Debug.Log("Player Punched!");
-        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Punch");
+        GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Punch", "Power_Punch_Ready");
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
-        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerPunched", RpcTarget.All, playerObj.GetComponent<PhotonView>().Owner, currentSpace.GetPosInBoard());
-        StopAllCardAnimations();
+        UIController.Instance.RemoveCard(currentCardInUse);
+        currentCardInUse = null;
+        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerPunched", RpcTarget.Others, playerObj.GetComponent<PhotonView>().Owner, currentSpace.GetPosInBoard());
     }
 
     public void HandlePlayerFrozen(GameObject playerObj) {
@@ -457,9 +477,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }
         Debug.Log("Player Frozen!");
         GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Time_Stop");
+        StopAllCardAnimations();
         UIController.Instance.ToggleCardsButton(false);
         ActionsRemaining -= 1;
-        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerFrozen", RpcTarget.All);
+        UIController.Instance.RemoveCard(currentCardInUse);
+        currentCardInUse = null;
+        playerObj.GetComponent<PhotonView>().RPC("RPCPlayerFrozen", RpcTarget.Others, playerObj.GetComponent<PhotonView>().Owner);
         //GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", false);
     }
 
@@ -513,6 +536,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
             Debug.Log("DONE!");
         }
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
+        StopAllCardAnimations();
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
     }
 
@@ -520,12 +544,10 @@ public class PlayerController: MonoBehaviourPunCallbacks
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
-                space.GetPlayerObjOnSpace().GetComponent<PhotonView>().RPC("RPCPlayerTaunted", RpcTarget.All, space.GetPlayerOnSpace());
+                space.GetPlayerObjOnSpace().GetComponent<PhotonView>().RPC("RPCPlayerTaunted", RpcTarget.Others, space.GetPlayerOnSpace());
                 //space.GetPlayerObjOnSpace().gameObject.GetComponent<PhotonView>().RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.All, space.GetPlayerOnSpace(), "Cry");
             }
         }
-        UIController.Instance.ToggleCardsButton(false);
-        ActionsRemaining -= 1;
     }
 
     [PunRPC]
@@ -604,6 +626,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
         audioManager.amPhotonView.RPC("RPCAudioManagerStopPlayerLoopSound", RpcTarget.All);
 
         ActionsRemaining -= 1;
+        UIController.Instance.RemoveCard(currentCardInUse);
+        currentCardInUse = null;
+
     }
 
     public static float CalculateParabolaY(Vector3 startPosition, Vector3 endPosition, float xValue)

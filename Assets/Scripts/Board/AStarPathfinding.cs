@@ -21,7 +21,7 @@ public class AStarPathfinding
                 for (int z = 0; z < gridSize.z; z++)
                 {
                     bool isWalkable = false;
-                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt() && Board.Instance.boardArray[x, y, z].GetPlayerOnSpace() == null)
+                    if(Board.Instance.boardArray[x, y, z].GetIsBuilt() && y + 1 < Board.Instance.heightSize && !Board.Instance.boardArray[x, y + 1, z].GetIsBuilt() && Board.Instance.boardArray[x, y, z].GetPlayerOnSpace() == null)
                     {
                         isWalkable = true;
                     }

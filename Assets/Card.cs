@@ -38,7 +38,7 @@ public class Card : MonoBehaviour
     }
 
     public void UseCard() {
-        PlayerController.Instance.UseCard(type);
+        PlayerController.Instance.UseCard(gameObject, type);
     }
 
     

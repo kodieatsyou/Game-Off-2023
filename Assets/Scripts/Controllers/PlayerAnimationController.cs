@@ -22,7 +22,7 @@ public class PlayerAnimationController : MonoBehaviour
         animator = GetComponent<Animator>();
         PCPhotonView = GetComponent<PhotonView>();
     }
-    public void PlayTriggeredAnimation(string animationName)
+    public void PlayTriggeredAnimation(string animationName, string boolToToggleOff = null)
     {
         if(currentTriggeredAnimationName != null) {
             animator.SetBool(currentTriggeredAnimationName, false);
@@ -31,6 +31,10 @@ public class PlayerAnimationController : MonoBehaviour
         }
         continueAnimations = false;
         animator.SetBool(animationName, true);
+        if(boolToToggleOff != null)
+        {
+            animator.SetBool(boolToToggleOff, false);
+        }
         currentTriggeredAnimationName = animationName;
     }
 
@@ -72,7 +76,8 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void DestroyParticle() {
         if(currentParticle != null) {
-            Destroy(currentParticle);
+            GameObject oldParticle = currentParticle;
+            Destroy(oldParticle);
         }
         currentParticle = null;
     }

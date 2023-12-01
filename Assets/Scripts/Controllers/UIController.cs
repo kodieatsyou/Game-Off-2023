@@ -765,6 +765,12 @@ public class UIController : MonoBehaviour
         }
     }
 
+    public void RemoveCard(GameObject card)
+    {
+        cards.RemoveAll(pair => pair.gameObject == card);
+        Destroy(card);
+    }
+
     IEnumerator SpreadCardsOut()
     {
         cardsScreen.SetActive(true);

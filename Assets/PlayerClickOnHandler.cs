@@ -25,7 +25,6 @@ public class PlayerClickOnHandler : MonoBehaviour
     void Update() {
         if(isHovered && isSelectable) {
             if(Input.GetMouseButtonDown(0)) {
-                Debug.Log("FUCK");
                 OnPlayerClicked?.Invoke(gameObject);
             }
         }
@@ -33,13 +32,20 @@ public class PlayerClickOnHandler : MonoBehaviour
     public void ToggleSelectability(bool isSelectable) {
         this.isSelectable = isSelectable;
         trigger.enabled = isSelectable;
+        if(!isSelectable)
+        {
+            highlightBox.SetActive(false);
+        }
+
     }
 
     void OnMouseEnter() {
         isHovered = true;
+        highlightBox.SetActive(true);
     }
 
     void OnMouseExit() {
         isHovered = false;
+        highlightBox.SetActive(false);
     }
 }
