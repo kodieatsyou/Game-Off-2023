@@ -96,7 +96,8 @@ MonoBehaviour:
   - RPCAudioManagerPausePlayerLoopSound
   - RPCAudioManagerUnPausePlayerLoopSound
   - RPCAudioManagerTogglePausePlayerLoopSound
-  - testRPC
+  - RPCPlayerDoPunch
+  - RPCPlayerPunched
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

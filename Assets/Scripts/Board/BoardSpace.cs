@@ -355,6 +355,8 @@ public class BoardSpace : MonoBehaviour
         playerOnSpace = player;
     }
 
+    public BoardSpace GetBelowBlock() {return blockBelow; }
+
     public void ClearPlayerOnSpace() { playerOnSpace = null; }
 
     private void OnMouseEnter()

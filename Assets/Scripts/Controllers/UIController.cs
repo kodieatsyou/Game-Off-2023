@@ -162,7 +162,11 @@ public class UIController : MonoBehaviour
         ToggleHotbar(true);
         ToggleRollButton(true);
         ToggleBuildButton(true);
-        ToggleMoveButton(true);
+        if(!PlayerController.Instance.isTaunted) {
+            ToggleMoveButton(true);
+        } else {
+            ToggleMoveButton(false);
+        }
         SetTurnTime(turnTime);
     }
 
@@ -580,6 +584,11 @@ public class UIController : MonoBehaviour
             ToggleRollButton(false);
         }
         grappleButton.gameObject.SetActive(toggle);
+        if(PlayerController.Instance != null && !PlayerController.Instance.isTaunted) {
+            grappleButton.interactable = true;
+        } else {
+            grappleButton.interactable = false;
+        }
     }
 
     public void RegisterWindButton(GameObject button)
