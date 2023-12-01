@@ -568,6 +568,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7dff5d22c6db1439fac9f3d5e0c7c23a, type: 3}
   - {fileID: 8300000, guid: 2fb1c8d9d0cfa49b6869d8e0be237735, type: 3}
   - {fileID: 8300000, guid: 3e1bbc62b17b94796b9505a3b9f8538e, type: 3}
+  - {fileID: 8300000, guid: fba772ef406c34390b5664ba2535eed1, type: 3}
+  - {fileID: 8300000, guid: d47eb2629e6a542d89a510ab651f45b8, type: 3}
+  - {fileID: 8300000, guid: 2b5b1652331e646918fd82e259812975, type: 3}
   aSourcePlayerLoop: {fileID: 8479543755123605021}
   aSourcePlayerOneShot: {fileID: 4844940547974138632}
 --- !u!1 &6489977744755011906

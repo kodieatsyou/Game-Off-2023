@@ -17,6 +17,9 @@ public class BoardManager : MonoBehaviourPunCallbacks
     private static int randomBlockCount;
     public bool[,,] board;
 
+    public AudioClip[] clips;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         if (Instance == null)
@@ -28,6 +31,13 @@ public class BoardManager : MonoBehaviourPunCallbacks
             PhotonNetwork.Destroy(gameObject);
         }
         BMPhotonView = GetComponent<PhotonView>();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = clips[0];
+        audioSource.Play();
+
+        heightSize = (int)PhotonNetwork.CurrentRoom.CustomProperties["WinHeight"];
+        Debug.Log("HEIGHT " + heightSize);
+        //heightSize = settingHeightSize;
     }
 
     private void Start()
@@ -59,7 +69,7 @@ public class BoardManager : MonoBehaviourPunCallbacks
                     }
                 }
             }
-            BMPhotonView.RPC("RPCBoardManagerInitializeClientBoards", RpcTarget.AllBuffered, FlattenBoardArray(board), baseSize, heightSize);
+            BMPhotonView.RPC("RPCBoardManagerInitializeClientBoards", RpcTarget.AllBuffered, FlattenBoardArray(board), heightSize, baseSize);
         }
         StartCoroutine(SpawnPlayer());
     }
@@ -164,6 +174,12 @@ public class BoardManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void RPCBoardManagerPlacePlayerOnSpace(Player player, int viewID, Vector3 posOfSpaceToPutOn, Vector3 oldSpace)
     {
+        GameManagerTest.Instance.SetPlayerHeight((int)posOfSpaceToPutOn.y, player);
+        if (posOfSpaceToPutOn.y >= heightSize-1)
+        {
+            GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerWon", RpcTarget.All, PhotonNetwork.LocalPlayer);
+            return;
+        }
         Debug.Log("Plscing plsyrt on spacd: " + posOfSpaceToPutOn);
         if(player == PhotonNetwork.LocalPlayer)
         {
@@ -202,6 +218,8 @@ public class BoardManager : MonoBehaviourPunCallbacks
     public void RPCBoardManagerDoWind(WindDir dir)
     {
         Debug.Log("MAKING WIND PARTICLES");
+        audioSource.clip = clips[1];
+        audioSource.Play();
         Instantiate(GameAssets.i.wind_particle_.GetComponent<WindParticle>().InitializeWindParticles(3f, dir));
         PlayerController.Instance.GetPushedByWind(dir);
     }

@@ -605,7 +605,7 @@ public class UIController : MonoBehaviour
     }
 
     public void ToggleBuildButton(bool toggle)
-    {
+    {  
         buildButton.interactable = toggle;
     }
 
@@ -626,7 +626,8 @@ public class UIController : MonoBehaviour
 
     public void OnBuildButtonClick()
     {
-        if(Board.Instance.selectionMode == SelectionMode.Build) {
+        ToggleCardsScreen(false);
+        if (Board.Instance.selectionMode == SelectionMode.Build) {
             Board.Instance.selectionMode = SelectionMode.None;
             ToggleActionPanel(false);
             Board.Instance.ClearSelected();
@@ -644,6 +645,7 @@ public class UIController : MonoBehaviour
 
     public void OnMoveButtonClick()
     {
+        ToggleCardsScreen(false);
         if(Board.Instance.selectionMode == SelectionMode.Move) {
             Board.Instance.selectionMode = SelectionMode.None;
             ToggleActionPanel(false);
@@ -703,6 +705,20 @@ public class UIController : MonoBehaviour
         }
     }
 
+    public void OnCardsButtonClick()
+    {
+        if (cardsScreen.activeSelf)
+        {
+            ToggleCardsScreen(false);
+        }
+        else
+        {
+            ToggleCardsScreen(true);
+        }
+        Board.Instance.selectionMode = SelectionMode.None;
+        ToggleActionPanel(false);
+    }
+
     public void SetBlocksLeftToBuild(int blocksToBuild)
     {
         actionInfoPanel.GetComponentInChildren<TMP_Text>().text = "x" + blocksToBuild;
@@ -736,9 +752,9 @@ public class UIController : MonoBehaviour
         cards.Add(cardObj);
     }
 
-    public void ToggleCardsScreen()
+    public void ToggleCardsScreen(bool toggle)
     {
-        if(!cardsScreen.activeSelf)
+        if(toggle)
         {
             Board.Instance.selectionMode = SelectionMode.None;
             ToggleActionPanel(false);

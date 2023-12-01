@@ -28,6 +28,18 @@ public class PlayerTurnOrder
     }
 }
 
+public class PlayerHeight
+{
+    public int height { get; set; }
+    public Player player { get; set; }
+
+    public PlayerHeight(int height, Player player)
+    {
+        this.height = height;
+        this.player = player;
+    }
+}
+
 public class GameManagerTest : MonoBehaviour
 {
     public static GameManagerTest Instance;
@@ -35,6 +47,7 @@ public class GameManagerTest : MonoBehaviour
     public GameState State = GameState.GameInitializing;
     public PhotonView GMPhotonView;
     private List<PlayerTurnOrder> turnOrder;
+    private List<PlayerHeight> playerHeights;
     private int currentTurnIndex = 0;
 
     private void Awake()
@@ -49,6 +62,7 @@ public class GameManagerTest : MonoBehaviour
         }
         
         turnOrder = new List<PlayerTurnOrder>();
+        playerHeights = new List<PlayerHeight>();
         GMPhotonView = GetComponent<PhotonView>();
     }
 
@@ -91,7 +105,7 @@ public class GameManagerTest : MonoBehaviour
         UIController.Instance.HighlightTurn(currentTurnIndex);
         if (turnOrder[currentTurnIndex].player == PhotonNetwork.LocalPlayer)
         {
-            PlayerController.Instance.StartTurn(60f);
+            PlayerController.Instance.StartTurn((float)PhotonNetwork.CurrentRoom.CustomProperties["TurnTime"]);
             UIController.Instance.PlayAnnouncement("Your turn!", AnnouncementType.ScrollLR);
         }
         else
@@ -150,6 +164,45 @@ public class GameManagerTest : MonoBehaviour
             currentTurnIndex += 1;
         }
         StartTurn();
+    }
+
+    [PunRPC]
+    public void RPCGameManagerPlayerWon(Player player, PhotonMessageInfo info)
+    {
+        if (GMPhotonView.IsMine)
+        {
+            //UIController.Instance.PlayAnnouncement("You won!", AnnouncementType.ScrollLR);
+        } else
+        {
+            //UIController.Instance.PlayAnnouncement(player.NickName + " won!", AnnouncementType.ScrollLR);
+        }
+        EndGame(player);
+    }
+
+    void EndGame(Player winningPlayer)
+    {
+        foreach(PlayerHeight p in playerHeights)
+        {
+            if (p.player == winningPlayer)
+            {
+                UIController.Instance.AddPlayertoGameOverBoard(p.player.NickName, p.height, true);
+            }
+            else
+            {
+                UIController.Instance.AddPlayertoGameOverBoard(p.player.NickName, p.height, false);
+            }
+        }
+        UIController.Instance.ToggleGameOverScreen(true);
+        State = GameState.GameEnded;
+    }
+
+    public void SetPlayerHeight(int height, Player player)
+    {
+        if (!playerHeights.Exists(pair => pair.player == player))
+        {
+            playerHeights.RemoveAll(pair => pair.player == player);
+            playerHeights.Add(new PlayerHeight(height, player));
+        }
     }
 
 }

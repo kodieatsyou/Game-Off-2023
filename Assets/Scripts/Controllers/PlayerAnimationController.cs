@@ -94,6 +94,7 @@ public class PlayerAnimationController : MonoBehaviour
 
             switch(animationName) {
                 case "Cry":
+                    PlayerController.Instance.audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-sad");
                     PlayerController.Instance.GetTaunted(info.Sender.NickName);
                     break;
             }

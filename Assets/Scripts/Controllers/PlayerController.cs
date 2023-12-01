@@ -35,7 +35,9 @@ public class PlayerController: MonoBehaviourPunCallbacks
     public int rotationSpeed = 10;
     public bool moving = false;
 
-    private AudioManager audioManager;
+    public AudioManager audioManager;
+
+    private bool countDownPlayed = false;
 
     #region UnityFrameFunctions
     void Awake()
@@ -76,13 +78,21 @@ public class PlayerController: MonoBehaviourPunCallbacks
             CurrTurnLength -= Time.deltaTime;
             UIController.Instance.SetTurnTime(CurrTurnLength);
             UIController.Instance.SetBlocksLeftToBuild(blocksLeftToPlace);
+            if (CurrTurnLength <= 4 && !countDownPlayed)
+            {
+                audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "count-down");
+                countDownPlayed = true;
+            }
             if (ActionsRemaining <= 0)
             {
                 EndTurn();
+                countDownPlayed = false;
                 UIController.Instance.PlayAnnouncement("Out of Actions!", AnnouncementType.DropBounce);
                 GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
             } else if(CurrTurnLength <= 0f) {
+                GetComponent<AudioManager>().HandlePlayerOneShotSound("time-up");
                 EndTurn();
+                countDownPlayed = false;
                 UIController.Instance.PlayAnnouncement("Out of Time!", AnnouncementType.DropBounce);
                 GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerEndedTurn", RpcTarget.All);
             }
@@ -129,7 +139,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
     void DoActionDieResult(int roll)
     {
         Debug.Log("Rolled a: " + roll);
-        UIController.Instance.PlayAnnouncement("Power Card", AnnouncementType.DropBounce);
+        UIController.Instance.PlayAnnouncement("Wind", AnnouncementType.DropBounce);
         UIController.Instance.ToggleCardsButton(true);
         /*switch(roll)
         {
@@ -315,12 +325,14 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 distance = Vector3.Distance(transform.position, spaceToLandOn.GetWorldPositionOfTopOfSpace());
                 yield return null;
             }
+            audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-sad");
             GetComponent<PlayerAnimationController>().SetAnimatorBool("Wind_Fall", false);
             falling = false;
             Debug.Log("DONE!");
         }
         transform.position = spaceToLandOn.GetWorldPositionOfTopOfSpace();
         BoardManager.Instance.BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, GetComponent<PhotonView>().ViewID, spaceToLandOn.GetPosInBoard(), currentSpace.GetPosInBoard());
+        audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "land");
     }
 
     #endregion
@@ -334,27 +346,27 @@ public class PlayerController: MonoBehaviourPunCallbacks
             case CardType.Switch:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Switch_Ready", true);
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 break;
             case CardType.Punch:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Punch_Ready", true);
                 DoPunch();
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 break;
             case CardType.TimeStop:
                 EnableOtherPlayerColliders();
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Time_Stop_Ready", true);
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 break;
             case CardType.Levitate:
                 StartCoroutine(DoLevitate());
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 break;
             case CardType.Barrier:
                 audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "barrier");
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Barrier", true);
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 UIController.Instance.ToggleCardsButton(false);
                 hasBarrier = true;
                 ActionsRemaining = 0;
@@ -363,12 +375,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
             case CardType.Taunt:
                 audioManager.amPhotonView.RPC("RPCAudioManagerPlayPlayerOneShotSound", RpcTarget.All, "taunt-flex");
                 GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Power_Taunt");
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 DoTaunt();
                 break;
             case CardType.Ninja:
                 GetComponent<PlayerAnimationController>().SetAnimatorBool("Power_Ninja_Ready", true);
-                UIController.Instance.ToggleCardsScreen();
+                UIController.Instance.ToggleCardsScreen(false);
                 Board.Instance.selectionMode = SelectionMode.Ninja;
             break;
         }  

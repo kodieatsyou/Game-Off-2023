@@ -104,7 +104,23 @@ public class AudioManager : MonoBehaviour
                 break;
 
             case "taunt-sad":
+                Debug.Log("TAUNT SAD");
                 aSourcePlayerOneShot.clip = playerOneShotSounds[5];
+                aSourcePlayerOneShot.Play();
+                break;
+
+            case "punch":
+                aSourcePlayerOneShot.clip = playerOneShotSounds[6];
+                aSourcePlayerOneShot.Play();
+                break;
+
+            case "count-down":
+                aSourcePlayerOneShot.clip = playerOneShotSounds[7];
+                aSourcePlayerOneShot.Play();
+                break;
+
+            case "time-up":
+                aSourcePlayerOneShot.clip = playerOneShotSounds[8];
                 aSourcePlayerOneShot.Play();
                 break;
 
