@@ -104,7 +104,6 @@ public class AudioManager : MonoBehaviour
                 break;
 
             case "taunt-sad":
-                Debug.Log("TAUNT SAD");
                 aSourcePlayerOneShot.clip = playerOneShotSounds[5];
                 aSourcePlayerOneShot.Play();
                 break;
@@ -121,6 +120,16 @@ public class AudioManager : MonoBehaviour
 
             case "time-up":
                 aSourcePlayerOneShot.clip = playerOneShotSounds[8];
+                aSourcePlayerOneShot.Play();
+                break;
+
+            case "levitate":
+                aSourcePlayerOneShot.clip = playerOneShotSounds[9];
+                aSourcePlayerOneShot.Play();
+                break;
+
+            case "time-stop":
+                aSourcePlayerOneShot.clip = playerOneShotSounds[10];
                 aSourcePlayerOneShot.Play();
                 break;
 
