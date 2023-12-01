@@ -145,16 +145,13 @@ MonoBehaviour:
       Value: Lift youself in the air... Just high enough to get a block under your
         feet.
     - Key: 2
-      Value: Become a ninja for a turn. Who needs grappling hooks?
+      Value: Become a ninja for a turn. Who needs grappling hooks... Especially with
+        their poor range?
     - Key: 3
-      Value: Summon your inner brawler and knock your opponents to the floor!
+      Value: Summon your inner brawler and knock an opponent next to you to the floor!
     - Key: 4
-      Value: Thats one more block for me and one less for the enemy.
-    - Key: 5
-      Value: Hows the weather over there?
-    - Key: 6
       Value: Make those around you so mad they can hardly move.
-    - Key: 7
+    - Key: 5
       Value: Target someone and freeze them in time!
   card_art_:
     _serializedList:
@@ -167,12 +164,8 @@ MonoBehaviour:
     - Key: 3
       Value: {fileID: 21300000, guid: bd0ac5a53fbd1db47848397533a71b97, type: 3}
     - Key: 4
-      Value: {fileID: 21300000, guid: e17a4fee180acdb4f81455ce9e1da147, type: 3}
-    - Key: 5
-      Value: {fileID: 21300000, guid: a5a48318b6030f1469d0157945dcbde4, type: 3}
-    - Key: 6
       Value: {fileID: 21300000, guid: 040720a33f628c44b92992f8a6c7351b, type: 3}
-    - Key: 7
+    - Key: 5
       Value: {fileID: 21300000, guid: 15a4ea981cf235b42815eb93a083fa38, type: 3}
   player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
   character_skins_:

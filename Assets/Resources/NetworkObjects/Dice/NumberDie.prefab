@@ -144,7 +144,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: FredBot
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3ea8621f0163b2b4abf06e8275d9f59e, type: 2}
+  m_fontAsset: {fileID: 0}
   m_sharedMaterial: {fileID: 2512994999855987807, guid: 3ea8621f0163b2b4abf06e8275d9f59e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
