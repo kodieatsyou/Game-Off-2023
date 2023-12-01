@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public static CameraController Instance;
     private bool canMove = true;
     public float zoomSpeed = 9f;
     public float rotationSpeed = 10f;
@@ -10,22 +11,39 @@ public class CameraController : MonoBehaviour
     Vector3 mousePreviousPos = Vector3.zero;
     Vector3 mousePositionDelta = Vector3.zero;
     int cameraHeight = 1;
+    private bool initialized = false;
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
-    void Start()
+    public void InitializeCamera()
     {
-        Vector3 boardMiddlePos = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 boardMiddlePos = Board.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
         transform.position = new Vector3(boardMiddlePos.x + 50, boardMiddlePos.y + 50, boardMiddlePos.z);
+        initialized = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.LookAt(BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
-        if(canMove)
+        if(initialized)
         {
-            DoZoom();
-            DoRotate();
+            transform.LookAt(Board.Instance.GetBoardMiddlePosAtYLevel(cameraHeight));
+            if (canMove)
+            {
+                DoZoom();
+                DoRotate();
+            }
         }
     }
 
@@ -34,7 +52,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoRotate()
     {
-        Vector3 target = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 target = Board.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         if (Input.GetMouseButton(0))
         {
@@ -65,7 +83,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void DoZoom()
     {
-        Vector3 target = BoardManagerLocal.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
+        Vector3 target = Board.Instance.GetBoardMiddlePosAtYLevel(cameraHeight);
 
         float scrollDelta = -Input.mouseScrollDelta.y;
 
@@ -84,9 +102,9 @@ public class CameraController : MonoBehaviour
 
     public int MoveCameraUpOneBoardLevel()
     {
-        if (cameraHeight + 1 >= BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock)
+        if (cameraHeight + 1 >= Board.Instance.yOfCurrentHeighestBuiltBlock)
         {
-            cameraHeight = BoardManagerLocal.Instance.yOfCurrentHeighestBuiltBlock;
+            cameraHeight = Board.Instance.yOfCurrentHeighestBuiltBlock;
         }
         else
         {

@@ -12,11 +12,14 @@ public enum AnnouncementType
 {
     ScrollLR,
     DropBounce,
-    StaticBreathing
+    StaticBreathing,
+    StaticFrame
 }
 
 public class UIController : MonoBehaviour
 {
+    public static UIController Instance;
+
     [Header("Regions")]
     [SerializeField] GameObject hotBar;
     [SerializeField] GameObject info;
@@ -26,7 +29,7 @@ public class UIController : MonoBehaviour
     [SerializeField] GameObject gameOverScreenHost;
     [SerializeField] GameObject gameOverScreenNonHost;
     [SerializeField] GameObject chatPanel;
-    //[SerializeField] GameObject actionInfoPanel;
+    [SerializeField] GameObject actionInfoPanel;
     [Header("Info")]
     [SerializeField] GameObject infoPanelPlayerList;
     [SerializeField] GameObject playerInfoCard;
@@ -35,9 +38,7 @@ public class UIController : MonoBehaviour
     [SerializeField] float cardsAnimationDuration = 0.05f;
     [Header("Announcement")]
     [SerializeField] TMP_Text announcementText;
-    [SerializeField] float announcementSpeed = 5f;
-    [SerializeField] float announcementPauseTime = 3f;
-    [SerializeField] int announcementPos = 900;
+    [SerializeField] float announcementPauseTime = 1f;
     [Header("Game Over Screen")]
     [SerializeField] GameObject gameOverPlayerListObject;
     [Header("Chat")]
@@ -50,19 +51,44 @@ public class UIController : MonoBehaviour
     [SerializeField] Button buildButton;
     [SerializeField] Button moveButton;
     [SerializeField] Button cardsButton;
+    [SerializeField] Button windButton;
+    [SerializeField] Button grappleButton;
+    [Header("Action Panel")]
+    [SerializeField] Button ActionPanelConfirm;
+    [SerializeField] Button ActionPanelClear;
     [Header("Camera Position")]
     [SerializeField] TMP_Text cameraHeightText;
     [Header("Other")]
     [SerializeField] GameObject playerCamera;
     [SerializeField] PlayerController playerController;
 
+
     #region Non Serialized Variables
     List<GameObject> gameOverPlayerListObjects = new List<GameObject>();
+    List<GameObject> infoPanelPlayerListObjects = new List<GameObject>();
     List<GameObject> cards = new List<GameObject>();
-    Coroutine currentAnnouncement;
-    float originalAnnouncementTextSize;
+    List<GameObject> windDirectionButtons = new List<GameObject>();
+    float originalAnnouncementTextSize = 36;
+    private bool newAnnouncementQueued = false;
+    private Queue<IEnumerator> announcementQueue = new Queue<IEnumerator>();
+    private bool isPlayingAnnouncement = false;
+
+
+
     Player player;
     #endregion
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -117,30 +143,88 @@ public class UIController : MonoBehaviour
         ToggleChat();
         ToggleHotbar(false);
         ToggleRollButton(false);
+        ToggleCardsButton(false);
+        ToggleWindButton(false);
+        ToggleGrappleButton(false);
         ToggleBuildButton(false);
         ToggleMoveButton(false);
         SetTurnTime(0);
-        StopAnnouncement();
+        StopCurrentAnnouncements();
         ToggleGameOverScreen(false);
         ToggleQuitScreen();
+        cardsScreen.SetActive(false);
         PopulateTurnPanel();
     }
 
-    public void StartTurn()
+    #region Main Functions
+    public void StartTurnSetUI(float turnTime)
     {
         ToggleHotbar(true);
         ToggleRollButton(true);
         ToggleBuildButton(true);
-        ToggleMoveButton(true);
+        if(!PlayerController.Instance.isTaunted) {
+            ToggleMoveButton(true);
+        } else {
+            ToggleMoveButton(false);
+        }
+        SetTurnTime(turnTime);
     }
+
+    public void EndTurnSetUI()
+    {
+        ToggleHotbar(false);
+        ToggleRollButton(false);
+        ToggleBuildButton(false);
+        ToggleMoveButton(false);
+        SetTurnTime(0);
+    }
+    #endregion
 
     #region Info Panel
 
     public void PopulateTurnPanel()
     {
-        foreach(Player p in PhotonNetwork.PlayerList)
+        ClearTurnPanel();
+        foreach (Player p in PhotonNetwork.PlayerList)
         {
-            Instantiate(playerInfoCard, infoPanelPlayerList.transform).GetComponent<PlayerInfoCardItem>().SetInfo(p);
+            GameObject infoCard = Instantiate(playerInfoCard, infoPanelPlayerList.transform);
+            infoCard.GetComponent<PlayerInfoCardItem>().SetInfo(p);
+            infoPanelPlayerListObjects.Add(infoCard);
+        }
+    }
+
+    public void ClearTurnPanel()
+    {
+        foreach (GameObject infoCard in infoPanelPlayerListObjects)
+        {
+            Destroy(infoCard);
+        }
+        infoPanelPlayerListObjects.Clear();
+    }
+
+    public void SortTurnPanelBasedOnTurnOrder(List<PlayerTurnOrder> sortedOrder)
+    {
+        ClearTurnPanel();
+        foreach (PlayerTurnOrder pto in sortedOrder)
+        {
+            GameObject infoCard = Instantiate(playerInfoCard, infoPanelPlayerList.transform);
+            infoCard.GetComponent<PlayerInfoCardItem>().SetInfo(pto.player);
+            infoPanelPlayerListObjects.Add(infoCard);
+        }
+    }
+
+    public void HighlightTurn(int turnIndex)
+    {
+        for(int i = 0; i < infoPanelPlayerListObjects.Count; i ++)
+        {
+            if(i == turnIndex)
+            {
+                infoPanelPlayerListObjects[i].GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(true);
+            } else
+            {
+                infoPanelPlayerListObjects[i].GetComponent<PlayerInfoCardItem>().currentTurnGlow.SetActive(false);
+            }
+            
         }
     }
 
@@ -174,6 +258,27 @@ public class UIController : MonoBehaviour
         gameOverPlayerListObjects.Add(playerListItem);
     }
 
+    public void DoGameOverCountHeight() {
+        StartCoroutine(DoHeightCount());
+    }
+
+    IEnumerator DoHeightCount() {
+        bool maxHeightReached = false;
+        int currentHeight = 0;
+        float currentTextScale = 0.2f;
+        float currentSpeed = 0.1f;
+        while (!maxHeightReached)
+        {
+            foreach(GameObject obj in gameOverPlayerListObjects) {
+                obj.GetComponent<GameOverPlayerListItem>().SetHeightText(currentHeight, currentTextScale);
+            }
+            currentHeight++;
+            currentTextScale++;
+            yield return new WaitForSeconds(1f / currentSpeed);
+            currentSpeed += 0.5f;
+        }
+    }
+
     public void ToggleGameOverScreen(bool toggle)
     {
         if(toggle == false)
@@ -183,9 +288,11 @@ public class UIController : MonoBehaviour
         if(player.IsMasterClient)
         {
             gameOverScreenHost.SetActive(toggle);
+            DoHeightCount();
         } else
         {
             gameOverScreenNonHost.SetActive(toggle);
+            DoHeightCount();
         }
     }
 
@@ -203,45 +310,126 @@ public class UIController : MonoBehaviour
     #region Announcement
     public void PlayAnnouncement(string message, AnnouncementType type)
     {
-        if (currentAnnouncement != null)
-        {
-            StopCoroutine(currentAnnouncement);
-        }
-
+        IEnumerator announcementCoroutine = null;
         announcementBar.SetActive(true);
 
-        announcementText.text = message;
-
-        switch(type)
+        switch (type)
         {
             case AnnouncementType.ScrollLR:
-                currentAnnouncement = StartCoroutine(ScrollTextLR());
+                announcementCoroutine = ScrollTextLR(message);
                 break;
             case AnnouncementType.DropBounce:
-                currentAnnouncement = StartCoroutine(FallAndBounceText(1.0f));
+                announcementCoroutine = FallAndBounceText(message, 2.0f); // Set your desired timeShownAfterBounce value
                 break;
             case AnnouncementType.StaticBreathing:
-                currentAnnouncement = StartCoroutine(BreatheText());
+                announcementCoroutine = BreatheText(message);
                 break;
+            case AnnouncementType.StaticFrame:
+                announcementCoroutine = StaticFrame(new string[] { message });
+                break;
+            default:
+                Debug.LogError("Invalid AnnouncementType");
+                return;
+        }
+
+        announcementQueue.Enqueue(announcementCoroutine);
+
+        if (!isPlayingAnnouncement)
+        {
+            StartCoroutine(PlayQueuedAnnouncements());
         }
     }
 
-    public void StopAnnouncement()
+    public void PlayAnnouncement(string[] message, AnnouncementType type)
     {
-        if (currentAnnouncement != null)
+        IEnumerator announcementCoroutine = null;
+        announcementBar.SetActive(true);
+
+        switch (type)
         {
-            StopCoroutine(currentAnnouncement);
-            currentAnnouncement = null;
+            case AnnouncementType.ScrollLR:
+                announcementCoroutine = ScrollTextLR(message[0]);
+                break;
+            case AnnouncementType.DropBounce:
+                announcementCoroutine = FallAndBounceText(message[0], 2.0f); // Set your desired timeShownAfterBounce value
+                break;
+            case AnnouncementType.StaticBreathing:
+                announcementCoroutine = BreatheText(message[0]);
+                break;
+            case AnnouncementType.StaticFrame:
+                announcementCoroutine = StaticFrame(message);
+                break;
+            default:
+                Debug.LogError("Invalid AnnouncementType");
+                return;
         }
-        announcementText.GetComponent<TextMeshProUGUI>().fontSize = originalAnnouncementTextSize;
-        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+
+        announcementQueue.Enqueue(announcementCoroutine);
+
+        if (!isPlayingAnnouncement)
+        {
+            StartCoroutine(PlayQueuedAnnouncements());
+        }
+    }
+
+    private IEnumerator PlayQueuedAnnouncements()
+    {
+        isPlayingAnnouncement = true;
+
+        while (announcementQueue.Count > 0)
+        {
+            newAnnouncementQueued = false;
+            IEnumerator currentAnnouncement = announcementQueue.Dequeue();
+            yield return StartCoroutine(currentAnnouncement);
+        }
+
+        isPlayingAnnouncement = false;
+
+        // Hide announcement bar when all announcements finish playing
         announcementBar.SetActive(false);
     }
 
-    IEnumerator ScrollTextLR(float targetPositionX = 900, float speed = 500)
+    public void StopCurrentAnnouncements()
+    {
+        StopAllCoroutines();
+        newAnnouncementQueued = false;
+        isPlayingAnnouncement = false;
+        announcementQueue.Clear();
+
+        // Hide announcement bar when stopping announcements
+        announcementBar.SetActive(false);
+    }
+
+    IEnumerator StaticFrame(string[] frames, float speed = 0.5f)
+    {
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+        int counter = 0;
+        announcementText.text = frames[counter];
+        bool run = true;
+        while (run)
+        {
+            if (newAnnouncementQueued)
+            {
+                run = false;
+            }
+            announcementText.text = frames[counter];
+            if(counter + 1 > frames.Length - 1)
+            {
+                counter = 0;
+            } else
+            {
+                counter++;
+            }
+            yield return new WaitForSeconds(speed);
+        }
+        yield return null;
+    }
+
+    IEnumerator ScrollTextLR(string message, float targetPositionX = 900, float speed = 800)
     {
         // Set text to left side
         announcementText.rectTransform.anchoredPosition = new Vector2(-targetPositionX, 0);
+        announcementText.text = message;
 
         // Go to the middle
         while (Mathf.Abs(announcementText.rectTransform.anchoredPosition.x) > 0.1f)
@@ -276,11 +464,12 @@ public class UIController : MonoBehaviour
 
         // Ensure that the final position is exactly at the target position
         announcementText.rectTransform.anchoredPosition = new Vector2(targetPositionX, 0);
-        StopAnnouncement();
+        yield return null;
     }
 
-    IEnumerator FallAndBounceText(float timeShownAfterBounce, float targetPositionY = 3000, float speed = 6000, float bounciness = 0.05f)
+    IEnumerator FallAndBounceText(string message, float timeShownAfterBounce, float targetPositionY = 3000, float speed = 6000, float bounciness = 0.05f)
     {
+        announcementText.text = message;
         announcementText.rectTransform.anchoredPosition = new Vector2(0, targetPositionY);
 
         //Fall to middle
@@ -310,20 +499,28 @@ public class UIController : MonoBehaviour
 
         announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
         yield return new WaitForSeconds(timeShownAfterBounce);
-        StopAnnouncement();
+        yield return null;
     }
 
-    IEnumerator BreatheText()
+    IEnumerator BreatheText(string message)
     {
-        originalAnnouncementTextSize = announcementText.GetComponent<TextMeshProUGUI>().fontSize;
-        while (true)
+        announcementText.text = message;
+        announcementText.rectTransform.anchoredPosition = new Vector2(0, 0);
+        bool run = true;
+        while (run)
         {
+            if (newAnnouncementQueued)
+            {
+                run = false;
+            }
+
             // Grow the text
             yield return ScaleTextAnimation(originalAnnouncementTextSize, originalAnnouncementTextSize * 1.2f, 0.5f);
 
             // Shrink the text
             yield return ScaleTextAnimation(originalAnnouncementTextSize * 1.2f, originalAnnouncementTextSize, 0.5f);
         }
+        yield return null;
     }
 
     IEnumerator ScaleTextAnimation(float startScale, float endScale, float duration)
@@ -347,12 +544,11 @@ public class UIController : MonoBehaviour
     public void ToggleHotbar(bool toggle)
     {
         hotBar.SetActive(toggle);
-        //actionInfoPanel.SetActive(toggle);
+        actionInfoPanel.SetActive(false);
     }
 
     public void SetTurnTime(float seconds)
     {
-
         int minutes = TimeSpan.FromSeconds(seconds).Minutes;
         seconds = TimeSpan.FromSeconds(seconds).Seconds;
 
@@ -372,7 +568,7 @@ public class UIController : MonoBehaviour
         {
             secondsString = "" + seconds;
         }
-        hotBar.transform.GetChild(4).GetComponent<TMP_Text>().text = minutesString + ":" + secondsString;
+        hotBar.transform.GetChild(6).GetComponent<TMP_Text>().text = minutesString + ":" + secondsString;
     }
 
     public void ToggleRollButton(bool toggle)
@@ -380,14 +576,176 @@ public class UIController : MonoBehaviour
         rollButton.interactable = toggle;
     }
 
-    public void ToggleBuildButton(bool toggle)
+    public void ToggleCardsButton(bool toggle)
     {
+        if (toggle)
+        {
+            ToggleWindButton(false);
+            ToggleGrappleButton(false);
+            ToggleRollButton(false);
+        }
+        cardsButton.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleWindButton(bool toggle)
+    {
+        if(toggle)
+        {
+            ToggleCardsButton(false);
+            ToggleGrappleButton(false);
+            ToggleRollButton(false);
+        }
+        windButton.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleGrappleButton(bool toggle)
+    {
+        if (toggle)
+        {
+            ToggleCardsButton(false);
+            ToggleWindButton(false);
+            ToggleRollButton(false);
+        }
+        grappleButton.gameObject.SetActive(toggle);
+        if(PlayerController.Instance != null && !PlayerController.Instance.isTaunted) {
+            grappleButton.interactable = true;
+        } else {
+            grappleButton.interactable = false;
+        }
+    }
+
+    public void RegisterWindButton(GameObject button)
+    {
+        windDirectionButtons.Add(button);
+    }
+
+    public void ToggleWindDirectionButtons(bool toggle)
+    {
+        foreach(GameObject button in windDirectionButtons)
+        {
+            button.SetActive(toggle);
+        }
+    }
+
+    public void ToggleBuildButton(bool toggle)
+    {  
         buildButton.interactable = toggle;
+    }
+
+    public void ToggleActionPanel(bool toggle)
+    {
+        actionInfoPanel.SetActive(toggle);
     }
 
     public void ToggleMoveButton(bool toggle)
     {
         moveButton.interactable = toggle;
+    }
+
+    public void ToggleActionPanelConfirm(bool toggle)
+    {
+        ActionPanelConfirm.interactable = toggle;
+    }
+
+    public void OnBuildButtonClick()
+    {
+        ToggleCardsScreen(false);
+        if (Board.Instance.selectionMode == SelectionMode.Build) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            PlayerController.Instance.StopAllCardAnimations();
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = true;
+            ToggleActionPanel(true);
+            if(Board.Instance.selectedSpaces.Count == 0) {
+                ToggleActionPanelConfirm(false);
+            }
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(5, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Build;
+        }
+    }
+
+    public void OnMoveButtonClick()
+    {
+        ToggleCardsScreen(false);
+        if(Board.Instance.selectionMode == SelectionMode.Move) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            PlayerController.Instance.StopAllCardAnimations();
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
+            ToggleActionPanel(true);
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-45, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Move;
+        }
+    }
+
+    public void OnGrappleButtonClick()
+    {
+        if(Board.Instance.selectionMode == SelectionMode.Grapple) {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            Board.Instance.ClearSelected();
+        } else {
+            PlayerController.Instance.StopAllCardAnimations();
+            actionInfoPanel.GetComponentInChildren<TMP_Text>().enabled = false;
+            ToggleActionPanel(true);
+            actionInfoPanel.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(-95, 50, 0);
+            Board.Instance.selectionMode = SelectionMode.Grapple;
+        }
+    }
+
+    public void OnRollButtonClick()
+    {
+        ToggleActionPanel(false);
+        PlayerController.Instance.RollForActionDie();
+        ToggleRollButton(false);
+    }
+
+    public void OnActionPanelConfirm()
+    {
+        Board.Instance.ConfirmAction();
+        ToggleActionPanel(false);
+    }
+
+    public void OnActionPanelClear()
+    {
+        Board.Instance.ClearAction();
+    }
+
+    public void OnWindButtonClick()
+    {
+        if (windDirectionButtons[0].activeSelf)
+        {
+            ToggleWindDirectionButtons(false);
+        } else
+        {
+            PlayerController.Instance.StopAllCardAnimations();
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
+            ToggleWindDirectionButtons(true);
+        }
+    }
+
+    public void OnCardsButtonClick()
+    {
+        if (cardsScreen.activeSelf)
+        {
+            ToggleCardsScreen(false);
+        }
+        else
+        {
+            ToggleCardsScreen(true);
+        }
+        Board.Instance.selectionMode = SelectionMode.None;
+        ToggleActionPanel(false);
+    }
+
+    public void SetBlocksLeftToBuild(int blocksToBuild)
+    {
+        actionInfoPanel.GetComponentInChildren<TMP_Text>().text = "x" + blocksToBuild;
     }
     
 
@@ -401,22 +759,40 @@ public class UIController : MonoBehaviour
     #endregion
 
     #region Cards
-    public void AddCard(GameObject card)
+    public void AddCard()
     {
-        GameObject cardObj = Instantiate(card, Vector3.zero, Quaternion.identity);
+        Array values = Enum.GetValues(typeof(CardType));
+        CardType randomCardType = (CardType)values.GetValue(UnityEngine.Random.Range(0, values.Length));
+        GameObject cardObj = Instantiate(GameAssets.i.card_, Vector3.zero, Quaternion.identity);
         cardObj.transform.SetParent(cardsScreen.transform, false);
+        cardObj.GetComponent<Card>().SetCardType(randomCardType);
         cards.Add(cardObj);
     }
 
-    public void ToggleCardsScreen()
+    public void AddSpecificCard(CardType type) {
+        GameObject cardObj = Instantiate(GameAssets.i.card_, Vector3.zero, Quaternion.identity);
+        cardObj.transform.SetParent(cardsScreen.transform, false);
+        cardObj.GetComponent<Card>().SetCardType(type);
+        cards.Add(cardObj);
+    }
+
+    public void ToggleCardsScreen(bool toggle)
     {
-        if(!cardsScreen.activeSelf)
+        if(toggle)
         {
+            Board.Instance.selectionMode = SelectionMode.None;
+            ToggleActionPanel(false);
             StartCoroutine(SpreadCardsOut());
         } else
         {
             StartCoroutine(PutCardsAway());
         }
+    }
+
+    public void RemoveCard(GameObject card)
+    {
+        cards.RemoveAll(pair => pair.gameObject == card);
+        Destroy(card);
     }
 
     IEnumerator SpreadCardsOut()

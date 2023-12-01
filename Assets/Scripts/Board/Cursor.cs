@@ -4,21 +4,28 @@ using UnityEngine;
 
 public class Cursor : MonoBehaviour
 {
-    BoardSpaceLocal space;
-    GameObject hover;
+    BoardSpace space;
+    public GameObject blockHover;
+    GameObject playerHover;
+
+    GameObject currentHover;
     GameObject indicator;
     GameObject moveArrow;
     GameObject buildScaffold;
 
     private void Start()
     {
-        space = transform.parent.GetComponent<BoardSpaceLocal>();
-        hover = transform.GetChild(0).gameObject;
-        indicator = transform.GetChild(1).gameObject;
-        buildScaffold = transform.GetChild(2).gameObject;
-        moveArrow = transform.GetChild(3).gameObject;
+        space = transform.parent.GetComponent<BoardSpace>();
+        blockHover = transform.GetChild(0).gameObject;
+        playerHover = transform.GetChild(1).gameObject;
+        indicator = transform.GetChild(2).gameObject;
+        buildScaffold = transform.GetChild(3).gameObject;
+        moveArrow = transform.GetChild(4).gameObject;
 
-        hover.SetActive(false);
+        currentHover = blockHover;
+
+        blockHover.SetActive(false);
+        playerHover.SetActive(false);
         indicator.SetActive(false);
         buildScaffold.SetActive(false);
         moveArrow.SetActive(false);
@@ -27,22 +34,28 @@ public class Cursor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(space.GetIsSelectable())
+        SetCursorMode();
+        indicator.SetActive(false);
+        currentHover.SetActive(false);
+        buildScaffold.SetActive(false);
+        moveArrow.SetActive(false);
+
+        if (space.GetIsSelectable())
         {
             indicator.SetActive(true);
             if (space.GetIsBeingHovered())
             {
-                hover.SetActive(true);
+                currentHover.SetActive(true);
                 indicator.SetActive(false);
                 SetCursorMode();
             } else if(space.GetIsSelected())
             {
-                hover.SetActive(false);
+                currentHover.SetActive(false);
                 indicator.SetActive(false);
                 SetCursorMode();
             } else
             {
-                hover.SetActive(false);
+                currentHover.SetActive(false);
                 indicator.SetActive(true);
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(false);
@@ -53,15 +66,33 @@ public class Cursor : MonoBehaviour
 
     private void SetCursorMode()
     {
-        switch (BoardManagerLocal.Instance.selectionMode)
+        switch (Board.Instance.selectionMode)
         {
             case SelectionMode.Move:
                 buildScaffold.SetActive(false);
                 moveArrow.SetActive(true);
+                currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, transform.position.y + 3.75f, indicator.transform.position.z);
+                break;
+            case SelectionMode.Grapple:
+                buildScaffold.SetActive(false);
+                moveArrow.SetActive(true);
+                currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, transform.position.y + 3.75f, indicator.transform.position.z);
                 break;
             case SelectionMode.Build:
                 buildScaffold.SetActive(true);
                 moveArrow.SetActive(false);
+                indicator.transform.position = new Vector3(indicator.transform.position.x, transform.position.y + 1.25f, indicator.transform.position.z);
+                break;
+            case SelectionMode.Ninja:
+                buildScaffold.SetActive(false);
+                moveArrow.SetActive(true);
+                currentHover = blockHover;
+                indicator.transform.position = new Vector3(indicator.transform.position.x, transform.position.y + 3.75f, indicator.transform.position.z);
+                break;
+            case SelectionMode.None:
+                currentHover = blockHover;
                 break;
         }
     }

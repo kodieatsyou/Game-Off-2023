@@ -20,6 +20,9 @@ public class GameAssets : MonoBehaviour
 
     [Header("Board")]
     public GameObject board_space_object_;
+    public GameObject board_;
+    public GameObject wind_button_;
+    public GameObject wind_particle_;
     [Header("Cursors")]
     public GameObject board_cursor_;
     [Header("Grass")]
@@ -30,15 +33,28 @@ public class GameAssets : MonoBehaviour
     public SerializedDictionary<int, GameObject> stone_blocks_;
     [Header("Detail")]
     public GameObject[] block_details_;
+    [Header("Cards")]
+    public GameObject card_;
+    public SerializedDictionary<CardType, string> card_descriptions_;
+    public SerializedDictionary<CardType, Sprite> card_art_;
 
-    [Header("Loadable Assets")]
-    [Header("Essentials")]
+
+    [Header("Player")]
     public GameObject player_object_;
-    [Header("Character")]
     public Texture[] character_skins_;
     [SerializedDictionary("Player Name", "Skin")]
-    public SerializedDictionary<string, Texture> character_special_skins_;
+    public Texture[] character_special_skins_;
     public Material super_special_material_;
     public GameObject[] character_head_accessories_;
     public GameObject[] character_face_accessories_;
+
+    public GameObject player_highlight_;
+
+    [Header("Animation Props")]
+    public GameObject prop_grapple_gun_;
+    public GameObject prop_hourglass_;
+
+
+    [Header("Card Particles")]
+    public GameObject card_switch_particle_;
 }

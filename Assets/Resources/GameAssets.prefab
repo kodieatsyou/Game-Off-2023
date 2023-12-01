@@ -45,6 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   board_space_object_: {fileID: 6650280991801686592, guid: 6cdb1a142ea4dd04c8555727e564b75f, type: 3}
+  board_: {fileID: 8056477766742870483, guid: 10c921b3d688b56459bfdab33733cfe5, type: 3}
+  wind_button_: {fileID: 2035104791060378251, guid: 6a2e7ef45076feb46bd9b37701ba93fb, type: 3}
+  wind_particle_: {fileID: 7623596365961900424, guid: 6097795d5355441bf9e2e2a9b65ff3f6, type: 3}
   board_cursor_: {fileID: 3774863005068883490, guid: ab3ee5cc25d3d464fbafb1f54a48987c, type: 3}
   grass_blocks_:
     _serializedList:
@@ -133,6 +136,44 @@ MonoBehaviour:
   - {fileID: 2845986319323596710, guid: 834c20e5642bdd0499203f44141d07bc, type: 3}
   - {fileID: 9140929216165335027, guid: b1d993a8fb6e8c548945466e9d06cec6, type: 3}
   - {fileID: 7032300123889191275, guid: 4555e72be0f10fb4c82be345712de8e6, type: 3}
+  card_: {fileID: 5643217516290647438, guid: 52bf3b3eaa515e740ab46a2469a213b1, type: 3}
+  card_descriptions_:
+    _serializedList:
+    - Key: 0
+      Value: Cast a magical barrier that blocks all unwanted attention.
+    - Key: 1
+      Value: Lift youself in the air... Just high enough to get a block under your
+        feet.
+    - Key: 2
+      Value: Become a ninja for a turn. Who needs grappling hooks?
+    - Key: 3
+      Value: Summon your inner brawler and knock your opponents to the floor!
+    - Key: 4
+      Value: Thats one more block for me and one less for the enemy.
+    - Key: 5
+      Value: Hows the weather over there?
+    - Key: 6
+      Value: Make those around you so mad they can hardly move.
+    - Key: 7
+      Value: Target someone and freeze them in time!
+  card_art_:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: 4ad71c501671b584cb666668acea5bc2, type: 3}
+    - Key: 1
+      Value: {fileID: 21300000, guid: 04d7583918edf594a93e6f3e70c6b557, type: 3}
+    - Key: 2
+      Value: {fileID: 21300000, guid: e2457c697e7ad1046a2e2355e40d6813, type: 3}
+    - Key: 3
+      Value: {fileID: 21300000, guid: bd0ac5a53fbd1db47848397533a71b97, type: 3}
+    - Key: 4
+      Value: {fileID: 21300000, guid: e17a4fee180acdb4f81455ce9e1da147, type: 3}
+    - Key: 5
+      Value: {fileID: 21300000, guid: a5a48318b6030f1469d0157945dcbde4, type: 3}
+    - Key: 6
+      Value: {fileID: 21300000, guid: 040720a33f628c44b92992f8a6c7351b, type: 3}
+    - Key: 7
+      Value: {fileID: 21300000, guid: 15a4ea981cf235b42815eb93a083fa38, type: 3}
   player_object_: {fileID: 3016171009201000026, guid: 2c15157f7eff0a142b0423e0c5813d6f, type: 3}
   character_skins_:
   - {fileID: 2800000, guid: 21de7ca2d83eaa84e8c4162be06deb33, type: 3}
@@ -152,11 +193,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 7a7083df3f2324a4aa4f2c1a97694de2, type: 3}
   - {fileID: 2800000, guid: 31581ea5b7cc0974c81f78376d9968ca, type: 3}
   character_special_skins_:
-    _serializedList:
-    - Key: Jared
-      Value: {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
-    - Key: Ryan
-      Value: {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
+  - {fileID: 2800000, guid: 1887a10c593483d4fbefb9f9f9e3e35c, type: 3}
+  - {fileID: 2800000, guid: 7864970867d6f28419c09eb3bcf95bc2, type: 3}
   super_special_material_: {fileID: 0}
   character_head_accessories_:
   - {fileID: 8612011285689394938, guid: babe59df5349a414688420f8b0a9bd56, type: 3}
@@ -185,3 +223,7 @@ MonoBehaviour:
   - {fileID: 1776885312876451402, guid: c7c2b8fed47f0bc4889a4f1f6a6ba7a4, type: 3}
   - {fileID: 2194824439739574541, guid: 0733c91aaae06b545ad4a7069051a0ae, type: 3}
   - {fileID: 8938123118380925807, guid: 0a1dfd31a9ee5ec4b8f7e656872a5702, type: 3}
+  player_highlight_: {fileID: 3042316048879298334, guid: ec2d12c7c26274065982a0b7f7a542a4, type: 3}
+  prop_grapple_gun_: {fileID: 3375307950989656675, guid: 2257d987791c14b0faac2cfa6f83330d, type: 3}
+  prop_hourglass_: {fileID: 5678193131563498798, guid: 9d0a192ad6865f44e8ba9ca7008d1d4e, type: 3}
+  card_switch_particle_: {fileID: 894291940622221738, guid: 82262b82136748b408d55889782c9657, type: 3}

@@ -46,6 +46,61 @@ MonoBehaviour:
   - RPCBoardManagerConfirmSelection
   - RPCBoardManagerPushChangesFromLocalBoard
   - RPCBoardManagerBoardInitialized
+  - PostChatMessage
+  - RPCGameManagerEndTurn
+  - RPCGameManagerSyncGameState
+  - RPCGameManagerSyncPlayerTurnIndex
+  - RPCSetPlayerOrder
+  - ChangeMaterial
+  - RPCPlayerControllerNetworkInitialize
+  - RPCPlayerControllerNetworkCreateAccessories
+  - RPCBoardManagerNetworkMovePlayerTo
+  - RPCPlayerControllerNetworkMoveThroughPath
+  - RPCPlayerControllerNetworkSetAnimatorState
+  - Test
+  - RPCBoardManagerInitializeNonMasterClientBoards
+  - RPCBoardManagerInitializeClientBoards
+  - BoardManagerFlipSpaceIsBuilt
+  - BoardManagerSetSpaceIsBuilt
+  - RPCBoardManagerSpawnPlayer
+  - RPCBoardManagerSpawnPlayers
+  - RPCBoardManagerPlayerMovedToSpace
+  - RPCPlayerNetworkInitialize
+  - RPCPlayerNetworkMoveThroughPath
+  - RPCPlayerManagerPlayerMovedToSpace
+  - RPCPlayerControllerMoveToSpace
+  - RPCPlayerNetworkControllerInitialize
+  - SyncRootMotion
+  - SyncPosition
+  - SyncRootMotionDelta
+  - SyncRootPosition
+  - RPCPlayerAnimationControllerPlayTriggeredAnimation
+  - RPCGameManagerStartPlayerTurn
+  - RPCGameManagerPlayerInitialized
+  - RPCGameManagerPlayerRolledForTurn
+  - RPCBoardManagerLocalInitialized
+  - RPCBoardManagerSetPlayerOnSpace
+  - RPCBoardManagerMasterInitialized
+  - RPCBoardManagerPlacePlayerOnSpace
+  - RPCBoardManagerPlayWindParticle
+  - RPCBoardManagerDoWind
+  - RPCGameManagerPlayerEndedTurn
+  - DestroyAnimationItems
+  - RPCBoardManagerPlacePlayerOnSpaceWithSpecificID
+  - RPCAudioManagerPlaySound
+  - RPCAudioManagerPlayPlayerSound
+  - RPCAudioManagerStopPlayerSound
+  - RPCAudioManagerStopPlayerLoopSound
+  - RPCAudioManagerPlayPlayerLoopSound
+  - RPCAudioManagerPlayPlayerOneShotSound
+  - RPCAudioManagerPausePlayerLoopSound
+  - RPCAudioManagerUnPausePlayerLoopSound
+  - RPCAudioManagerTogglePausePlayerLoopSound
+  - RPCPlayerDoPunch
+  - RPCPlayerPunched
+  - RPCGameManagerPlayerWon
+  - RPCPlayerTaunted
+  - RPCPlayerFrozen
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

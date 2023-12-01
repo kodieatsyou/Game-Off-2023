@@ -7,21 +7,20 @@ using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Unity.VisualScripting;
 
-public enum GameState
+/*public enum GameState
 {
     GameStarted,
     GameWaiting,
     GameEnded
-}
+}*/
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    public static GameManager Instance;
+    /*public static GameManager Instance;
     public PhotonView GMPhotonView;
 
     //private BoardManager BM = BoardManager.Instance;
     public bool offlineMode = false;
-    private UIController UI;
 
     private int CurrentPlayerTurnIndex;
     private int winHeight;
@@ -46,7 +45,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                 GMPhotonView.OwnershipTransfer = OwnershipOption.Takeover;
             }
             winHeight = (int)PhotonNetwork.CurrentRoom.CustomProperties["WinHeight"];
-            UI = GameObject.FindGameObjectWithTag("UI").GetComponent<UIController>();
             PlayerCount = PhotonNetwork.CurrentRoom.PlayerCount;
             PlayerActorLeft = new bool[PlayerCount];
             PlayerTurnOrder = new int[PlayerCount];
@@ -112,6 +110,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region GameNetwork
+
     /// <summary>
     /// RPC designated function that takes state update for each local player and determines how to handle the switches.
     /// </summary>
@@ -260,4 +259,5 @@ public class GameManager : MonoBehaviourPunCallbacks
         // TODO UI element that player rejoined?
     }
     #endregion
+    */
 }

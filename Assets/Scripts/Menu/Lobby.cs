@@ -63,8 +63,8 @@ public class Lobby : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         GeneratePlayerName();
 
-        customRoomProps.Add("WinHeight", 10);
-        customRoomProps.Add("TurnTime", 10);
+        customRoomProps.Add("WinHeight", int.Parse(winHeightInput.options[winHeightInput.value].text));
+        customRoomProps.Add("TurnTime", float.Parse(turnTimeInput.options[turnTimeInput.value].text));
         customRoomProps.Add("CardDeal", "Random");
     }
 
@@ -90,12 +90,12 @@ public class Lobby : MonoBehaviourPunCallbacks
 
     public void HandleWinHeightInput()
     {
-        customRoomProps["WinHeight"] = winHeightInput.options[winHeightInput.value].text;
+        customRoomProps["WinHeight"] = int.Parse(winHeightInput.options[winHeightInput.value].text);
     }
 
     public void HandleTurnTimeInput()
     {
-        customRoomProps["TurnTime"] = turnTimeInput.options[turnTimeInput.value].text;
+        customRoomProps["TurnTime"] = float.Parse(turnTimeInput.options[turnTimeInput.value].text);
     }
 
     public void HandleCardDealingInput()
@@ -127,7 +127,6 @@ public class Lobby : MonoBehaviourPunCallbacks
     // Creates room with specified settings
     public void CreateRoom()
     {
-        Debug.Log("MaxPlayer: " + maxPlayerInput.value);
         if(string.IsNullOrEmpty(roomNameInput.text))
         {
             PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions { MaxPlayers = int.Parse(maxPlayerInput.options[maxPlayerInput.value].text), BroadcastPropsChangeToAll = true }, TypedLobby.Default);
@@ -226,10 +225,10 @@ public class Lobby : MonoBehaviourPunCallbacks
         serverSettingRoomName.text = PhotonNetwork.CurrentRoom.Name;
 
         MenuManager.Instance.OpenMenu("room");
+        startGameButton.SetActive(PhotonNetwork.IsMasterClient);
 
         if (PhotonNetwork.IsMasterClient)
         {
-            startGameButton.SetActive(true);
             PhotonNetwork.CurrentRoom.SetCustomProperties(customRoomProps);
         }
     }

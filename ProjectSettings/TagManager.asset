@@ -8,6 +8,9 @@ TagManager:
   - Camera
   - UI
   - UIDiePanel
+  - DiePit
+  - OtherPlayer
+  - DieWall
   layers:
   - Default
   - TransparentFX
