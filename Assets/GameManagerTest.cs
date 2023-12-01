@@ -133,8 +133,8 @@ public class GameManagerTest : MonoBehaviour
         {
             UIController.Instance.StopCurrentAnnouncements();
             StartGame();
-            //DealRandomCards();
-            DealOneOfEachCards();
+            DealRandomCards();
+            //DealOneOfEachCards();
         }
     }
 
