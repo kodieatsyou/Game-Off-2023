@@ -156,7 +156,6 @@ public class BoardManager : MonoBehaviourPunCallbacks
             }
             yield return null;
         }
-
         Vector3 pos = currentPos.GetWorldPositionOfTopOfSpace();
         GameObject player = PhotonNetwork.Instantiate("NetworkObjects/Player", pos, Quaternion.identity);
         BMPhotonView.RPC("RPCBoardManagerPlacePlayerOnSpace", RpcTarget.All, PhotonNetwork.LocalPlayer, player.GetComponent<PhotonView>().ViewID, currentPos.GetPosInBoard(), null);
@@ -170,26 +169,10 @@ public class BoardManager : MonoBehaviourPunCallbacks
         {
             PlayerController.Instance.currentSpace = Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z];
         }
-        Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerObjectOnSpace(PhotonView.Find(viewID).gameObject);
-        Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerOnSpace(player);
-        
-        if(oldSpace != null) {
-            Board.Instance.boardArray[(int)oldSpace.x, (int)oldSpace.y, (int)oldSpace.z].PlacePlayerOnSpace(null);
-            Board.Instance.boardArray[(int)oldSpace.x, (int)oldSpace.y, (int)oldSpace.z].PlacePlayerObjectOnSpace(null);
+        if(PhotonView.Find(viewID).gameObject != null) {
+            Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerObjectOnSpace(PhotonView.Find(viewID).gameObject);
         }
-    }
-
-    [PunRPC]
-    void RPCBoardManagerPlacePlayerOnSpaceWithSpecificID(Player player, Vector3 posOfSpaceToPutOn, Vector3 oldSpace, int viewID)
-    {
-        Debug.Log("Plscing plsyrt on spacd: " + posOfSpaceToPutOn);
-        if(player == PhotonNetwork.LocalPlayer)
-        {
-            PlayerController.Instance.currentSpace = Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z];
-        }
-        Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerObjectOnSpace(PhotonView.Find(viewID).gameObject);
         Board.Instance.boardArray[(int)posOfSpaceToPutOn.x, (int)posOfSpaceToPutOn.y, (int)posOfSpaceToPutOn.z].PlacePlayerOnSpace(player);
-        
         if(oldSpace != null) {
             Board.Instance.boardArray[(int)oldSpace.x, (int)oldSpace.y, (int)oldSpace.z].PlacePlayerOnSpace(null);
             Board.Instance.boardArray[(int)oldSpace.x, (int)oldSpace.y, (int)oldSpace.z].PlacePlayerObjectOnSpace(null);

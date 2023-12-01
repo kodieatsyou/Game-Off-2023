@@ -283,6 +283,34 @@ public class Board : MonoBehaviour
         return null;
     }
 
+
+    public BoardSpace GetPunchedBlock(BoardSpace puncherSpot, BoardSpace mySpot) {
+        Vector3 direction = -(puncherSpot.GetPosInBoard() - mySpot.GetPosInBoard());
+        direction.Normalize(); 
+
+        BoardSpace currentSpace = mySpot;
+
+        while (currentSpace != null) {
+            // Get the position of the next space in the direction
+            Vector3 nextPos = currentSpace.GetPosInBoard() + direction;
+            if(nextPos.x < 0 || nextPos.x >= baseSize || nextPos.z < 0 || nextPos.z >= baseSize) {
+                return null;
+            }
+            // Get the next space using the position
+            BoardSpace nextSpace = boardArray[(int)nextPos.x, (int)nextPos.y, (int)nextPos.z];
+
+            // Check if the next space is built or the block below is not built
+            if (nextSpace != null && (nextSpace.GetIsBuilt() || !nextSpace.GetBelowBlock().GetIsBuilt())) {
+                Vector3 blockFallDown = FindNextValidYGoingDown(nextSpace.GetPosInBoard());
+                return boardArray[(int)blockFallDown.x, (int)blockFallDown.y, (int)blockFallDown.z]; // Found a suitable space
+            }
+
+            currentSpace = nextSpace;
+        }
+        return null;
+    }
+
+
     Vector3 FindNextValidYGoingDown(Vector3 positionToCheckFrom) {
         while(!Board.Instance.boardArray[(int)positionToCheckFrom.x, (int)positionToCheckFrom.y, (int)positionToCheckFrom.z].GetIsBuilt() && positionToCheckFrom.y != 0) {
             positionToCheckFrom = new Vector3(positionToCheckFrom.x, positionToCheckFrom.y - 1, positionToCheckFrom.z);

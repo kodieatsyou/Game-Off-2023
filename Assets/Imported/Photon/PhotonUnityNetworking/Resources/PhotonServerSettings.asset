@@ -87,6 +87,7 @@ MonoBehaviour:
   - RPCGameManagerPlayerEndedTurn
   - DestroyAnimationItems
   - RPCBoardManagerPlacePlayerOnSpaceWithSpecificID
+  - RPCPlayerDoPunch
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -22,6 +22,7 @@ public class PlayerController: MonoBehaviourPunCallbacks
 
     private bool frozen = false;
 
+    public bool isTaunted = false;
     private bool hasBarrier = false;
 
     public BoardSpace currentSpace;
@@ -54,7 +55,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
         //NetworkTurnLength = (float)PhotonNetwork.CurrentRoom.CustomProperties["WinHeight"];
         NetworkTurnLength = 3.0f;
         CurrTurnLength = NetworkTurnLength;
-        ActionsRemaining = 3; // move, roll, build
+        if(isTaunted) {
+            ActionsRemaining = 2; // roll, build
+        } else {
+            ActionsRemaining = 3; // move, roll, build
+        }
+        
         IsActiveTurn = false;
 
         GameManagerTest.Instance.GMPhotonView.RPC("RPCGameManagerPlayerInitialized", RpcTarget.All);
@@ -127,7 +133,12 @@ public class PlayerController: MonoBehaviourPunCallbacks
                 UIController.Instance.ToggleWindButton(true);
                 break;
             case 2:
-                UIController.Instance.PlayAnnouncement("Grapple", AnnouncementType.DropBounce);
+                if(isTaunted) {
+                    UIController.Instance.PlayAnnouncement("Grapple Blocked by Taunt!", AnnouncementType.DropBounce);
+                    ActionsRemaining -= 1;
+                } else {
+                    UIController.Instance.PlayAnnouncement("Grapple", AnnouncementType.DropBounce);
+                }
                 UIController.Instance.ToggleGrappleButton(true);
                 break;
             case 3:
@@ -344,11 +355,49 @@ public class PlayerController: MonoBehaviourPunCallbacks
         }  
     }
 
+    public void GetTaunted(string nameOfPlayerWhoTaunted) {
+        isTaunted = true;
+        UIController.Instance.PlayAnnouncement("You were taunted by " + nameOfPlayerWhoTaunted + "!", AnnouncementType.DropBounce);
+    }
+
+    public void DoPunch() {
+        List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
+        if(spacesWithPlayers.Count != 0) {
+            foreach(BoardSpace space in spacesWithPlayers) {
+                space.GetPlayerObjOnSpace().GetComponent<PlayerClickOnHandler>().ToggleSelectability(true);
+            }
+        }
+    }
+
+    IEnumerator GetPunchedToBlock(BoardSpace targetBlock) {
+
+        float punchSpeed = 5f;
+
+        // Horizontal movement
+        Vector3 horizontalTarget = new Vector3(targetBlock.GetWorldPositionOfTopOfSpace().x, transform.position.y, targetBlock.GetWorldPositionOfTopOfSpace().z);
+        Vector3 verticalTarget = targetBlock.GetWorldPositionOfTopOfSpace();
+
+        // Move horizontally and then vertically
+        while (Vector3.Distance(transform.position, horizontalTarget) > 0.1f || Vector3.Distance(transform.position, verticalTarget) > 0.1f) {
+            if (Vector3.Distance(transform.position, horizontalTarget) > 0.1f) {
+                // Move horizontally
+                transform.position = Vector3.MoveTowards(transform.position, horizontalTarget, punchSpeed * Time.deltaTime);
+            } else if (Vector3.Distance(transform.position, verticalTarget) > 0.1f) {
+                // Move vertically
+                transform.position = Vector3.MoveTowards(transform.position, verticalTarget, punchSpeed * Time.deltaTime);
+            }
+            yield return null;
+        }
+        yield return null;
+    }
+
+    
+
     public void DoTaunt() {
         List<BoardSpace> spacesWithPlayers = Board.Instance.GetPlayerObjectsAroundSpace(currentSpace);
         if(spacesWithPlayers.Count != 0) {
             foreach(BoardSpace space in spacesWithPlayers) {
-                space.GetPlayerObjOnSpace().gameObject.GetComponent<PlayerAnimationController>().PlayTriggeredAnimation("Cry");
+                space.GetPlayerObjOnSpace().gameObject.GetComponent<PhotonView>().RPC("RPCPlayerAnimationControllerPlayTriggeredAnimation", RpcTarget.All, space.GetPlayerOnSpace(), "Cry");
             }
         }
         UIController.Instance.ToggleCardsButton(false);
